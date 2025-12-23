@@ -75,7 +75,7 @@ export default function ProductDetail() {
         </div>
         <div className="grid md:grid-cols-2 gap-12">
           <div>
-            <Gallery images={product.images || [product.image]} onImageClick={() => {
+            <Gallery images={product.images?.length ? product.images : [product.image]} onImageClick={() => {
               const el = document.getElementById('details-top');
               el?.scrollIntoView({ behavior: 'smooth' });
             }} />
