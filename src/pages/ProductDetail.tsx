@@ -23,6 +23,10 @@ export default function ProductDetail() {
     return products.find(p => (p._id || p.id) === id);
   }, [products, id]);
 
+  const hasSizes = useMemo(() => {
+    return (product?.size?.length || product?.sizes?.length) > 0;
+  }, [product]);
+
   if (loadingProducts) {
     return (
       <main className="bg-white">
@@ -48,13 +52,17 @@ export default function ProductDetail() {
   const avgRating = product.reviews ? (product.reviews.reduce((s, r) => s + r.rating, 0) / (product.reviews.length || 1)) : 0;
 
   const handleAdd = () => {
+    if (hasSizes && !size) {
+      alert('Please select a size');
+      return;
+    }
     const productId = product._id || product.id;
     addItem({ id: productId as any, name: product.name, price: product.price, image: product.image }, 1);
     alert('Added to bag');
   };
 
   const handleBuyNow = () => {
-    if (!size) {
+    if (hasSizes && !size) {
       alert('Please select a size');
       return;
     }
@@ -153,7 +161,7 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button onClick={() => { if (!size) { alert('Please select a size'); return; } handleAdd(); }} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
+              <button onClick={handleAdd} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
               <button onClick={handleBuyNow} className="premium-button w-full sm:w-auto">Buy Now</button>
               <button onClick={() => {
                 if (navigator.share) {
@@ -198,7 +206,7 @@ export default function ProductDetail() {
         )}
 
         <SimilarProducts currentId={product._id || product.id} category={product.category} />
-        <StickyBuyBar name={product.name} price={product.price} disabled={!size} onAdd={() => { if (!size) { alert('Please select a size'); return; } handleAdd(); }} />
+        <StickyBuyBar name={product.name} price={product.price} disabled={hasSizes && !size} onAdd={handleAdd} />
       </section>
     </main>
   );
