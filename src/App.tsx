@@ -3,7 +3,7 @@ import HomePage from './components/HomePage';
 import Navigation from './components/Navigation';
 import NewsletterPopup from './components/NewsletterPopup';
 import Footer from './components/Footer';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { hydrateBackend } from './utils/storage';
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
@@ -16,7 +16,8 @@ import Profile from './pages/Profile';
 import SavedAddresses from './pages/SavedAddresses';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
-import { isAdminAuthenticated, isAuthenticated } from './utils/storage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 import SizeGuide from './pages/SizeGuide';
 import Care from './pages/Care';
 import GiftCards from './pages/GiftCards';
@@ -53,11 +54,11 @@ function AppRoutes() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
         <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/dashboard" element={isAuthenticated() ? <Dashboard /> : <Navigate to="/login" replace />} />
-        <Route path="/orders" element={isAuthenticated() ? <MyOrders /> : <Navigate to="/login" replace />} />
-        <Route path="/profile" element={isAuthenticated() ? <Profile /> : <Navigate to="/login" replace />} />
-        <Route path="/addresses" element={isAuthenticated() ? <SavedAddresses /> : <Navigate to="/login" replace />} />
-        <Route path="/admin" element={isAdminAuthenticated() ? <AdminDashboard /> : <Navigate to="/admin/login" replace />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/addresses" element={<ProtectedRoute><SavedAddresses /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/size-guide" element={<SizeGuide />} />
         <Route path="/care" element={<Care />} />
