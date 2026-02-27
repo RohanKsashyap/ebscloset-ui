@@ -106,7 +106,7 @@ export default function Checkout() {
 
   return (
     <main className="bg-white">
-      <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
+      <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20">
           <div className="order-2 lg:order-1">
             <nav className="text-[10px] md:text-xs mb-8 text-gray-600 flex items-center flex-wrap gap-2 uppercase tracking-widest">

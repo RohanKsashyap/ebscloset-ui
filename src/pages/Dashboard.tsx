@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useProductContext } from '../context/ProductContext';
 import { orderService, Order } from '../services/orderService';
+import { authService } from '../services/authService';
 import DashboardLayout from '../components/DashboardLayout';
 
 const Dashboard = () => {
@@ -30,6 +31,10 @@ const Dashboard = () => {
       try {
         const myOrders = await orderService.getMyOrders();
         setOrders(myOrders);
+        // Refresh user data from backend to get latest addresses etc
+        const me = await authService.getMe();
+        setUser(me);
+        localStorage.setItem('user', JSON.stringify(me));
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
       }
@@ -43,11 +48,14 @@ const Dashboard = () => {
 
   if (!user) return null;
 
+  const totalSpent = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+  const primaryAddress = user.addresses?.find((a: any) => a.isPrimary) || user.addresses?.[0];
+
   const stats = [
-    { label: 'TOTAL SPENT', value: '$1,420.50' },
+    { label: 'TOTAL SPENT', value: `$${totalSpent.toFixed(2)}` },
     { label: 'ORDERS COMPLETED', value: orders.length.toString() },
     { label: 'ITEMS IN WISHLIST', value: wishlistIds.length.toString() },
-    { label: 'LOYALTY POINTS', value: '850' },
+    { label: 'LOYALTY POINTS', value: Math.floor(totalSpent / 10).toString() },
   ];
 
   return (
@@ -56,7 +64,7 @@ const Dashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8 md:mb-10">
         <div>
           <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, <span className="text-[#ed4690]">{user.fullName.split(' ')[0]}</span>!
+            Welcome back, <span className="text-[#ed4690]">{user.fullName?.split(' ')[0] || 'User'}</span>!
           </h1>
           <p className="text-gray-500 text-sm md:text-base">Here's what's happening with your account today.</p>
         </div>
@@ -83,10 +91,16 @@ const Dashboard = () => {
             </button>
           </div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">Recent Orders</h3>
-          <p className="text-sm text-gray-500 mb-4">Order #LX-88219</p>
-          <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
-            In Transit
-          </span>
+          {orders.length > 0 ? (
+            <>
+              <p className="text-sm text-gray-500 mb-4">{orders[0].orderId || `#ORD-${orders[0]._id?.substring(0, 8)}`}</p>
+              <span className="px-3 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                {orders[0].status || 'Pending'}
+              </span>
+            </>
+          ) : (
+            <p className="text-sm text-gray-400 italic">No orders yet</p>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 shadow-sm relative group">
@@ -102,10 +116,14 @@ const Dashboard = () => {
             </button>
           </div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">Primary Address</h3>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            123 Soft Pink Lane, Manhattan<br />
-            New York, NY 10001
-          </p>
+          {primaryAddress ? (
+            <p className="text-sm text-gray-500 leading-relaxed">
+              {primaryAddress.address}<br />
+              {primaryAddress.city}, {primaryAddress.postalCode}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-400 italic">No address saved</p>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-[2rem] md:rounded-[2.5rem] border border-gray-50 shadow-sm relative group md:col-span-2 lg:col-span-1">
@@ -122,7 +140,7 @@ const Dashboard = () => {
           </div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">Account Profile</h3>
           <p className="text-sm text-gray-500 mb-1">{user.fullName}</p>
-          <p className="text-[10px] text-gray-400 font-medium">Member since July 2023</p>
+          <p className="text-[10px] text-gray-400 font-medium">Member since {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'July 2023'}</p>
         </div>
       </div>
 

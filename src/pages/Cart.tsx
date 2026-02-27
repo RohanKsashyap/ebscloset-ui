@@ -44,7 +44,7 @@ export default function Cart() {
 
   return (
     <main className="bg-white">
-      <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
+      <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-10 md:mb-16">
           <h1 className="font-serif text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">Your Bag</h1>
           <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Premium picks for magical moments</p>

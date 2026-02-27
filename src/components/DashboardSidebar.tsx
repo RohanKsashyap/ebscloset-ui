@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ShoppingBag, 
-  User, 
+  User as UserIcon, 
   MapPin, 
   Heart, 
   RefreshCcw, 
@@ -10,6 +10,7 @@ import {
   Award,
   X
 } from 'lucide-react';
+import { authService } from '../services/authService';
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -19,17 +20,17 @@ interface DashboardSidebarProps {
 const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    authService.logout();
     navigate('/login');
   };
 
   const sidebarLinks = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: ShoppingBag, label: 'My Orders', path: '/orders' },
-    { icon: User, label: 'My Profile', path: '/profile' },
+    { icon: UserIcon, label: 'My Profile', path: '/profile' },
     { icon: MapPin, label: 'Saved Addresses', path: '/addresses' },
     { icon: Heart, label: 'Wishlist', path: '/wishlist' },
     { icon: RefreshCcw, label: 'Returns & Refunds', path: '/returns' },
@@ -54,9 +55,12 @@ const DashboardSidebar = ({ isOpen, onClose }: DashboardSidebarProps) => {
         <div className="flex items-center justify-between px-4 mb-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#ed4690] rounded-full flex items-center justify-center text-white">
-              <User className="w-6 h-6" />
+              <UserIcon className="w-6 h-6" />
             </div>
-            <span className="font-bold text-gray-900">Account Hub</span>
+            <div className="min-w-0">
+              <p className="font-bold text-gray-900 truncate">{user.fullName || 'Account Hub'}</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest truncate">{user.role || 'Member'}</p>
+            </div>
           </div>
           <button 
             onClick={onClose}

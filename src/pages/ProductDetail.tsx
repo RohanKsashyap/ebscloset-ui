@@ -105,7 +105,7 @@ export default function ProductDetail() {
 
   return (
     <main className="bg-white">
-      <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
+      <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="mb-6 text-[10px] md:text-xs text-gray-600 overflow-x-auto whitespace-nowrap">
           <a href="/" className="hover:underline">Home</a>
           <span className="mx-2">/</span>

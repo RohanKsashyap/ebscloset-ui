@@ -52,7 +52,7 @@ const ForgotPassword = () => {
 
       {/* Right Side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col relative overflow-y-auto">
-        <div className="max-w-md w-full mx-auto px-6 py-12 flex flex-col">
+        <div className="max-w-md w-full mx-auto px-6 pt-24 pb-12 flex flex-col">
           <Link to="/login" className="flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors self-end mb-12">
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Login</span>

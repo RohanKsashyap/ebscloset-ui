@@ -7,18 +7,32 @@ import {
   EyeOff,
   AlertTriangle,
   Settings,
-  RefreshCcw
+  RefreshCcw,
+  Loader2
 } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
+import { authService } from '../services/authService';
 
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     phone: '',
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   useEffect(() => {
@@ -32,9 +46,48 @@ const Profile = () => {
     setFormData({
       fullName: parsedUser.fullName || '',
       email: parsedUser.email || '',
-      phone: '',
+      phone: parsedUser.phone || '',
     });
   }, [navigate]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      const updatedUser = await authService.updateProfile(formData);
+      setUser(updatedUser);
+      setSuccess('Profile updated successfully!');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+    setPasswordLoading(true);
+    setPasswordError('');
+    setPasswordSuccess('');
+    try {
+      await authService.updatePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+      setPasswordSuccess('Password updated successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.message || 'Failed to update password');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   if (!user) return null;
 
@@ -60,13 +113,16 @@ const Profile = () => {
         </div>
 
         {/* Personal Details */}
-        <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm mb-6 md:mb-8">
+        <form onSubmit={handleUpdateProfile} className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm mb-6 md:mb-8">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center text-[#ed4690]">
               <User className="w-5 h-5" />
             </div>
             <h2 className="text-xl font-bold text-gray-900">Personal Details</h2>
           </div>
+
+          {error && <p className="mb-4 text-red-500 text-sm font-medium">{error}</p>}
+          {success && <p className="mb-4 text-green-500 text-sm font-medium">{success}</p>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
             <div>
@@ -77,6 +133,7 @@ const Profile = () => {
                 onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                 placeholder="Sarah Jenkins"
                 className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
+                required
               />
             </div>
             <div>
@@ -87,6 +144,7 @@ const Profile = () => {
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder="sarah.j@example.com"
                 className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
+                required
               />
             </div>
           </div>
@@ -103,14 +161,19 @@ const Profile = () => {
           </div>
 
           <div className="flex justify-end">
-            <button className="w-full sm:w-auto px-8 py-4 bg-[#ed4690] text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-pink-100">
+            <button 
+              type="submit"
+              disabled={loading}
+              className="w-full sm:w-auto px-8 py-4 bg-[#ed4690] text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-pink-100 flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Change Password */}
-        <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm mb-6 md:mb-8">
+        <form onSubmit={handleUpdatePassword} className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-gray-100 shadow-sm mb-6 md:mb-8">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center text-[#ed4690]">
               <RefreshCcw className="w-5 h-5" />
@@ -118,15 +181,22 @@ const Profile = () => {
             <h2 className="text-xl font-bold text-gray-900">Change Password</h2>
           </div>
 
+          {passwordError && <p className="mb-4 text-red-500 text-sm font-medium">{passwordError}</p>}
+          {passwordSuccess && <p className="mb-4 text-green-500 text-sm font-medium">{passwordSuccess}</p>}
+
           <div className="mb-4 md:mb-6">
             <label className="block text-sm font-bold text-gray-900 mb-2 md:mb-3">Current Password</label>
             <div className="relative">
               <input 
                 type={showCurrentPassword ? "text" : "password"} 
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
                 placeholder="••••••••"
                 className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
+                required
               />
               <button 
+                type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
@@ -138,18 +208,34 @@ const Profile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2 md:mb-3">New Password</label>
-              <input 
-                type="password" 
-                placeholder="Min. 8 characters"
-                className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
-              />
+              <div className="relative">
+                <input 
+                  type={showNewPassword ? "text" : "password"} 
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                  placeholder="Min. 8 characters"
+                  className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
+                  required
+                  minLength={8}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-900 mb-2 md:mb-3">Confirm New Password</label>
               <input 
                 type="password" 
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                 placeholder="Confirm password"
                 className="w-full px-5 md:px-6 py-3 md:py-4 bg-[#f8f9fa] border-none rounded-2xl focus:ring-2 focus:ring-[#ed4690] outline-none transition-all placeholder:text-gray-400 font-medium"
+                required
               />
             </div>
           </div>
@@ -158,11 +244,16 @@ const Profile = () => {
             <p className="text-xs text-gray-400 max-w-xs leading-relaxed font-medium text-center sm:text-left">
               Password must be at least 8 characters long and include a mix of uppercase, lowercase, and symbols.
             </p>
-            <button className="w-full sm:w-auto px-8 py-4 bg-[#0f172a] text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-slate-200">
+            <button 
+              type="submit"
+              disabled={passwordLoading}
+              className="w-full sm:w-auto px-8 py-4 bg-[#0f172a] text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-slate-200 flex items-center justify-center gap-2 disabled:opacity-70"
+            >
+              {passwordLoading && <Loader2 className="w-4 h-4 animate-spin" />}
               Update Password
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Delete Account */}
         <div className="bg-red-50/30 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-red-100 flex flex-col md:flex-row justify-between items-center gap-6">

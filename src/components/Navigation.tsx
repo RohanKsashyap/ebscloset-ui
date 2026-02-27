@@ -226,7 +226,7 @@ export default function Navigation() {
 
           {/* Secondary Row: Links (Visible only when scrolled/solid) */}
           <div className={`hidden lg:flex justify-center transition-all duration-500 ${
-            shouldShowSolid ? 'h-11 border-t border-gray-50 overflow-visible' : 'h-0 overflow-hidden'
+            shouldShowSolid ? 'h-7 border-t border-gray-50 overflow-visible' : 'h-0 overflow-hidden'
           }`}>
             <div className="flex items-center space-x-8 xl:space-x-12 h-full">
               {loadNav(defaultCategories).map((category) => (
