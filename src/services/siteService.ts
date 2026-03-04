@@ -31,7 +31,7 @@ export const siteService = {
   getNavigation: async (): Promise<any[]> => {
     if (!(await ensureBackendAvailable())) return [];
     try {
-      const response = await apiClient.get('/admin/navigation'); // Temporary until public route exists, but usually navigation is public
+      const response = await apiClient.get('/site/navigation');
       return response.data.data || [];
     } catch {
       return [];
@@ -41,7 +41,7 @@ export const siteService = {
   getSiteSettings: async (): Promise<any> => {
     if (!(await ensureBackendAvailable())) return null;
     try {
-      const response = await apiClient.get('/admin/site-settings');
+      const response = await apiClient.get('/site/site-settings');
       return response.data.data;
     } catch {
       return null;

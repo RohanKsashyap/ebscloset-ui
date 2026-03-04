@@ -15,14 +15,24 @@ export default function HomePage() {
   const [animations, setAnimations] = useState(loadHomeAnimations());
 
   const budgetItems = useMemo(() => {
-    const fallback: SiteSettings = { hero: {} as any, editorial: {} as any, collections: [], footerGroups: [], social: [], newsletter: { heading: '', subtext: '' }, legalLabels: { privacy: '', terms: '', cookies: '' }, infoPages: {}, budgets: [
-      { label: 'Under ₹499', slug: 'under499', min: 0, max: 499 },
-      { label: 'Under ₹799', slug: 'under799', min: 0, max: 799 },
-      { label: 'Under ₹999', slug: 'under999', min: 0, max: 999 },
-      { label: '₹1000 – ₹1499', slug: '1000-1499', min: 1000, max: 1499 },
-      { label: '₹1500 – ₹1999', slug: '1500-1999', min: 1500, max: 1999 },
-      { label: '₹2000+ Premium', slug: '2000plus', min: 2000, max: 10000 },
-    ] };
+    const fallback: SiteSettings = { 
+      hero: { title: '', subtitle: '', slides: [], bannerImage: '', bannerTitle: '', bannerSubtitle: '', bannerCtaText: '', bannerCtaHref: '' }, 
+      editorial: { image: '', kicker: '', title: '', body: '', ctaText: '', ctaHref: '' }, 
+      collections: [], 
+      footerGroups: [], 
+      social: [], 
+      newsletter: { heading: '', subtext: '' }, 
+      legalLabels: { privacy: '', terms: '', cookies: '' }, 
+      infoPages: {}, 
+      budgets: [
+        { label: 'Under ₹499', slug: 'under499', min: 0, max: 499 },
+        { label: 'Under ₹799', slug: 'under799', min: 0, max: 799 },
+        { label: 'Under ₹999', slug: 'under999', min: 0, max: 999 },
+        { label: '₹1000 – ₹1499', slug: '1000-1499', min: 1000, max: 1499 },
+        { label: '₹1500 – ₹1999', slug: '1500-1999', min: 1500, max: 1999 },
+        { label: '₹2000+ Premium', slug: '2000plus', min: 2000, max: 10000 },
+      ] 
+    };
     const site = loadSite(fallback);
     return (site.budgets ?? fallback.budgets!).map((b) => {
       const label = b.slug.startsWith('under')

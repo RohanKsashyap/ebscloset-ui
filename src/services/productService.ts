@@ -2,7 +2,7 @@ import apiClient, { ensureBackendAvailable } from './api';
 
 export interface Product {
   _id?: string;
-  id?: number;
+  id?: string | number;
   name: string;
   description: string;
   price: number;

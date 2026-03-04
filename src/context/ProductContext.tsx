@@ -25,10 +25,11 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const [loadingArrivals, setLoadingArrivals] = useState(true);
   const [loadingTrending, setLoadingTrending] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [wishlistIds, setWishlistIds] = useState<number[]>(() => {
+  const [wishlistIds, setWishlistIds] = useState<(string | number)[]>(() => {
     try {
       const raw = localStorage.getItem('wishlist_ids_v1');
-      return raw ? JSON.parse(raw) : [];
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -67,10 +68,10 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     }
   }, [wishlistIds]);
 
-  const toggleWishlist = (id: number) => {
+  const toggleWishlist = (id: string | number) => {
     setWishlistIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev]));
   };
-  const isWishlisted = (id: number) => wishlistIds.includes(id);
+  const isWishlisted = (id: string | number) => wishlistIds.includes(id);
 
   return (
     <ProductContext.Provider value={{

@@ -50,7 +50,7 @@ export default function ArrivalsDetail() {
 
   const handleAdd = () => {
     const label = size ? `${product.name} (${size})` : product.name;
-    addItem({ id: product.id, name: label, image: product.image, price: product.price, size: size || undefined });
+    addItem({ id: product._id || product.id, name: label, image: product.image, price: product.price, size: size || undefined });
     showToast('Added to bag');
   };
 

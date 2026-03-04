@@ -50,7 +50,7 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product?.id) {
       const stored = localStorage.getItem('recently_viewed');
-      let ids: number[] = stored ? JSON.parse(stored) : [];
+      let ids: (string | number)[] = stored ? JSON.parse(stored) : [];
       ids = [product.id, ...ids.filter(i => i !== product.id)].slice(0, 10);
       localStorage.setItem('recently_viewed', JSON.stringify(ids));
     }

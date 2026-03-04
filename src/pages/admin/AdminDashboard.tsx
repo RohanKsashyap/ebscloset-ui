@@ -1,8 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { Product } from '../../services/productService';
 import { adminService, type Review, type GalleryCategory } from '../../services/adminService';
 import type { Testimonial, GalleryImage } from '../../services/siteService';
 import { useNavigate } from 'react-router-dom';
+import OrdersManagement from './OrdersManagement';
+import DiscountsManagement from './DiscountsManagement';
+import CustomersManagement from './CustomersManagement';
+import Analytics from './Analytics';
+import SiteSettings from './SiteSettings';
+import { useToast } from '../../context/ToastContext';
+import { 
+  LayoutGrid, 
+  ShoppingBag, 
+  Mail, 
+  Inbox, 
+  Star, 
+  MessageSquare, 
+  Image as ImageIcon, 
+  Tag, 
+  Navigation as NavIcon, 
+  Settings,
+  Users,
+  BarChart3 as BarChart,
+  Plus,
+  Bell,
+  Sparkles,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  LogOut,
+  Menu,
+  X,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Video,
+  Upload,
+} from 'lucide-react';
 
 type NavCategory = { _id?: string; name: string; href?: string; items: { label: string; href: string }[] };
 type DiscountCode = { _id?: string; code: string; type: 'percent' | 'amount'; value: number };
@@ -66,67 +103,115 @@ function ProductForm({ initial, onSave }: { initial?: Product; onSave: (p: Produ
   };
 
   return (
-    <div className="border p-4 space-y-3 bg-white">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input className="border px-3 py-2" placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        <input className="border px-3 py-2" type="number" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
-        <input className="border px-3 py-2" placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-        <input className="border px-3 py-2" placeholder="SKU" value={form.sku ?? ''} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Product Name</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="e.g. Silk Midi Dress" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Price (₹)</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" type="number" placeholder="0.00" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Category</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="e.g. Dresses" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">SKU</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="LUX-2024-001" value={form.sku ?? ''} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+        </div>
       </div>
-      <textarea className="border px-3 py-2 w-full" placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input className="border px-3 py-2" placeholder="Materials" value={form.materials ?? ''} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
-        <input className="border px-3 py-2" placeholder="Care" value={form.care ?? ''} onChange={(e) => setForm({ ...form, care: e.target.value })} />
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Description</label>
+        <textarea className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5 h-32 resize-none" placeholder="Describe your product..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {(form.sizes || []).map((s) => (
-          <div key={s} className="flex items-center gap-2">
-            <label className="text-sm">{s}</label>
-            <input className="border px-2 py-1 w-20" type="number" value={form.stock?.[s] ?? 0} onChange={(e) => setForm({ ...form, stock: { ...(form.stock ?? {}), [s]: Number(e.target.value) } })} />
-          </div>
-        ))}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Materials</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" value={form.materials ?? ''} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Care Instructions</label>
+          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" value={form.care ?? ''} onChange={(e) => setForm({ ...form, care: e.target.value })} />
+        </div>
       </div>
-      <div className="flex gap-2 items-center">
-         <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={!!form.isTrending} onChange={(e) => setForm({...form, isTrending: e.target.checked})} />
-            Trending
+
+      <div className="space-y-3">
+        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider block">Stock by Size</label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {(form.sizes || []).map((s) => (
+            <div key={s} className="bg-gray-50 rounded-xl p-3 flex flex-col gap-1">
+              <span className="text-[10px] font-bold uppercase text-gray-400">{s}</span>
+              <input className="bg-transparent border-none p-0 text-sm font-bold focus:ring-0" type="number" value={form.stock?.[s] ?? 0} onChange={(e) => setForm({ ...form, stock: { ...(form.stock ?? {}), [s]: Number(e.target.value) } })} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex gap-6 py-2">
+         <label className="flex items-center gap-3 cursor-pointer group">
+            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${form.isTrending ? 'bg-black border-black' : 'border-gray-200 group-hover:border-gray-300'}`}>
+              {form.isTrending && <CheckCircle2 size={12} className="text-white" />}
+            </div>
+            <input type="checkbox" className="hidden" checked={!!form.isTrending} onChange={(e) => setForm({...form, isTrending: e.target.checked})} />
+            <span className="text-sm font-medium text-gray-600">Trending Product</span>
          </label>
-         <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={!!form.isNewArrival} onChange={(e) => setForm({...form, isNewArrival: e.target.checked})} />
-            New Arrival
+         <label className="flex items-center gap-3 cursor-pointer group">
+            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${form.isNewArrival ? 'bg-black border-black' : 'border-gray-200 group-hover:border-gray-300'}`}>
+              {form.isNewArrival && <CheckCircle2 size={12} className="text-white" />}
+            </div>
+            <input type="checkbox" className="hidden" checked={!!form.isNewArrival} onChange={(e) => setForm({...form, isNewArrival: e.target.checked})} />
+            <span className="text-sm font-medium text-gray-600">New Arrival</span>
          </label>
       </div>
-      <div>
+
+      <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <label className="text-xs border px-2 py-1 rounded cursor-pointer hover:bg-gray-50">
-            Upload Images
+          <label className="bg-white border-2 border-dashed border-gray-200 px-6 py-4 rounded-2xl cursor-pointer hover:border-gray-300 transition-all flex flex-col items-center gap-1 flex-1">
+            <Plus size={20} className="text-gray-400" />
+            <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Add Images</span>
             <input type="file" multiple accept="image/*" className="hidden" onChange={onFile} />
           </label>
-          <label className="text-xs border px-2 py-1 rounded cursor-pointer hover:bg-gray-50">
-            Cover Image
+          <label className="bg-white border-2 border-dashed border-gray-200 px-6 py-4 rounded-2xl cursor-pointer hover:border-gray-300 transition-all flex flex-col items-center gap-1 flex-1">
+            <ImageIcon size={20} className="text-gray-400" />
+            <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Set Cover</span>
             <input type="file" accept="image/*" className="hidden" onChange={onCoverFile} />
           </label>
         </div>
+
         {form.images?.length ? (
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {form.images.map((src, i) => (
-              <div key={i} className="relative w-16 h-20 group">
-                <img src={src} alt="preview" className="w-full h-full object-cover rounded border" />
+              <div key={i} className="relative w-20 h-24 group rounded-xl overflow-hidden shadow-sm border">
+                <img src={src} alt="preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-white/90 backdrop-blur shadow-sm text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white"
                   onClick={() => removeImageAt(i)}
                 >
-                  ✕
+                  <Trash2 size={14} />
                 </button>
-                {form.image === src && <span className="absolute bottom-0 left-0 right-0 bg-hot-pink text-white text-[8px] text-center uppercase py-0.5">Cover</span>}
+                {form.image === src && (
+                  <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm text-white text-[8px] text-center font-bold uppercase py-1">
+                    Cover
+                  </div>
+                )}
               </div>
             ))}
           </div>
         ) : null}
       </div>
-      <div className="pt-2">
-        <button className="bg-hot-pink text-white px-6 py-2 text-xs tracking-widest uppercase hover:bg-hot-pink/90 transition-colors" onClick={() => onSave(form)}>Save Product</button>
+
+      <div className="pt-4">
+        <button 
+          className="w-full bg-[#f26322] text-white py-4 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-[#d9561b] transition-all shadow-lg shadow-orange-500/20" 
+          onClick={() => onSave(form)}
+        >
+          Save Product Details
+        </button>
       </div>
     </div>
   );
@@ -183,92 +268,6 @@ function NavManager({ initial, onSave }: { initial: NavCategory[]; onSave: (n: N
       <div className="flex gap-3">
         <button className="border border-gray-300 px-4 py-2 text-xs tracking-widest uppercase hover:bg-gray-50" onClick={addCategory}>Add Category</button>
         <button className="bg-hot-pink text-white px-6 py-2 text-xs tracking-widest uppercase hover:bg-hot-pink/90" onClick={() => onSave(nav)}>Save Navigation</button>
-      </div>
-    </div>
-  );
-}
-
-function DiscountsManager({ initial, onSave }: { initial: DiscountCode[]; onSave: (d: DiscountCode[]) => void }) {
-  const [codes, setCodes] = useState<DiscountCode[]>(initial);
-  useEffect(() => { setCodes(initial); }, [initial]);
-
-  const addCode = () => setCodes([...codes, { code: 'NEWCODE', type: 'percent', value: 10 }]);
-  const removeCode = (i: number) => setCodes(codes.filter((_, idx) => idx !== i));
-
-  return (
-    <div className="space-y-3">
-      {codes.map((c, i) => (
-        <div key={i} className="grid grid-cols-4 gap-2 items-center border p-2 rounded">
-          <input className="border px-3 py-2 uppercase" value={c.code} onChange={(e) => {
-            const copy = [...codes]; copy[i].code = e.target.value.toUpperCase(); setCodes(copy);
-          }} />
-          <select className="border px-3 py-2" value={c.type} onChange={(e) => { const copy = [...codes]; copy[i].type = e.target.value as any; setCodes(copy); }}>
-            <option value="percent">Percent (%)</option>
-            <option value="amount">Amount (₹)</option>
-          </select>
-          <input type="number" className="border px-3 py-2" value={c.value} onChange={(e) => { const copy = [...codes]; copy[i].value = Number(e.target.value); setCodes(copy); }} />
-          <button className="text-red-500 hover:underline text-xs" onClick={() => removeCode(i)}>Remove</button>
-        </div>
-      ))}
-      <div className="flex gap-3 pt-2">
-        <button className="border border-gray-300 px-4 py-2 text-xs tracking-widest uppercase hover:bg-gray-50" onClick={addCode}>Add Code</button>
-        <button className="bg-hot-pink text-white px-6 py-2 text-xs tracking-widest uppercase hover:bg-hot-pink/90" onClick={() => onSave(codes)}>Save Codes</button>
-      </div>
-    </div>
-  );
-}
-
-function SiteManager({ initial, onSave }: { initial: SiteSettings; onSave: (s: SiteSettings) => void }) {
-  const [site, setSite] = useState<SiteSettings>(initial);
-  useEffect(() => { setSite(initial); }, [initial]);
-
-  const onHeroBannerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    const imgs = await uploadImages(e.target.files);
-    setSite((s) => ({ ...s, hero: { ...s.hero, bannerImage: imgs[0] } }));
-  };
-
-  return (
-    <div className="space-y-8 pb-20">
-      <div className="border p-6 space-y-4 rounded shadow-sm bg-white">
-        <h3 className="font-serif text-xl border-b pb-2">Hero Section</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Title</label>
-            <input className="border px-3 py-2 w-full" value={site.hero.title} onChange={(e) => setSite({ ...site, hero: { ...site.hero, title: e.target.value } })} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Subtitle</label>
-            <input className="border px-3 py-2 w-full" value={site.hero.subtitle} onChange={(e) => setSite({ ...site, hero: { ...site.hero, subtitle: e.target.value } })} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Banner Title</label>
-            <textarea className="border px-3 py-2 w-full h-20" value={site.hero.bannerTitle} onChange={(e) => setSite({ ...site, hero: { ...site.hero, bannerTitle: e.target.value } })} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Banner Subtitle</label>
-            <input className="border px-3 py-2 w-full" value={site.hero.bannerSubtitle} onChange={(e) => setSite({ ...site, hero: { ...site.hero, bannerSubtitle: e.target.value } })} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Banner CTA Text</label>
-            <input className="border px-3 py-2 w-full" value={site.hero.bannerCtaText} onChange={(e) => setSite({ ...site, hero: { ...site.hero, bannerCtaText: e.target.value } })} />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-500 uppercase">Banner CTA Link</label>
-            <input className="border px-3 py-2 w-full" value={site.hero.bannerCtaHref} onChange={(e) => setSite({ ...site, hero: { ...site.hero, bannerCtaHref: e.target.value } })} />
-          </div>
-        </div>
-        <div className="pt-2">
-           <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Banner Image</label>
-           <div className="flex items-center gap-4">
-              <input type="file" accept="image/*" onChange={onHeroBannerFile} />
-              {site.hero.bannerImage && <img src={site.hero.bannerImage} className="w-20 h-20 object-cover border rounded" />}
-           </div>
-        </div>
-      </div>
-      
-      <div className="flex justify-start">
-        <button className="bg-hot-pink text-white px-10 py-3 text-sm tracking-widest uppercase hover:bg-hot-pink/90 shadow-lg" onClick={() => onSave(site)}>Save All Site Settings</button>
       </div>
     </div>
   );
@@ -364,11 +363,26 @@ function GalleryCategoryForm({ onSave }: { onSave: (data: FormData) => void }) {
   );
 }
 
+const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-6 py-3.5 text-sm font-bold transition-all rounded-[1.25rem] ${
+      active 
+        ? 'bg-[#eb4899] text-white shadow-lg shadow-pink-500/20' 
+        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+    }`}
+  >
+    <Icon size={20} className={active ? 'text-white' : 'text-gray-400'} />
+    <span>{label}</span>
+  </button>
+);
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'products'|'navigation'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'>('products');
+  const [tab, setTab] = useState<'products'|'navigation'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'>('analytics');
   const [catalog, setCatalog] = useState<Product[]>([]);
   const [productEditing, setProductEditing] = useState<Product | undefined>(undefined);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [nav, setNav] = useState<NavCategory[]>([]);
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [site, setSite] = useState<SiteSettings | null>(null);
@@ -379,22 +393,39 @@ export default function AdminDashboard() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [galleryCategories, setGalleryCategories] = useState<GalleryCategory[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [adminName, setAdminName] = useState('Administrator');
+
+  useEffect(() => {
+    const adminStr = localStorage.getItem('admin');
+    if (adminStr) {
+      try {
+        const adminObj = JSON.parse(adminStr);
+        setAdminName(adminObj.fullName || adminObj.email || 'Administrator');
+      } catch (e) {
+        console.error('Error parsing admin data:', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchInitial = async () => {
       try {
-        const [p, n, s, d] = await Promise.all([
+        const [p, n, s, d, db] = await Promise.all([
           adminService.getProducts(),
           adminService.getNavigation(),
           adminService.getSiteSettings(),
-          adminService.getDiscounts()
+          adminService.getDiscounts(),
+          adminService.getDashboard()
         ]);
         setCatalog(p);
         setNav(n);
         setSite(s);
         setCodes(d);
+        setDashboardData(db);
       } catch (err) {
         console.error('Fetch error:', err);
       } finally {
@@ -405,6 +436,7 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
+    if (tab === 'analytics') adminService.getDashboard().then(setDashboardData);
     if (tab === 'orders') adminService.getOrders().then(setOrders);
     if (tab === 'newsletter') adminService.getSubscribers().then(setSubscribers);
     if (tab === 'inbox') adminService.getMessages().then(setMessages);
@@ -414,6 +446,7 @@ export default function AdminDashboard() {
       adminService.getAdminGalleryImages().then(setGalleryImages);
       adminService.getAdminGalleryCategories().then(setGalleryCategories);
     }
+    if (tab === 'customers') adminService.getUsers().then(setUsers);
   }, [tab]);
 
   const saveProduct = async (p: Product) => {
@@ -422,6 +455,7 @@ export default function AdminDashboard() {
       else await adminService.createProduct(p);
       setCatalog(await adminService.getProducts());
       setProductEditing(undefined);
+      setIsProductModalOpen(false);
       alert('Saved');
     } catch { alert('Error'); }
   };
@@ -529,88 +563,333 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
+  const navItems = [{ id: 'analytics', label: 'Analytics', icon: BarChart },
+    { id: 'products', label: 'Products', icon: LayoutGrid },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'discounts', label: 'Discounts', icon: Tag },
+  ] as const;
+
+  const secondaryNavItems = [
+    { id: 'newsletter', label: 'Newsletter', icon: Mail },
+    { id: 'inbox', label: 'Inbox', icon: Inbox },
+    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
+    { id: 'gallery', label: 'Gallery', icon: ImageIcon },
+    { id: 'navigation', label: 'Navigation', icon: NavIcon },
+  ] as const;
+
   if (loading) return <div className="p-20 text-center font-serif text-2xl">Loading Magic...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <nav className="bg-white border-b px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-[60] shadow-sm">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
-            </svg>
-          </button>
-          <h1 className="font-serif text-xl md:text-2xl text-hot-pink truncate">Admin Dashboard</h1>
-        </div>
-        <button onClick={logout} className="text-[10px] md:text-sm font-bold text-gray-500 hover:text-black uppercase tracking-widest bg-gray-50 md:bg-transparent px-3 py-1.5 md:p-0 rounded-lg">Logout</button>
-      </nav>
-
-      <div className="flex-1 flex flex-col lg:flex-row max-w-[1600px] w-full mx-auto relative">
-        {/* Sidebar / Tab Navigation */}
-        <aside className={`
-          fixed lg:sticky lg:top-20 inset-y-0 left-0 z-50
-          w-64 bg-white border-r lg:border-none lg:bg-transparent
-          transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          transition-transform duration-300 ease-in-out
-          flex flex-col p-6
-        `}>
-          <div className="space-y-1">
-            {(['products','navigation','discounts','site','orders','newsletter','inbox','reviews','testimonials','gallery'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => { setTab(t); setIsMobileMenuOpen(false); }}
-                className={`w-full text-left px-4 py-3 text-xs font-bold uppercase tracking-widest rounded-xl transition-all ${tab === t ? 'bg-hot-pink text-white shadow-lg shadow-hot-pink/20' : 'text-gray-500 hover:bg-white hover:text-hot-pink hover:shadow-sm'}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        {/* Mobile Sidebar Overlay */}
-        {isMobileMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-        )}
-
-        <main className="flex-1 p-4 md:p-8 min-w-0">
-          {tab === 'products' && (
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-              <div className="xl:col-span-1">
-                <h2 className="font-serif text-2xl mb-6 text-gray-800">Add / Edit</h2>
-                <ProductForm initial={productEditing} onSave={saveProduct} />
-                {productEditing && (
-                  <button className="mt-4 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-hot-pink transition-colors" onClick={() => setProductEditing(undefined)}>
-                    Cancel Editing
-                  </button>
-                )}
-              </div>
-              <div className="xl:col-span-2">
-                <h2 className="font-serif text-2xl mb-6 text-gray-800">Catalog ({catalog.length})</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {catalog.map((p) => (
-                  <div key={p._id} className="bg-white border p-4 rounded flex gap-4 items-start shadow-sm hover:shadow-md transition-shadow">
-                    <img src={p.image} className="w-20 h-28 object-cover rounded border" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm truncate">{p.name}</p>
-                      <p className="text-hot-pink font-bold text-xs mt-1">₹{p.price}</p>
-                      <p className="text-[10px] text-gray-400 uppercase mt-1">{p.category}</p>
-                      <div className="flex gap-2 mt-4">
-                        <button onClick={() => setProductEditing(p)} className="text-[10px] font-bold uppercase tracking-tighter border px-2 py-1 hover:bg-gray-50">Edit</button>
-                        <button onClick={() => removeProduct(p._id!)} className="text-[10px] font-bold uppercase tracking-tighter border border-red-100 text-red-500 px-2 py-1 hover:bg-red-50">Delete</button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+    <div className="min-h-screen bg-white flex">
+      {/* Sidebar */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transition-transform duration-300 ease-in-out lg:static lg:translate-x-0
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="h-full flex flex-col px-4 py-6">
+          <div className="flex items-center gap-3 px-4 mb-10">
+            <div className="w-10 h-10 bg-[#eb4899] rounded-xl flex items-center justify-center shadow-lg shadow-pink-500/20">
+              <ShoppingBag className="text-white" size={20} />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold tracking-tight text-gray-900">Admin Panel</h1>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Ecommerce Manager</p>
             </div>
           </div>
-        )}
+
+          <nav className="flex-1 space-y-1">
+            {navItems.map((item) => (
+              <SidebarItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                active={tab === item.id}
+                onClick={() => { setTab(item.id as any); setIsMobileMenuOpen(false); }}
+              />
+            ))}
+            
+            <div className="pt-6 pb-2">
+              <p className="px-6 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Management</p>
+              {secondaryNavItems.map((item) => (
+                <SidebarItem
+                  key={item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  active={tab === item.id}
+                  onClick={() => { setTab(item.id as any); setIsMobileMenuOpen(false); }}
+                />
+              ))}
+            </div>
+          </nav>
+
+          <div className="pt-6 border-t border-gray-100">
+            <SidebarItem 
+              icon={Settings} 
+              label="Settings" 
+              active={tab === 'site'} 
+              onClick={() => setTab('site')} 
+            />
+            <button 
+              onClick={logout}
+              className="mt-2 w-full flex items-center gap-3 px-6 py-3.5 text-sm font-bold text-gray-400 hover:text-red-500 transition-all"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Topbar */}
+        <header className="h-20 border-b flex items-center justify-between px-4 md:px-8 bg-white sticky top-0 z-30">
+          <div className="flex items-center gap-4 flex-1">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Menu size={24} className="text-gray-600" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center text-pink-500">
+                <Sparkles size={18} />
+              </div>
+              <h2 className="text-sm font-bold text-gray-900 tracking-tight capitalize">
+                {tab === 'products' ? 'Catalog Management' : `${tab} Management`}
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button className="relative p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all">
+              <Bell size={20} />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+            <div className="flex items-center gap-4 pl-6 border-l border-gray-100">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-gray-900">{adminName}</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Store Administrator</p>
+              </div>
+              <img 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(adminName)}&background=fdf2f8&color=eb4899&bold=true`} 
+                alt="Profile" 
+                className="w-10 h-10 rounded-xl object-cover ring-2 ring-pink-50 ring-offset-2"
+              />
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-[#fafafa]">
+          {tab === 'products' && (
+            <div className="max-w-[1200px] mx-auto space-y-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight">Product Catalog</h2>
+                  <p className="text-gray-500 mt-1">Manage, update and track your store Products.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button className="bg-white border px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
+                    <Filter size={18} />
+                    Filters
+                  </button>
+                  <button 
+                    onClick={() => { setProductEditing(undefined); setIsProductModalOpen(true); }}
+                    className="bg-[#f26322] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#d9561b] transition-all shadow-md shadow-orange-500/20"
+                  >
+                    <Plus size={18} />
+                    New Product
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabs / Filters */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
+                {['All Products', 'Trending', 'New Arrivals', 'Best Sellers', 'Out of Stock'].map((filter, i) => (
+                  <button 
+                    key={filter}
+                    className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                      i === 0 ? 'bg-black text-white' : 'bg-[#f1f1f1] text-[#333] hover:bg-[#e1e1e1]'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              {/* Product Table */}
+              <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-[#fcfcfc] border-b text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                      <tr>
+                        <th className="px-6 py-5">Product</th>
+                        <th className="px-6 py-5">Category</th>
+                        <th className="px-6 py-5">Price</th>
+                        <th className="px-6 py-5">Status</th>
+                        <th className="px-6 py-5">Stock</th>
+                        <th className="px-6 py-5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y text-sm">
+                      {catalog.map((p) => (
+                        <tr key={p._id} className="hover:bg-gray-50/50 transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-4">
+                              <img src={p.image} className="w-12 h-14 object-cover rounded-lg bg-gray-100" />
+                              <div className="min-w-0">
+                                <p className="font-bold text-gray-900 truncate">{p.name}</p>
+                                <p className="text-[10px] text-gray-400 uppercase font-medium mt-0.5">SKU: {p.sku || 'N/A'}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-600 font-medium">{p.category}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="font-bold text-gray-900">₹{p.price.toFixed(2)}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            {p.isTrending ? (
+                              <span className="bg-[#fdf2f8] text-[#be185d] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Trending</span>
+                            ) : p.isNewArrival ? (
+                              <span className="bg-[#eff6ff] text-[#1d4ed8] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">New Arrival</span>
+                            ) : (
+                              <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Classic</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="w-32">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className={`text-[10px] font-bold uppercase ${
+                                  Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10 ? 'text-orange-500' : 'text-green-600'
+                                }`}>
+                                  {Object.values(p.stock || {}).reduce((a, b) => a + b, 0)} in stock
+                                </span>
+                              </div>
+                              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all ${
+                                    Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10 ? 'bg-orange-500' : 'bg-green-500'
+                                  }`}
+                                  style={{ width: `${Math.min(100, (Object.values(p.stock || {}).reduce((a, b) => a + b, 0) / 100) * 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={() => { setProductEditing(p); setIsProductModalOpen(true); }}
+                                className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-all"
+                              >
+                                <Edit size={18} />
+                              </button>
+                              <button 
+                                onClick={() => removeProduct(p._id!)}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-6 py-5 bg-[#fcfcfc] border-t flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    Showing {catalog.length} of {catalog.length} Products
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button className="p-2 border rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50" disabled>
+                      <ChevronLeft size={16} />
+                    </button>
+                    <button className="p-2 border rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50" disabled>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Total Value</p>
+                    <p className="text-2xl font-bold mt-1">₹{catalog.reduce((acc, p) => acc + (p.price * Object.values(p.stock || {}).reduce((a, b) => a + b, 0)), 0).toLocaleString()}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-green-600">
+                    <TrendingUp size={14} />
+                    <span className="text-xs font-bold">12% growth</span>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Low Stock</p>
+                    <p className="text-2xl font-bold mt-1">{catalog.filter(p => Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10).length} Items</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-orange-500">
+                    <AlertCircle size={14} />
+                    <span className="text-xs font-bold">Needs restock</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#fdf2f8] p-6 rounded-2xl shadow-sm border border-pink-100 space-y-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-pink-400">Active Discounts</p>
+                    <p className="text-2xl font-bold mt-1 text-[#be185d]">{codes.length} Promos</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[#be185d]">
+                    <Clock size={14} />
+                    <span className="text-xs font-bold">3 ends soon</span>
+                  </div>
+                </div>
+
+                <div className="bg-[#111827] p-6 rounded-2xl shadow-sm space-y-4 text-white">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">New Reviews</p>
+                    <p className="text-2xl font-bold mt-1">+{reviews.length} This Week</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-400">
+                    <Star size={14} className="fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs font-bold">4.8 Avg Rating</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'products' && isProductModalOpen && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+              <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-slideUp">
+                <div className="sticky top-0 bg-white px-8 py-6 border-b flex items-center justify-between z-10">
+                  <h3 className="text-2xl font-bold">{productEditing ? 'Edit Product' : 'New Product'}</h3>
+                  <button 
+                    onClick={() => { setProductEditing(undefined); setIsProductModalOpen(false); }}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="p-8">
+                  <ProductForm initial={productEditing} onSave={saveProduct} />
+                </div>
+              </div>
+            </div>
+          )}
 
         {tab === 'navigation' && (
           <div className="max-w-3xl">
@@ -620,52 +899,23 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'discounts' && (
-          <div className="max-w-2xl">
-            <h2 className="font-serif text-2xl mb-4">Discount Codes</h2>
-            <DiscountsManager initial={codes} onSave={saveCodesAll} />
-          </div>
+          <DiscountsManagement codes={codes} onSave={saveCodesAll} />
         )}
 
         {tab === 'site' && site && (
-          <SiteManager initial={site} onSave={saveSiteAll} />
+          <SiteSettings initial={site} onSave={saveSiteAll} />
         )}
 
         {tab === 'orders' && (
-          <div className="space-y-4">
-             <h2 className="font-serif text-2xl mb-4">Orders ({orders.length})</h2>
-             {orders.map((o) => (
-               <div key={o._id} className="bg-white border p-6 rounded shadow-sm">
-                 <div className="flex justify-between items-start mb-4">
-                   <div>
-                     <p className="font-bold">Order #{o._id.slice(-6).toUpperCase()}</p>
-                     <p className="text-xs text-gray-500">{o.email} • {new Date(o.createdAt).toLocaleString()}</p>
-                   </div>
-                   <div className="text-right">
-                     <p className="font-serif text-xl text-hot-pink">₹{o.total}</p>
-                     <select 
-                       className="text-xs border mt-2 px-2 py-1 rounded" 
-                       value={o.status || 'new'} 
-                       onChange={(e) => updateOrderStatus(o._id, e.target.value)}
-                     >
-                       <option value="new">New</option>
-                       <option value="paid">Paid</option>
-                       <option value="shipped">Shipped</option>
-                       <option value="delivered">Delivered</option>
-                       <option value="cancelled">Cancelled</option>
-                     </select>
-                   </div>
-                 </div>
-                 <div className="flex flex-wrap gap-4 mt-4 border-t pt-4">
-                   {(o.items || []).map((it: any, i: number) => (
-                     <div key={i} className="flex gap-2 items-center">
-                       <img src={it.image} className="w-10 h-12 object-cover rounded" />
-                       <p className="text-[10px] leading-tight"><span className="font-bold">{it.name}</span><br/>Qty: {it.qty}</p>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             ))}
-          </div>
+          <OrdersManagement orders={orders} onUpdateStatus={updateOrderStatus} />
+        )}
+
+        {tab === 'customers' && (
+          <CustomersManagement users={users} />
+        )}
+
+        {tab === 'analytics' && (
+          <Analytics data={dashboardData} />
         )}
 
         {tab === 'newsletter' && (

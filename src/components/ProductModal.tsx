@@ -26,7 +26,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
   }, []);
   const handleAdd = () => {
     if (!selectedSize) { showToast('Please select a size', 'error'); return; }
-    addItem({ id: product.id, name: `${product.name} (${selectedSize})`, price: Number(product.price), image: product.image, size: selectedSize }, 1);
+    addItem({ id: product._id || product.id, name: `${product.name} (${selectedSize})`, price: Number(product.price), image: product.image, size: selectedSize }, 1);
     showToast('Added to bag');
     onClose();
   };
@@ -50,7 +50,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
 
         <div className="grid md:grid-cols-2">
           <div className="p-4">
-            <Gallery images={galleryImages} onImageClick={() => { navigate(`/product/${product.id}`); onClose(); }} />
+            <Gallery images={galleryImages} onImageClick={() => { navigate(`/product/${product._id || product.id}`); onClose(); }} />
           </div>
 
           <div className="p-8 md:p-12">

@@ -79,6 +79,10 @@ export const adminService = {
     await apiClient.delete(`/admin/products/${productId}`);
   },
 
+  bulkDeleteProducts: async (productIds: string[]): Promise<void> => {
+    await apiClient.delete('/admin/products/bulk', { data: { ids: productIds } });
+  },
+
   getSubscribers: async (): Promise<Subscriber[]> => {
     const response = await apiClient.get('/admin/newsletter');
     return response.data || [];
@@ -98,6 +102,11 @@ export const adminService = {
     return response.data || [];
   },
 
+  getUsers: async (): Promise<any[]> => {
+    const response = await apiClient.get('/admin/users');
+    return response.data.users || [];
+  },
+
   createDiscount: async (discountData: Partial<DiscountCode>): Promise<DiscountCode> => {
     const response = await apiClient.post('/admin/discounts', discountData);
     return response.data;
@@ -105,6 +114,11 @@ export const adminService = {
 
   deleteSubscriber: async (id: string): Promise<void> => {
     await apiClient.delete(`/admin/newsletter/${id}`);
+  },
+
+  getDashboard: async (): Promise<any> => {
+    const response = await apiClient.get('/admin/dashboard');
+    return response.data;
   },
 
   getNavigation: async (): Promise<any[]> => {

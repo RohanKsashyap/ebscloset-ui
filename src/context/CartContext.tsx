@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
 
 export interface CartItem {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   image: string;
@@ -13,8 +13,8 @@ export interface CartItem {
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
-  removeItem: (id: number, size?: string) => void;
-  updateQty: (id: number, qty: number, size?: string) => void;
+  removeItem: (id: string | number, size?: string) => void;
+  updateQty: (id: string | number, qty: number, size?: string) => void;
   total: number;
   clear: () => void;
 }

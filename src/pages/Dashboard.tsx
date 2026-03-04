@@ -174,8 +174,8 @@ const Dashboard = () => {
         {wishlistProducts.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {latestWishlist.map((product) => (
-              <div key={product.id} className="group cursor-pointer">
-                <div className="relative aspect-[3/4] rounded-2xl md:rounded-3xl overflow-hidden mb-3">
+              <div key={product._id || product.id} className="group cursor-pointer">
+                <div className="relative aspect-[3/4] rounded-2xl md:rounded-3xl overflow-hidden mb-3" onClick={() => navigate(`/product/${product._id || product.id}`)}>
                   <img 
                     src={product.image} 
                     alt={product.name}

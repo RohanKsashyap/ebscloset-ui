@@ -94,7 +94,28 @@ export function saveDiscounts(codes: DiscountCode[]) {
 export function loadSite(fallback: SiteSettings): SiteSettings {
   try {
     const raw = localStorage.getItem(SITE_KEY);
-    return raw ? JSON.parse(raw) : fallback;
+    if (!raw) return fallback;
+    
+    const loaded = JSON.parse(raw);
+    
+    // Deep merge or at least ensure top-level properties are present
+    // Using a simple merge for stability
+    return {
+      ...fallback,
+      ...loaded,
+      hero: { 
+        ...fallback.hero, 
+        ...(loaded.hero || {}),
+        slides: (loaded.hero?.slides?.length ? loaded.hero.slides : fallback.hero.slides) || []
+      },
+      editorial: { ...fallback.editorial, ...(loaded.editorial || {}) },
+      newsletter: { ...fallback.newsletter, ...(loaded.newsletter || {}) },
+      legalLabels: { ...fallback.legalLabels, ...(loaded.legalLabels || {}) },
+      collections: loaded.collections?.length ? loaded.collections : fallback.collections,
+      footerGroups: loaded.footerGroups?.length ? loaded.footerGroups : fallback.footerGroups,
+      social: loaded.social?.length ? loaded.social : fallback.social,
+      budgets: loaded.budgets?.length ? loaded.budgets : fallback.budgets,
+    };
   } catch {
     return fallback;
   }
