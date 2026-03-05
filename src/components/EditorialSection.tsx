@@ -16,10 +16,10 @@ export default function EditorialSection() {
       <div className="absolute inset-0 bg-gradient-to-r from-hot-pink/40 to-millennial-pink/30" />
 
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto py-20 md:py-0">
-        <p className="text-xs md:text-sm lg:text-base tracking-[0.5em] uppercase mb-8 animate-fadeIn">
+        <p className="text-xs md:text-sm lg:text-base tracking-[0.5em] uppercase mb-8 animate-fadeIn ">
           {site.editorial.kicker}
         </p>
-        <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
+        <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-8xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
         <p className="text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-12 leading-relaxed animate-fadeIn">
           {site.editorial.body}
         </p>

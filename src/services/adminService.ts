@@ -34,6 +34,7 @@ export interface GalleryCategory {
   imageUrl?: string;
   isActive: boolean;
   displayOrder: number;
+  productCount?: number;
 }
 
 export const adminService = {

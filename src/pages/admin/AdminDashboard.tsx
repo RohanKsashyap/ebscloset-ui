@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import type { Product } from '../../services/productService';
 import { adminService, type Review, type GalleryCategory } from '../../services/adminService';
 import type { Testimonial, GalleryImage } from '../../services/siteService';
@@ -6,12 +6,16 @@ import { useNavigate } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
 import DiscountsManagement from './DiscountsManagement';
 import CustomersManagement from './CustomersManagement';
+import CategoryManagement from './CategoryManagement';
 import Analytics from './Analytics';
 import SiteSettings from './SiteSettings';
 import { useToast } from '../../context/ToastContext';
+import ProductManagementModal from '../../components/admin/ProductManagementModal';
+import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import { 
   LayoutGrid, 
   ShoppingBag, 
+  ShoppingCart,
   Mail, 
   Inbox, 
   Star, 
@@ -33,6 +37,7 @@ import {
   LogOut,
   Menu,
   X,
+  Info,
   TrendingUp,
   Clock,
   CheckCircle2,
@@ -53,167 +58,38 @@ type SiteSettings = {
   legalLabels: { privacy: string; terms: string; cookies: string };
   infoPages: Record<string, any>;
   budgets?: any[];
+  sparkleEffectEnabled?: boolean;
 };
 
-async function filesToBase64(files: FileList | File[]): Promise<string[]> {
-  const list: File[] = Array.from(files instanceof FileList ? files : files as File[]);
-  const results = await Promise.all(
-    list.map(
-      (file) =>
-        new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = () => reject(new Error('Failed to read file'));
-          reader.readAsDataURL(file);
-        })
-    )
-  );
-  return results;
-}
 
-async function uploadImages(files: FileList | File[]): Promise<string[]> {
-  return filesToBase64(files);
-}
+function TestimonialForm({ onSave }: { onSave: (data: FormData) => void }) {
+  const [form, setForm] = useState({ name: '', role: '', content: '', rating: 5 });
+  const [file, setFile] = useState<File | null>(null);
 
-function ProductForm({ initial, onSave }: { initial?: Product; onSave: (p: Product) => void }) {
-  const makeDefault = (): Product => ({
-    name: '', price: 0, image: '', images: [], category: 'Age 7-9', description: '', sizes: ['7-8','9-10','11-12','12-13'], reviews: [], sku: '', materials: '', care: '', stock: { '7-8': 0, '9-10': 0, '11-12': 0, '12-13': 0 }
-  });
-  const [form, setForm] = useState<Product>(initial ?? makeDefault());
-  useEffect(() => { setForm(initial ?? makeDefault()); }, [initial]);
-
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    const base64 = await uploadImages(e.target.files);
-    setForm((f) => ({ ...f, images: [...(f.images || []), ...base64], image: f.image || base64[0] }));
-  };
-
-  const onCoverFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
-    const base64 = await uploadImages(e.target.files);
-    setForm((f) => ({ ...f, image: base64[0] }));
-  };
-
-  const removeImageAt = (i: number) => {
-    setForm((f) => {
-      const imgs = [...(f.images ?? [])];
-      imgs.splice(i, 1);
-      return { ...f, images: imgs };
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append('name', form.name);
+    fd.append('role', form.role);
+    fd.append('content', form.content);
+    fd.append('rating', String(form.rating));
+    if (file) fd.append('image', file);
+    onSave(fd);
+    setForm({ name: '', role: '', content: '', rating: 5 });
+    setFile(null);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Product Name</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="e.g. Silk Midi Dress" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Price (₹)</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" type="number" placeholder="0.00" value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Category</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="e.g. Dresses" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">SKU</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" placeholder="LUX-2024-001" value={form.sku ?? ''} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Description</label>
-        <textarea className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5 h-32 resize-none" placeholder="Describe your product..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Materials</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" value={form.materials ?? ''} onChange={(e) => setForm({ ...form, materials: e.target.value })} />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold uppercase text-gray-400 tracking-wider">Care Instructions</label>
-          <input className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-black/5" value={form.care ?? ''} onChange={(e) => setForm({ ...form, care: e.target.value })} />
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider block">Stock by Size</label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(form.sizes || []).map((s) => (
-            <div key={s} className="bg-gray-50 rounded-xl p-3 flex flex-col gap-1">
-              <span className="text-[10px] font-bold uppercase text-gray-400">{s}</span>
-              <input className="bg-transparent border-none p-0 text-sm font-bold focus:ring-0" type="number" value={form.stock?.[s] ?? 0} onChange={(e) => setForm({ ...form, stock: { ...(form.stock ?? {}), [s]: Number(e.target.value) } })} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-6 py-2">
-         <label className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${form.isTrending ? 'bg-black border-black' : 'border-gray-200 group-hover:border-gray-300'}`}>
-              {form.isTrending && <CheckCircle2 size={12} className="text-white" />}
-            </div>
-            <input type="checkbox" className="hidden" checked={!!form.isTrending} onChange={(e) => setForm({...form, isTrending: e.target.checked})} />
-            <span className="text-sm font-medium text-gray-600">Trending Product</span>
-         </label>
-         <label className="flex items-center gap-3 cursor-pointer group">
-            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${form.isNewArrival ? 'bg-black border-black' : 'border-gray-200 group-hover:border-gray-300'}`}>
-              {form.isNewArrival && <CheckCircle2 size={12} className="text-white" />}
-            </div>
-            <input type="checkbox" className="hidden" checked={!!form.isNewArrival} onChange={(e) => setForm({...form, isNewArrival: e.target.checked})} />
-            <span className="text-sm font-medium text-gray-600">New Arrival</span>
-         </label>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <label className="bg-white border-2 border-dashed border-gray-200 px-6 py-4 rounded-2xl cursor-pointer hover:border-gray-300 transition-all flex flex-col items-center gap-1 flex-1">
-            <Plus size={20} className="text-gray-400" />
-            <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Add Images</span>
-            <input type="file" multiple accept="image/*" className="hidden" onChange={onFile} />
-          </label>
-          <label className="bg-white border-2 border-dashed border-gray-200 px-6 py-4 rounded-2xl cursor-pointer hover:border-gray-300 transition-all flex flex-col items-center gap-1 flex-1">
-            <ImageIcon size={20} className="text-gray-400" />
-            <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Set Cover</span>
-            <input type="file" accept="image/*" className="hidden" onChange={onCoverFile} />
-          </label>
-        </div>
-
-        {form.images?.length ? (
-          <div className="flex flex-wrap gap-3">
-            {form.images.map((src, i) => (
-              <div key={i} className="relative w-20 h-24 group rounded-xl overflow-hidden shadow-sm border">
-                <img src={src} alt="preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-white/90 backdrop-blur shadow-sm text-red-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-white"
-                  onClick={() => removeImageAt(i)}
-                >
-                  <Trash2 size={14} />
-                </button>
-                {form.image === src && (
-                  <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm text-white text-[8px] text-center font-bold uppercase py-1">
-                    Cover
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      <div className="pt-4">
-        <button 
-          className="w-full bg-[#f26322] text-white py-4 rounded-2xl text-sm font-bold uppercase tracking-widest hover:bg-[#d9561b] transition-all shadow-lg shadow-orange-500/20" 
-          onClick={() => onSave(form)}
-        >
-          Save Product Details
-        </button>
-      </div>
-    </div>
+    <form onSubmit={handleSubmit} className="bg-white border p-4 space-y-3 rounded">
+      <input className="border px-3 py-2 w-full" placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+      <input className="border px-3 py-2 w-full" placeholder="Role (e.g. Happy Customer)" value={form.role} onChange={e => setForm({...form, role: e.target.value})} />
+      <textarea className="border px-3 py-2 w-full" placeholder="Content" value={form.content} onChange={e => setForm({...form, content: e.target.value})} required />
+      <select className="border px-3 py-2 w-full" value={form.rating} onChange={e => setForm({...form, rating: Number(e.target.value)})}>
+        {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+      </select>
+      <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
+      <button type="submit" className="bg-hot-pink text-white px-4 py-2 text-[10px] font-bold uppercase w-full">Add Testimonial</button>
+    </form>
   );
 }
 
@@ -273,36 +149,36 @@ function NavManager({ initial, onSave }: { initial: NavCategory[]; onSave: (n: N
   );
 }
 
-function TestimonialForm({ onSave }: { onSave: (data: FormData) => void }) {
-  const [form, setForm] = useState({ name: '', role: '', content: '', rating: 5 });
-  const [file, setFile] = useState<File | null>(null);
+// function TestimonialForm({ onSave }: { onSave: (data: FormData) => void }) {
+//   const [form, setForm] = useState({ name: '', role: '', content: '', rating: 5 });
+//   const [file, setFile] = useState<File | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const fd = new FormData();
-    fd.append('name', form.name);
-    fd.append('role', form.role);
-    fd.append('content', form.content);
-    fd.append('rating', String(form.rating));
-    if (file) fd.append('image', file);
-    onSave(fd);
-    setForm({ name: '', role: '', content: '', rating: 5 });
-    setFile(null);
-  };
+//   const handleSubmit = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     const fd = new FormData();
+//     fd.append('name', form.name);
+//     fd.append('role', form.role);
+//     fd.append('content', form.content);
+//     fd.append('rating', String(form.rating));
+//     if (file) fd.append('image', file);
+//     onSave(fd);
+//     setForm({ name: '', role: '', content: '', rating: 5 });
+//     setFile(null);
+//   };
 
-  return (
-    <form onSubmit={handleSubmit} className="bg-white border p-4 space-y-3 rounded">
-      <input className="border px-3 py-2 w-full" placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-      <input className="border px-3 py-2 w-full" placeholder="Role (e.g. Happy Customer)" value={form.role} onChange={e => setForm({...form, role: e.target.value})} />
-      <textarea className="border px-3 py-2 w-full" placeholder="Content" value={form.content} onChange={e => setForm({...form, content: e.target.value})} required />
-      <select className="border px-3 py-2 w-full" value={form.rating} onChange={e => setForm({...form, rating: Number(e.target.value)})}>
-        {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
-      </select>
-      <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
-      <button type="submit" className="bg-hot-pink text-white px-4 py-2 text-[10px] font-bold uppercase w-full">Add Testimonial</button>
-    </form>
-  );
-}
+//   return (
+//     <form onSubmit={handleSubmit} className="bg-white border p-4 space-y-3 rounded">
+//       <input className="border px-3 py-2 w-full" placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+//       <input className="border px-3 py-2 w-full" placeholder="Role (e.g. Happy Customer)" value={form.role} onChange={e => setForm({...form, role: e.target.value})} />
+//       <textarea className="border px-3 py-2 w-full" placeholder="Content" value={form.content} onChange={e => setForm({...form, content: e.target.value})} required />
+//       <select className="border px-3 py-2 w-full" value={form.rating} onChange={e => setForm({...form, rating: Number(e.target.value)})}>
+//         {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
+//       </select>
+//       <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
+//       <button type="submit" className="bg-hot-pink text-white px-4 py-2 text-[10px] font-bold uppercase w-full">Add Testimonial</button>
+//     </form>
+//   );
+// }
 
 function GalleryImageForm({ categories, onSave }: { categories: GalleryCategory[], onSave: (data: FormData) => void }) {
   const [form, setForm] = useState({ title: '', category: '', featured: false });
@@ -379,10 +255,14 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label:
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<'products'|'navigation'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'>('analytics');
+  const { showToast } = useToast();
+  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'navigation'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'>('dashboard');
   const [catalog, setCatalog] = useState<Product[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [productEditing, setProductEditing] = useState<Product | undefined>(undefined);
+  const [categoryEditing, setCategoryEditing] = useState<GalleryCategory | undefined>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [nav, setNav] = useState<NavCategory[]>([]);
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [site, setSite] = useState<SiteSettings | null>(null);
@@ -436,8 +316,10 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    if (tab === 'analytics') adminService.getDashboard().then(setDashboardData);
+    if (tab === 'analytics' || tab === 'dashboard') adminService.getDashboard().then(setDashboardData);
     if (tab === 'orders') adminService.getOrders().then(setOrders);
+    if (tab === 'categories') adminService.getAdminGalleryCategories().then(setGalleryCategories);
+    if (tab === 'products') adminService.getProducts().then(setCatalog);
     if (tab === 'newsletter') adminService.getSubscribers().then(setSubscribers);
     if (tab === 'inbox') adminService.getMessages().then(setMessages);
     if (tab === 'reviews') adminService.getReviews().then(setReviews);
@@ -449,23 +331,69 @@ export default function AdminDashboard() {
     if (tab === 'customers') adminService.getUsers().then(setUsers);
   }, [tab]);
 
-  const saveProduct = async (p: Product) => {
+  const saveProduct = async (p: any) => {
+    if (p === null) {
+      setIsProductModalOpen(false);
+      setProductEditing(undefined);
+      return;
+    }
     try {
-      if (p._id) await adminService.updateProduct(p._id, p);
-      else await adminService.createProduct(p);
+      let savedProduct;
+      const productName = p.get ? p.get('name') : p.name;
+      if (productEditing?._id) {
+        savedProduct = await adminService.updateProduct(productEditing._id, p);
+        showToast(`Product "${productName}" updated successfully`);
+      } else {
+        savedProduct = await adminService.createProduct(p);
+        showToast(`Product "${productName}" added successfully`);
+      }
       setCatalog(await adminService.getProducts());
       setProductEditing(undefined);
       setIsProductModalOpen(false);
-      alert('Saved');
-    } catch { alert('Error'); }
+    } catch (err) { 
+      console.error('Error saving product:', err);
+      showToast('Error saving product', 'error'); 
+    }
+  };
+
+  const saveCategory = async (formData: FormData) => {
+    try {
+      if (categoryEditing?._id) {
+        await adminService.updateGalleryCategory(categoryEditing._id, formData);
+        showToast('Category updated successfully');
+      } else {
+        await adminService.createGalleryCategory(formData);
+        showToast('Category created successfully');
+      }
+      setGalleryCategories(await adminService.getAdminGalleryCategories());
+      setIsCategoryModalOpen(false);
+      setCategoryEditing(undefined);
+    } catch (err: any) {
+      console.error('Error saving category:', err);
+      showToast(err.response?.data?.message || 'Error saving category', 'error');
+    }
   };
 
   const removeProduct = async (id: string) => {
-    if (!window.confirm('Delete?')) return;
+    const product = catalog.find(p => p._id === id);
+    if (!window.confirm(`Are you sure you want to delete "${product?.name || 'this product'}"?`)) return;
     try {
       await adminService.deleteProduct(id);
+      showToast(`Product "${product?.name || 'Product'}" deleted successfully`);
       setCatalog(await adminService.getProducts());
-    } catch { alert('Error'); }
+      setSelectedProductIds(prev => prev.filter(selectedId => selectedId !== id));
+    } catch { showToast('Error deleting product', 'error'); }
+  };
+
+  const bulkDeleteProducts = async () => {
+    if (selectedProductIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedProductIds.length} products?`)) return;
+    try {
+      await adminService.bulkDeleteProducts(selectedProductIds);
+      showToast(`${selectedProductIds.length} products deleted successfully`);
+      setCatalog(await adminService.getProducts());
+      setSelectedProductIds([]);
+    } catch { showToast('Error deleting products', 'error'); }
   };
 
   const saveNavAll = async (n: NavCategory[]) => {
@@ -563,14 +491,17 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
-  const navItems = [{ id: 'analytics', label: 'Analytics', icon: BarChart },
-    { id: 'products', label: 'Products', icon: LayoutGrid },
-    { id: 'orders', label: 'Orders', icon: ShoppingBag },
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
+    { id: 'categories', label: 'Catalog', icon: ShoppingBag },
+    { id: 'orders', label: 'Orders', icon: ShoppingCart },
     { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'discounts', label: 'Discounts', icon: Tag },
+    { id: 'analytics', label: 'Analytics', icon: BarChart },
+    { id: 'discounts', label: 'Discounts', icon: Sparkles },
   ] as const;
 
   const secondaryNavItems = [
+    { id: 'products', label: 'Products', icon: ShoppingBag },
     { id: 'newsletter', label: 'Newsletter', icon: Mail },
     { id: 'inbox', label: 'Inbox', icon: Inbox },
     { id: 'reviews', label: 'Reviews', icon: Star },
@@ -666,7 +597,7 @@ export default function AdminDashboard() {
                 <Sparkles size={18} />
               </div>
               <h2 className="text-sm font-bold text-gray-900 tracking-tight capitalize">
-                {tab === 'products' ? 'Catalog Management' : `${tab} Management`}
+                {tab === 'categories' ? 'Manage Categories' : `${tab} Management`}
               </h2>
             </div>
           </div>
@@ -689,7 +620,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </header>
-
+{/* product section */}
         <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-[#fafafa]">
           {tab === 'products' && (
             <div className="max-w-[1200px] mx-auto space-y-8">
@@ -699,13 +630,22 @@ export default function AdminDashboard() {
                   <p className="text-gray-500 mt-1">Manage, update and track your store Products.</p>
                 </div>
                 <div className="flex items-center gap-3">
+                  {selectedProductIds.length > 0 && (
+                    <button 
+                      onClick={bulkDeleteProducts}
+                      className="bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-red-100 transition-all border border-red-100"
+                    >
+                      <Trash2 size={18} />
+                      Delete ({selectedProductIds.length})
+                    </button>
+                  )}
                   <button className="bg-white border px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2 hover:bg-gray-50 transition-all shadow-sm">
                     <Filter size={18} />
                     Filters
                   </button>
                   <button 
                     onClick={() => { setProductEditing(undefined); setIsProductModalOpen(true); }}
-                    className="bg-[#f26322] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#d9561b] transition-all shadow-md shadow-orange-500/20"
+                    className="bg-[#eb4899] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#d43f8a] transition-all shadow-md shadow-pink-500/20"
                   >
                     <Plus size={18} />
                     New Product
@@ -733,6 +673,17 @@ export default function AdminDashboard() {
                   <table className="w-full text-left">
                     <thead className="bg-[#fcfcfc] border-b text-[10px] font-bold uppercase tracking-widest text-gray-400">
                       <tr>
+                        <th className="px-6 py-5 w-10">
+                          <input 
+                            type="checkbox" 
+                            className="rounded border-gray-300 text-[#eb4899] focus:ring-[#eb4899]"
+                            checked={catalog.length > 0 && selectedProductIds.length === catalog.length}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedProductIds(catalog.map(p => p._id!));
+                              else setSelectedProductIds([]);
+                            }}
+                          />
+                        </th>
                         <th className="px-6 py-5">Product</th>
                         <th className="px-6 py-5">Category</th>
                         <th className="px-6 py-5">Price</th>
@@ -743,7 +694,18 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody className="divide-y text-sm">
                       {catalog.map((p) => (
-                        <tr key={p._id} className="hover:bg-gray-50/50 transition-colors group">
+                        <tr key={p._id} className={`hover:bg-gray-50/50 transition-colors group ${selectedProductIds.includes(p._id!) ? 'bg-pink-50/30' : ''}`}>
+                          <td className="px-6 py-4">
+                            <input 
+                              type="checkbox" 
+                              className="rounded border-gray-300 text-[#eb4899] focus:ring-[#eb4899]"
+                              checked={selectedProductIds.includes(p._id!)}
+                              onChange={(e) => {
+                                if (e.target.checked) setSelectedProductIds([...selectedProductIds, p._id!]);
+                                else setSelectedProductIds(selectedProductIds.filter(id => id !== p._id));
+                              }}
+                            />
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-4">
                               <img src={p.image} className="w-12 h-14 object-cover rounded-lg bg-gray-100" />
@@ -755,12 +717,15 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-gray-600 font-medium">{p.category}</span>
+                            {(p as any).size && <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Size: {(p as any).size}</p>}
                           </td>
                           <td className="px-6 py-4">
                             <span className="font-bold text-gray-900">₹{p.price.toFixed(2)}</span>
                           </td>
                           <td className="px-6 py-4">
-                            {p.isTrending ? (
+                            {(p as any).assured ? (
+                              <span className="bg-pink-100 text-[#eb4899] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Assured</span>
+                            ) : p.isTrending ? (
                               <span className="bg-[#fdf2f8] text-[#be185d] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Trending</span>
                             ) : p.isNewArrival ? (
                               <span className="bg-[#eff6ff] text-[#1d4ed8] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">New Arrival</span>
@@ -772,17 +737,17 @@ export default function AdminDashboard() {
                             <div className="w-32">
                               <div className="flex items-center justify-between mb-1.5">
                                 <span className={`text-[10px] font-bold uppercase ${
-                                  Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10 ? 'text-orange-500' : 'text-green-600'
+                                  ((p as any).inStock || 0) < 10 ? 'text-orange-500' : 'text-green-600'
                                 }`}>
-                                  {Object.values(p.stock || {}).reduce((a, b) => a + b, 0)} in stock
+                                  {(p as any).inStock || 0} in stock
                                 </span>
                               </div>
                               <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                                 <div 
                                   className={`h-full rounded-full transition-all ${
-                                    Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10 ? 'bg-orange-500' : 'bg-green-500'
+                                    ((p as any).inStock || 0) < 10 ? 'bg-orange-500' : 'bg-green-500'
                                   }`}
-                                  style={{ width: `${Math.min(100, (Object.values(p.stock || {}).reduce((a, b) => a + b, 0) / 100) * 100)}%` }}
+                                  style={{ width: `${Math.min(100, (((p as any).inStock || 0) / 100) * 100)}%` }}
                                 ></div>
                               </div>
                             </div>
@@ -828,7 +793,7 @@ export default function AdminDashboard() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Total Value</p>
-                    <p className="text-2xl font-bold mt-1">₹{catalog.reduce((acc, p) => acc + (p.price * Object.values(p.stock || {}).reduce((a, b) => a + b, 0)), 0).toLocaleString()}</p>
+                    <p className="text-2xl font-bold mt-1">₹{catalog.reduce((acc, p) => acc + (p.price * ((p as any).inStock || 0)), 0).toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-green-600">
                     <TrendingUp size={14} />
@@ -839,7 +804,7 @@ export default function AdminDashboard() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Low Stock</p>
-                    <p className="text-2xl font-bold mt-1">{catalog.filter(p => Object.values(p.stock || {}).reduce((a, b) => a + b, 0) < 10).length} Items</p>
+                    <p className="text-2xl font-bold mt-1">{catalog.filter(p => ((p as any).inStock || 0) < 10).length} Items</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-orange-500">
                     <AlertCircle size={14} />
@@ -872,24 +837,7 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {tab === 'products' && isProductModalOpen && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-              <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-slideUp">
-                <div className="sticky top-0 bg-white px-8 py-6 border-b flex items-center justify-between z-10">
-                  <h3 className="text-2xl font-bold">{productEditing ? 'Edit Product' : 'New Product'}</h3>
-                  <button 
-                    onClick={() => { setProductEditing(undefined); setIsProductModalOpen(false); }}
-                    className="p-2 hover:bg-gray-100 rounded-xl transition-all"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-                <div className="p-8">
-                  <ProductForm initial={productEditing} onSave={saveProduct} />
-                </div>
-              </div>
-            </div>
-          )}
+         
 
         {tab === 'navigation' && (
           <div className="max-w-3xl">
@@ -899,7 +847,11 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'discounts' && (
-          <DiscountsManagement codes={codes} onSave={saveCodesAll} />
+          <DiscountsManagement 
+            codes={codes} 
+            onSave={saveCodesAll} 
+            onRefresh={async () => setCodes(await adminService.getDiscounts())} 
+          />
         )}
 
         {tab === 'site' && site && (
@@ -914,7 +866,16 @@ export default function AdminDashboard() {
           <CustomersManagement users={users} />
         )}
 
-        {tab === 'analytics' && (
+        {tab === 'categories' && (
+          <CategoryManagement 
+            categories={galleryCategories} 
+            onRefresh={async () => setGalleryCategories(await adminService.getAdminGalleryCategories())}
+            onEdit={(cat) => { setCategoryEditing(cat); setIsCategoryModalOpen(true); }}
+            onAdd={() => { setCategoryEditing(undefined); setIsCategoryModalOpen(true); }}
+          />
+        )}
+
+        {(tab === 'analytics' || tab === 'dashboard') && (
           <Analytics data={dashboardData} />
         )}
 
@@ -1073,7 +1034,20 @@ export default function AdminDashboard() {
           </div>
         )}
         </main>
+        
       </div>
+      <ProductManagementModal 
+            isOpen={isProductModalOpen}
+            onClose={() => { setProductEditing(undefined); setIsProductModalOpen(false); }}
+            onSave={saveProduct}
+            initialProduct={productEditing}
+          />
+          <CategoryManagementModal
+            isOpen={isCategoryModalOpen}
+            onClose={() => { setCategoryEditing(undefined); setIsCategoryModalOpen(false); }}
+            onSave={saveCategory}
+            initialCategory={categoryEditing}
+          />
     </div>
   );
 }

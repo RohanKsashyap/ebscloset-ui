@@ -45,6 +45,7 @@ export type SiteSettings = {
   legalLabels: { privacy: string; terms: string; cookies: string };
   infoPages: Record<string, InfoContent>;
   budgets?: Array<{ label: string; slug: string; min: number; max: number }>;
+  sparkleEffectEnabled?: boolean;
 };
 
 const PRODUCTS_KEY = 'catalog_products';
@@ -115,6 +116,7 @@ export function loadSite(fallback: SiteSettings): SiteSettings {
       footerGroups: loaded.footerGroups?.length ? loaded.footerGroups : fallback.footerGroups,
       social: loaded.social?.length ? loaded.social : fallback.social,
       budgets: loaded.budgets?.length ? loaded.budgets : fallback.budgets,
+      sparkleEffectEnabled: typeof loaded.sparkleEffectEnabled === 'boolean' ? loaded.sparkleEffectEnabled : fallback.sparkleEffectEnabled,
     };
   } catch {
     return fallback;

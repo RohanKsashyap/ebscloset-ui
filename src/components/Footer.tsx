@@ -142,7 +142,7 @@ export default function Footer() {
           </div>
 
           <p className="text-xs text-white/80">
-            © 2024 EB'S CLOSET. All rights reserved.
+            © 2025 EB'S CLOSET. All rights reserved.
           </p>
         </div>
       </div>

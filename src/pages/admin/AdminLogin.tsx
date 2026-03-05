@@ -26,7 +26,7 @@ export default function AdminLogin() {
           <input className="border px-4 py-3 w-full" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input type="password" className="border px-4 py-3 w-full" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
           {error && <p className="text-red-600 text-sm">{error}</p>}
-          <button className="border-2 border-hot-pink text-hot-pink px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-500" onClick={handleLogin}>Login</button>
+          <button className="border-2 border-hot-pink text-hot-pink px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300" onClick={handleLogin}>Login</button>
         </div>
       </section>
     </main>

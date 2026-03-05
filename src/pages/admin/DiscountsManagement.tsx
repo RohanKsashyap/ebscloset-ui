@@ -6,6 +6,9 @@ import {
   ChevronRight,
   Ticket
 } from 'lucide-react';
+import CreateDiscountModal from '../../components/admin/CreateDiscountModal';
+import { adminService } from '../../services/adminService';
+import { useToast } from '../../context/ToastContext';
 
 interface DiscountCode {
   _id?: string;
@@ -16,9 +19,29 @@ interface DiscountCode {
   usage?: number;
 }
 
-export default function DiscountsManagement({ codes }: { codes: DiscountCode[] }) {
+export default function DiscountsManagement({ codes, onRefresh }: { codes: DiscountCode[], onSave?: any, onRefresh?: () => void }) {
   const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Scheduled' | 'Expired'>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { showToast } = useToast();
+
+  const handleSaveDiscount = async (data: any) => {
+    try {
+      await adminService.createDiscount({
+        code: data.code,
+        type: data.type,
+        value: data.value,
+        maxUses: data.maxUses ? Number(data.maxUses) : undefined,
+        expiresAt: data.expiryDate.toISOString(),
+      });
+      showToast('Discount created successfully');
+      setIsModalOpen(false);
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      console.error('Error creating discount:', err);
+      showToast('Error creating discount', 'error');
+    }
+  };
 
   const enrichedCodes = codes.map(c => ({
     ...c,
@@ -38,11 +61,20 @@ export default function DiscountsManagement({ codes }: { codes: DiscountCode[] }
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Discounts</h2>
         </div>
-        <button className="bg-[#fdf2f8] text-[#be185d] px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-pink-100 transition-all shadow-sm">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="bg-[#fdf2f8] text-[#be185d] px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-pink-100 transition-all shadow-sm"
+        >
           <Plus size={18} />
           Create New Discount
         </button>
       </div>
+
+      <CreateDiscountModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveDiscount}
+      />
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Header with Tabs and Search */}

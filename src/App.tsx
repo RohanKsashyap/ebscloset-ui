@@ -4,7 +4,7 @@ import Navigation from './components/Navigation';
 import NewsletterPopup from './components/NewsletterPopup';
 import Footer from './components/Footer';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { hydrateBackend } from './utils/storage';
+import { hydrateBackend, loadSite } from './utils/storage';
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -116,6 +116,20 @@ function App() {
   const [showPopup, setShowPopup] = useState(false);
   const sparkleRef = useRef<HTMLDivElement | null>(null);
   const hydrated = useRef(false);
+  const [sparkleEnabled, setSparkleEnabled] = useState(true);
+
+  useEffect(() => {
+    const checkSettings = () => {
+      const site = loadSite({} as any);
+      if (typeof site.sparkleEffectEnabled === 'boolean') {
+        setSparkleEnabled(site.sparkleEffectEnabled);
+      }
+    };
+    
+    checkSettings();
+    window.addEventListener('backend-hydrated', checkSettings);
+    return () => window.removeEventListener('backend-hydrated', checkSettings);
+  }, []);
 
   useEffect(() => {
     if (!hydrated.current) {
@@ -134,6 +148,7 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!sparkleEnabled) return;
     const handler = (e: MouseEvent) => {
       const root = sparkleRef.current;
       if (!root) return;
@@ -155,7 +170,7 @@ function App() {
     };
     window.addEventListener('mousemove', handler);
     return () => window.removeEventListener('mousemove', handler);
-  }, []);
+  }, [sparkleEnabled]);
 
   return (
     <BrowserRouter>

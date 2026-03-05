@@ -3,10 +3,8 @@ import {
   Save, 
   Image as ImageIcon, 
   Plus, 
-  Info, 
   ExternalLink, 
   Calendar,
-  Clock,
   Eye,
   Settings
 } from 'lucide-react';
@@ -20,11 +18,6 @@ type HeroBanner = {
   bannerCtaText: string;
   bannerCtaHref: string;
   isActive?: boolean;
-};
-
-type SiteSettingsData = {
-  hero: HeroBanner;
-  // potentially other fields like editorial, collections etc
 };
 
 export default function SiteSettings({ initial, onSave }: { initial: any; onSave: (s: any) => void }) {
@@ -178,6 +171,29 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
 
         {/* Sidebar Options */}
         <div className="space-y-6">
+          {/* General Settings */}
+          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-6 text-[#eb4899]">
+              <Settings size={20} />
+              <h4 className="text-lg font-bold text-gray-900">General Settings</h4>
+            </div>
+            <div className="bg-gray-50 p-5 rounded-2xl flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-900">Sparkle Effect</p>
+                <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">Enable cursor sparkle trail</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={site?.sparkleEffectEnabled !== false} 
+                  onChange={(e) => setSite({...site, sparkleEffectEnabled: e.target.checked})} 
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#eb4899]"></div>
+              </label>
+            </div>
+          </div>
+
           {/* Banner Visibility */}
           <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
             <div className="flex items-center gap-3 mb-6 text-[#eb4899]">

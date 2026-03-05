@@ -114,7 +114,7 @@ export default function Navigation() {
           <div className={`flex items-center justify-between transition-all duration-500 ${
             shouldShowSolid ? 'h-14 lg:h-16' : 'h-20'
           }`}>
-            {/* Left Section: Menu (mobile), Search */}
+            {/* Left Section: Menu (mobile)  */}
             <div className="flex-1 flex items-center space-x-4 lg:space-x-6">
               <button
                 className="lg:hidden"
@@ -123,20 +123,11 @@ export default function Navigation() {
                 <Menu className={`w-6 h-6 ${shouldShowSolid ? 'text-black' : 'text-white'}`} />
               </button>
 
-              {!expanded && (
-                <button 
-                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
-                  onClick={() => setExpanded(true)}
-                >
-                  <Search className="w-5 h-5 lg:w-6 lg:h-6" />
-                </button>
-              )}
-
               <Link 
                 to="/"
                 className={`transition-colors duration-300 hidden lg:block ${shouldShowSolid ? 'text-black' : 'text-white hover:text-white/70'}`} 
               >
-                <img src="/logo.jpeg" alt="Eb's Closet" className="h-10 w-auto object-contain" />
+                <img src="/logo.png" alt="Eb's Closet" className="h-14 w-auto object-contain" />
               </Link>
             </div>
 
@@ -185,10 +176,10 @@ export default function Navigation() {
               )}
             </div>
 
-            {/* Right Section: Profile, Cart */}
+            {/* Right Section: Profile, Cart,Search */}
             <div className="flex-1 flex items-center justify-end space-x-4 lg:space-x-6">
               {expanded && (
-                <div ref={panelRef} className="lg:flex items-stretch w-64 relative hidden">
+                <div ref={panelRef} className="lg:flex items-stretch w-64 relative ">
                   <input 
                     value={q} 
                     onChange={(e) => setQ(e.target.value)} 
@@ -201,6 +192,15 @@ export default function Navigation() {
                     <Search className="w-4 h-4" />
                   </button>
                 </div>
+              )}
+
+{!expanded && (
+                <button 
+                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
+                  onClick={() => setExpanded(true)}
+                >
+                  <Search className="w-5 h-5 lg:w-6 lg:h-6" />
+                </button>
               )}
 
               <button 
@@ -277,7 +277,7 @@ export default function Navigation() {
           <div className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white shadow-2xl animate-slideInLeft h-full flex flex-col">
             <div className="p-6 flex-shrink-0 flex items-center justify-between border-b">
               <Link to="/" className="font-serif text-xl text-hot-pink" onClick={() => setIsMobileMenuOpen(false)}>
-                <img src="/logo.jpeg" alt="Eb's Closet" className="h-8 w-auto object-contain" />
+                <img src="/logo.png" alt="Eb's Closet" className="h-8 w-auto object-contain" />
               </Link>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2">
                 <X className="w-6 h-6 text-gray-500" />
