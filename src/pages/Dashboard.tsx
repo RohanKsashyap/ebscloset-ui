@@ -166,8 +166,8 @@ const Dashboard = () => {
       <div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-900">Latest from Wishlist</h2>
-          <Link to="/shop" className="text-sm font-bold text-[#ed4690] hover:underline flex items-center gap-1">
-            Go to Shop <ChevronRight className="w-4 h-4" />
+          <Link to="/wishlist" className="text-sm font-bold text-[#ed4690] hover:underline flex items-center gap-1">
+            View All <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         

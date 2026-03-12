@@ -14,6 +14,7 @@ import Dashboard from './pages/Dashboard';
 import MyOrders from './pages/MyOrders';
 import Profile from './pages/Profile';
 import SavedAddresses from './pages/SavedAddresses';
+import Wishlist from './pages/Wishlist';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/addresses" element={<ProtectedRoute><SavedAddresses /></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/size-guide" element={<SizeGuide />} />
@@ -98,7 +100,7 @@ function Layout({ children, sparkleRef, showPopup, setShowPopup }: {
   setShowPopup: (show: boolean) => void
 }) {
   const location = useLocation();
-  const hideNavPaths = ['/dashboard', '/orders', '/profile', '/addresses', '/admin'];
+  const hideNavPaths = ['/dashboard', '/orders', '/profile', '/addresses', '/wishlist', '/admin'];
   const isHideNav = hideNavPaths.some(path => location.pathname.startsWith(path));
 
   return (

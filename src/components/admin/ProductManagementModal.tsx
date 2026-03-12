@@ -147,14 +147,33 @@ export default function ProductManagementModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData();
+    
+    // Skip fields that are being uploaded as files to avoid duplicate keys in req.body/req.files
+    const fileKeys = Object.keys(files).filter(k => files[k]);
+
     Object.keys(form).forEach(key => {
+      // Don't send fields that are being replaced by files
+      if (fileKeys.includes(key)) return;
+      
+      // Filter out internal MongoDB/Mongoose fields and redundant IDs
+      const skipFields = [
+        '_id', '__v', 'createdAt', 'updatedAt', 
+        'imageId', 'hoverImageId', 'image3Id', 'image4Id', 
+        'videoId', 'video2Id', 'video3Id', 'thumbnailUrl'
+      ];
+      if (skipFields.includes(key)) return;
+
       if (key === 'variants') {
         formData.append(key, JSON.stringify(form[key]));
       } else {
-        formData.append(key, form[key]);
+        // Only append if it's defined and not null
+        if (form[key] !== null && form[key] !== undefined) {
+          formData.append(key, form[key]);
+        }
       }
     });
 
+    // Append the actual files
     Object.keys(files).forEach(key => {
       if (files[key]) {
         formData.append(key, files[key]!);
