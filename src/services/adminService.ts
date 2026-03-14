@@ -59,6 +59,10 @@ export const adminService = {
     await apiClient.delete(`/admin/orders/${orderId}`);
   },
 
+  bulkDeleteOrders: async (orderIds: string[]): Promise<void> => {
+    await apiClient.delete('/admin/orders/bulk', { data: { ids: orderIds } });
+  },
+
   getProducts: async (): Promise<Product[]> => {
     const response = await apiClient.get('/admin/products');
     return response.data || [];
@@ -66,13 +70,17 @@ export const adminService = {
 
   createProduct: async (productData: any): Promise<Product> => {
     // Note: Use FormData for uploads
-    const response = await apiClient.post('/admin/products', productData);
+    const response = await apiClient.post('/admin/products', productData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
 
   updateProduct: async (productId: string, productData: any): Promise<Product> => {
     // Note: Use FormData for uploads
-    const response = await apiClient.put(`/admin/products/${productId}`, productData);
+    const response = await apiClient.put(`/admin/products/${productId}`, productData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
 

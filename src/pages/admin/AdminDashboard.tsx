@@ -21,7 +21,6 @@ import {
   Star, 
   MessageSquare, 
   Image as ImageIcon, 
-  Tag, 
   Navigation as NavIcon, 
   Settings,
   Users,
@@ -36,14 +35,9 @@ import {
   Filter,
   LogOut,
   Menu,
-  X,
-  Info,
   TrendingUp,
   Clock,
-  CheckCircle2,
   AlertCircle,
-  Video,
-  Upload,
 } from 'lucide-react';
 
 type NavCategory = { _id?: string; name: string; href?: string; items: { label: string; href: string }[] };
@@ -338,13 +332,12 @@ export default function AdminDashboard() {
       return;
     }
     try {
-      let savedProduct;
       const productName = p.get ? p.get('name') : p.name;
       if (productEditing?._id) {
-        savedProduct = await adminService.updateProduct(productEditing._id, p);
+        await adminService.updateProduct(productEditing._id, p);
         showToast(`Product "${productName}" updated successfully`);
       } else {
-        savedProduct = await adminService.createProduct(p);
+        await adminService.createProduct(p);
         showToast(`Product "${productName}" added successfully`);
       }
       setCatalog(await adminService.getProducts());
@@ -418,8 +411,27 @@ export default function AdminDashboard() {
   const updateOrderStatus = async (id: string, status: string) => {
     try {
       await adminService.updateOrderStatus(id, status);
+      showToast('Order status updated successfully');
       setOrders(await adminService.getOrders());
-    } catch { alert('Error'); }
+    } catch { showToast('Error updating order status', 'error'); }
+  };
+
+  const deleteOrder = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this order?')) return;
+    try {
+      await adminService.deleteOrder(id);
+      showToast('Order deleted successfully');
+      setOrders(await adminService.getOrders());
+    } catch { showToast('Error deleting order', 'error'); }
+  };
+
+  const bulkDeleteOrders = async (ids: string[]) => {
+    if (!window.confirm(`Are you sure you want to delete ${ids.length} orders?`)) return;
+    try {
+      await adminService.bulkDeleteOrders(ids);
+      showToast(`${ids.length} orders deleted successfully`);
+      setOrders(await adminService.getOrders());
+    } catch { showToast('Error deleting orders', 'error'); }
   };
 
   const deleteSubscriber = async (id: string) => {
@@ -859,7 +871,12 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'orders' && (
-          <OrdersManagement orders={orders} onUpdateStatus={updateOrderStatus} />
+          <OrdersManagement 
+            orders={orders} 
+            onUpdateStatus={updateOrderStatus} 
+            onDeleteOrder={deleteOrder}
+            onBulkDeleteOrders={bulkDeleteOrders}
+          />
         )}
 
         {tab === 'customers' && (
