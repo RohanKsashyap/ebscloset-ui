@@ -127,7 +127,7 @@ export default function Navigation() {
                 to="/"
                 className={`transition-colors duration-300 hidden lg:block ${shouldShowSolid ? 'text-black' : 'text-white hover:text-white/70'}`} 
               >
-                <img src="/logo.png" alt="Eb's Closet" className="h-14 w-auto object-contain" />
+                {/* <img src="/logo.png" alt="Eb's Closet" className="h-14 w-auto object-contain" /> */}
               </Link>
             </div>
 
