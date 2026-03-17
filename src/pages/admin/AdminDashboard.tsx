@@ -38,6 +38,7 @@ import {
   TrendingUp,
   Clock,
   AlertCircle,
+  Search,
 } from 'lucide-react';
 
 type NavCategory = { _id?: string; name: string; href?: string; items: { label: string; href: string }[] };
@@ -439,10 +440,6 @@ export default function AdminDashboard() {
     try { await adminService.deleteSubscriber(id); setSubscribers(await adminService.getSubscribers()); } catch { alert('Error'); }
   };
 
-  const deleteMessage = async (id: string) => {
-    try { await adminService.deleteMessage(id); setMessages(await adminService.getMessages()); } catch { alert('Error'); }
-  };
-
   const updateReviewStatus = async (id: string, status: 'approved' | 'rejected') => {
     try {
       await adminService.updateReview(id, { status });
@@ -522,6 +519,48 @@ export default function AdminDashboard() {
     { id: 'gallery', label: 'Gallery', icon: ImageIcon },
     { id: 'navigation', label: 'Navigation', icon: NavIcon },
   ] as const;
+
+  const [inboxSearch, setInboxSearch] = useState('');
+  const [inboxStatusFilter, setInboxStatusFilter] = useState('All Status');
+  const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+
+  const filteredMessages = messages.filter(m => {
+    const matchesSearch = 
+      m.name.toLowerCase().includes(inboxSearch.toLowerCase()) || 
+      m.email.toLowerCase().includes(inboxSearch.toLowerCase());
+    
+    if (inboxStatusFilter === 'All Status') return matchesSearch;
+    if (inboxStatusFilter === 'Pending') return matchesSearch && m.status === 'new';
+    if (inboxStatusFilter === 'Resolved') return matchesSearch && m.status === 'resolved';
+    return matchesSearch;
+  });
+
+  const totalMessages = messages.length;
+  const pendingMessagesCount = messages.filter(m => m.status === 'new').length;
+  const resolvedMessagesCount = messages.filter(m => m.status === 'resolved').length;
+
+  const handleUpdateMessageStatus = async (id: string, status: 'new' | 'read' | 'resolved') => {
+    try {
+      await adminService.updateMessageStatus(id, status);
+      setMessages(await adminService.getMessages());
+      showToast('Message status updated');
+    } catch {
+      showToast('Error updating status', 'error');
+    }
+  };
+
+  const handleBulkDeleteMessages = async () => {
+    if (selectedMessageIds.length === 0) return;
+    if (!window.confirm(`Delete ${selectedMessageIds.length} messages?`)) return;
+    try {
+      await adminService.bulkDeleteMessages(selectedMessageIds);
+      setMessages(await adminService.getMessages());
+      setSelectedMessageIds([]);
+      showToast('Messages deleted');
+    } catch {
+      showToast('Error deleting messages', 'error');
+    }
+  };
 
   if (loading) return <div className="p-20 text-center font-serif text-2xl">Loading Magic...</div>;
 
@@ -935,17 +974,202 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'inbox' && (
-          <div className="space-y-4">
-            {messages.map((m) => (
-              <div key={m._id} className="bg-white border p-6 rounded shadow-sm">
-                <div className="flex justify-between items-start mb-2">
-                  <p className="font-bold text-lg">{m.name} <span className="text-xs font-normal text-gray-400 font-sans ml-2">&lt;{m.email}&gt;</span></p>
-                  <button onClick={() => deleteMessage(m._id)} className="text-red-500 text-xs font-bold uppercase">Delete</button>
-                </div>
-                <p className="text-gray-600 text-sm italic border-l-4 border-hot-pink/20 pl-4 py-2 bg-gray-50">{m.message}</p>
-                <p className="text-[10px] text-gray-400 mt-4 text-right">{new Date(m.createdAt).toLocaleString()}</p>
+          <div className="max-w-[1200px] mx-auto space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight">Customer Inbox</h2>
+                <p className="text-gray-500 mt-1">Manage and respond to customer inquiries.</p>
               </div>
-            ))}
+              <button className="bg-[#eb4899] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-[#d43f8a] transition-all shadow-md shadow-pink-500/20">
+                <Plus size={18} />
+                New Message
+              </button>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-4">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Total Messages</p>
+                <div className="flex items-end justify-between">
+                  <p className="text-4xl font-bold">{totalMessages.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-green-500 text-xs font-bold">
+                    <TrendingUp size={14} />
+                    <span>+12%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-4">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Pending</p>
+                <div className="flex items-end justify-between">
+                  <p className="text-4xl font-bold">{pendingMessagesCount.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-pink-500 text-xs font-bold">
+                    <span className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
+                    <span>-5%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-4">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Resolved</p>
+                <div className="flex items-end justify-between">
+                  <p className="text-4xl font-bold">{resolvedMessagesCount.toLocaleString()}</p>
+                  <div className="flex items-center gap-1 text-green-500 text-xs font-bold">
+                    <span>+18%</span>
+                    <span className="w-4 h-4 rounded-full border-2 border-green-500 flex items-center justify-center text-[10px]">✓</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search and Filters */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <div className="relative w-full md:max-w-md">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search by customer name or email..."
+                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all outline-none"
+                  value={inboxSearch}
+                  onChange={(e) => setInboxSearch(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <select 
+                  className="flex-1 md:flex-none px-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-pink-500/20"
+                  value={inboxStatusFilter}
+                  onChange={(e) => setInboxStatusFilter(e.target.value)}
+                >
+                  <option>All Status</option>
+                  <option>Pending</option>
+                  <option>Resolved</option>
+                </select>
+                <div className="relative">
+                  <button 
+                    onClick={handleBulkDeleteMessages}
+                    disabled={selectedMessageIds.length === 0}
+                    className={`px-6 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all ${selectedMessageIds.length > 0 ? 'text-red-500 border-red-100 hover:bg-red-50' : 'text-gray-500 opacity-50 cursor-not-allowed'}`}
+                  >
+                    <LayoutGrid size={18} />
+                    Bulk Actions {selectedMessageIds.length > 0 && `(${selectedMessageIds.length})`}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages Table */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-[#fcfcfc] border-b text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                    <tr>
+                      <th className="px-8 py-6 w-10">
+                        <input 
+                          type="checkbox" 
+                          className="rounded-md border-gray-300 text-[#eb4899] focus:ring-[#eb4899] w-4 h-4"
+                          checked={filteredMessages.length > 0 && selectedMessageIds.length === filteredMessages.length}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedMessageIds(filteredMessages.map(m => m._id));
+                            else setSelectedMessageIds([]);
+                          }}
+                        />
+                      </th>
+                      <th className="px-6 py-6">Customer</th>
+                      <th className="px-6 py-6">Subject</th>
+                      <th className="px-6 py-6">Date</th>
+                      <th className="px-6 py-6 text-center">Status</th>
+                      <th className="px-6 py-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {filteredMessages.map((m) => (
+                      <tr key={m._id} className={`hover:bg-gray-50/50 transition-colors group ${selectedMessageIds.includes(m._id) ? 'bg-pink-50/30' : ''}`}>
+                        <td className="px-8 py-6">
+                          <input 
+                            type="checkbox" 
+                            className="rounded-md border-gray-300 text-[#eb4899] focus:ring-[#eb4899] w-4 h-4"
+                            checked={selectedMessageIds.includes(m._id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedMessageIds([...selectedMessageIds, m._id]);
+                              else setSelectedMessageIds(selectedMessageIds.filter(id => id !== m._id));
+                            }}
+                          />
+                        </td>
+                        <td className="px-6 py-6">
+                          <div>
+                            <p className="font-bold text-gray-900">{m.name}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{m.email}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-6">
+                          <p className="text-sm text-gray-600 font-medium max-w-xs truncate">{m.subject || 'No Subject'}</p>
+                          <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">{m.message}</p>
+                        </td>
+                        <td className="px-6 py-6 text-sm text-gray-500 font-medium">
+                          {new Date(m.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td className="px-6 py-6 text-center">
+                          <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight ${
+                            m.status === 'resolved' 
+                              ? 'bg-pink-100 text-pink-600' 
+                              : 'bg-white border-2 border-pink-100 text-pink-500'
+                          }`}>
+                            {m.status === 'resolved' ? 'Resolved' : 'Pending'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-6">
+                          <div className="flex items-center justify-end gap-2">
+                            {m.status !== 'resolved' && (
+                              <button 
+                                onClick={() => handleUpdateMessageStatus(m._id, 'resolved')}
+                                className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-xl transition-all"
+                                title="Mark as Resolved"
+                              >
+                                <Sparkles size={18} />
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => {
+                                if (window.confirm('Delete message?')) {
+                                  adminService.deleteMessage(m._id).then(() => {
+                                    setMessages(messages.filter(msg => msg._id !== m._id));
+                                    showToast('Message deleted');
+                                  });
+                                }
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                              title="Delete Message"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="px-8 py-6 bg-[#fcfcfc] border-t flex items-center justify-between">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                  Showing 1 to {filteredMessages.length} of {totalMessages} entries
+                </p>
+                <div className="flex items-center gap-2">
+                  <button className="p-2 border border-gray-100 rounded-xl hover:bg-white transition-all disabled:opacity-50 shadow-sm" disabled>
+                    <ChevronLeft size={16} />
+                  </button>
+                  <div className="flex gap-1">
+                    <button className="w-8 h-8 rounded-xl bg-pink-500 text-white text-xs font-bold shadow-lg shadow-pink-500/20 transition-all">1</button>
+                    <button className="w-8 h-8 rounded-xl bg-white border border-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-50 transition-all shadow-sm">2</button>
+                    <button className="w-8 h-8 rounded-xl bg-white border border-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-50 transition-all shadow-sm">3</button>
+                  </div>
+                  <button className="p-2 border border-gray-100 rounded-xl hover:bg-white transition-all disabled:opacity-50 shadow-sm" disabled>
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

@@ -10,10 +10,14 @@ export interface Subscriber {
 }
 
 export interface ContactMessage {
+  _id: string;
   name: string;
   email: string;
+  phone?: string;
+  subject: string;
   message: string;
-  createdAt?: string;
+  status: 'new' | 'read' | 'resolved';
+  createdAt: string;
 }
 
 export interface Review {
@@ -104,6 +108,15 @@ export const adminService = {
 
   deleteMessage: async (id: string): Promise<void> => {
     await apiClient.delete(`/admin/contacts/${id}`);
+  },
+
+  bulkDeleteMessages: async (ids: string[]): Promise<void> => {
+    await apiClient.delete('/admin/contacts/bulk', { data: { ids } });
+  },
+
+  updateMessageStatus: async (id: string, status: string): Promise<ContactMessage> => {
+    const response = await apiClient.put(`/admin/contacts/${id}`, { status });
+    return response.data;
   },
 
   getDiscounts: async (): Promise<DiscountCode[]> => {
