@@ -39,6 +39,8 @@ import {
   Clock,
   AlertCircle,
   Search,
+  GripVertical,
+  ExternalLink,
 } from 'lucide-react';
 
 type NavCategory = { _id?: string; name: string; href?: string; items: { label: string; href: string }[] };
@@ -92,10 +94,10 @@ function NavManager({ initial, onSave }: { initial: NavCategory[]; onSave: (n: N
   const [nav, setNav] = useState<NavCategory[]>(initial);
   useEffect(() => { setNav(initial); }, [initial]);
 
-  const addCategory = () => setNav([...nav, { name: 'New Category', items: [] }]);
+  const addCategory = () => setNav([...nav, { name: '', items: [] }]);
   const addItem = (ci: number) => {
     const copy = [...nav];
-    copy[ci].items.push({ label: 'New Item', href: '/shop' });
+    copy[ci].items.push({ label: '', href: '' });
     setNav(copy);
   };
   const removeItem = (ci: number, ii: number) => {
@@ -108,37 +110,190 @@ function NavManager({ initial, onSave }: { initial: NavCategory[]; onSave: (n: N
   };
 
   return (
-    <div className="space-y-4">
-      {nav.map((c, ci) => (
-        <div key={ci} className="border p-4 bg-gray-50 rounded">
-          <div className="flex gap-2 mb-3">
-            <input className="border px-3 py-2 flex-1" placeholder="Category Name" value={c.name} onChange={(e) => {
-              const copy = [...nav]; copy[ci].name = e.target.value; setNav(copy);
-            }} />
-            <input className="border px-3 py-2 flex-1" placeholder="Category Link (optional)" value={c.href ?? ''} onChange={(e) => {
-              const copy = [...nav]; copy[ci].href = e.target.value; setNav(copy);
-            }} />
-            <button className="text-red-500 hover:text-red-700 text-xs uppercase font-bold px-2" onClick={() => removeCategory(ci)}>Remove</button>
-          </div>
-          <div className="space-y-2 pl-4 border-l-2 border-gray-300">
-            {c.items.map((it, ii) => (
-              <div key={ii} className="flex gap-2 items-center">
-                <input className="border px-3 py-2 flex-1 text-sm" placeholder="Label" value={it.label} onChange={(e) => {
-                  const copy = [...nav]; copy[ci].items[ii].label = e.target.value; setNav(copy);
-                }} />
-                <input className="border px-3 py-2 flex-1 text-sm" placeholder="Link" value={it.href} onChange={(e) => {
-                  const copy = [...nav]; copy[ci].items[ii].href = e.target.value; setNav(copy);
-                }} />
-                <button className="text-gray-400 hover:text-red-500 text-lg" onClick={() => removeItem(ci, ii)}>×</button>
+    <div className="space-y-12">
+      {/* Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-[2.5rem] font-bold text-[#111827]">Navigation Manager</h1>
+          <p className="text-[#6B7280] text-lg">Configure your store's main navigation and dropdown menus.</p>
+        </div>
+        <div className="flex gap-4">
+          <button 
+            className="px-8 py-3.5 bg-white border border-[#E5E7EB] rounded-2xl text-sm font-bold text-[#374151] hover:bg-gray-50 transition-all shadow-sm"
+            onClick={() => setNav(initial)}
+          >
+            Discard Changes
+          </button>
+          <button 
+            className="px-10 py-3.5 bg-[#eb4899] text-white rounded-2xl text-sm font-bold hover:bg-[#db2777] transition-all shadow-lg shadow-pink-500/20"
+            onClick={() => onSave(nav)}
+          >
+            Save Navigation
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,360px] gap-12 items-start">
+        <div className="space-y-8">
+          {nav.map((c, ci) => (
+            <div key={ci} className="bg-white border border-[#F3F4F6] rounded-[2rem] shadow-sm overflow-hidden transition-all">
+              <div className="p-8 border-b border-[#F3F4F6]">
+                <div className="flex gap-6 items-start">
+                  <div className="mt-2 text-[#D1D5DB] cursor-grab active:cursor-grabbing">
+                    <GripVertical size={24} />
+                  </div>
+                  <div className="flex-1 grid grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">Category Label</label>
+                      <input 
+                        className="w-full text-xl font-bold text-[#111827] placeholder:text-gray-300 border-none p-0 focus:ring-0" 
+                        placeholder="New Arrival" 
+                        value={c.name} 
+                        onChange={(e) => {
+                          const copy = [...nav]; copy[ci].name = e.target.value; setNav(copy);
+                        }} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">URL / Handle</label>
+                      <input 
+                        className="w-full text-base font-medium text-[#6B7280] placeholder:text-gray-300 border-none p-0 focus:ring-0" 
+                        placeholder="/collections/new-arrivals" 
+                        value={c.href ?? ''} 
+                        onChange={(e) => {
+                          const copy = [...nav]; copy[ci].href = e.target.value; setNav(copy);
+                        }} 
+                      />
+                    </div>
+                  </div>
+                  <button onClick={() => removeCategory(ci)} className="text-[#D1D5DB] hover:text-red-500 transition-colors p-2">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
-            ))}
-            <button className="text-xs text-hot-pink font-bold uppercase hover:underline mt-1" onClick={() => addItem(ci)}>+ Add Item</button>
+
+              <div className="p-8 bg-[#FAFAFA]/50">
+                {c.items.length > 0 ? (
+                  <div className="space-y-4">
+                    {c.items.map((it, ii) => (
+                      <div key={ii} className="flex gap-4 items-center bg-white border border-[#F3F4F6] rounded-2xl p-5 shadow-sm group transition-all hover:border-pink-100">
+                        <div className="text-[#D1D5DB] cursor-grab">
+                          <GripVertical size={18} />
+                        </div>
+                        <input 
+                          className="flex-1 text-sm font-semibold text-[#374151] placeholder:text-gray-300 border-none p-0 focus:ring-0" 
+                          placeholder="Label" 
+                          value={it.label} 
+                          onChange={(e) => {
+                            const copy = [...nav]; copy[ci].items[ii].label = e.target.value; setNav(copy);
+                          }} 
+                        />
+                        <input 
+                          className="flex-1 text-sm font-medium text-[#9CA3AF] placeholder:text-gray-300 border-none p-0 focus:ring-0" 
+                          placeholder="Link" 
+                          value={it.href} 
+                          onChange={(e) => {
+                            const copy = [...nav]; copy[ci].items[ii].href = e.target.value; setNav(copy);
+                          }} 
+                        />
+                        <button className="text-gray-300 hover:text-red-500 transition-colors" onClick={() => removeItem(ci, ii)}>
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    ))}
+                    <button 
+                      className="w-full py-4 border-2 border-dashed border-[#E5E7EB] rounded-2xl text-xs font-bold uppercase tracking-widest text-[#9CA3AF] hover:border-[#eb4899] hover:text-[#eb4899] transition-all flex items-center justify-center gap-2 mt-4" 
+                      onClick={() => addItem(ci)}
+                    >
+                      <Plus size={16} />
+                      Add Sub-item
+                    </button>
+                  </div>
+                ) : (
+                  <div className="py-12 flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 bg-white border border-[#F3F4F6] rounded-2xl shadow-sm flex items-center justify-center text-[#D1D5DB]">
+                      <LayoutGrid size={24} />
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-[#111827]">No sub-items yet</p>
+                      <p className="text-sm text-[#9CA3AF] mt-1">Add sub-items to create a dropdown menu for this category.</p>
+                    </div>
+                    <button 
+                      className="mt-4 px-6 py-2.5 bg-white border border-[#E5E7EB] rounded-xl text-xs font-bold uppercase tracking-widest text-[#374151] hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+                      onClick={() => addItem(ci)}
+                    >
+                      <Plus size={14} />
+                      Add First Sub-item
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <button 
+            className="w-full py-12 border-2 border-dashed border-[#E5E7EB] rounded-[2rem] flex flex-col items-center justify-center gap-4 hover:border-[#eb4899] hover:bg-pink-50/10 transition-all group"
+            onClick={addCategory}
+          >
+            <div className="w-14 h-14 bg-white border border-[#E5E7EB] rounded-2xl shadow-sm flex items-center justify-center text-[#eb4899] group-hover:scale-110 transition-transform">
+              <Plus size={28} />
+            </div>
+            <span className="text-lg font-bold text-[#374151]">Add New Category</span>
+          </button>
+        </div>
+
+        {/* Live Preview Sidebar */}
+        <div className="sticky top-8 bg-white border border-[#F3F4F6] rounded-[2rem] shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-[#F3F4F6] flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">Live Preview</span>
+            </div>
+            <ExternalLink size={16} className="text-[#D1D5DB]" />
+          </div>
+          
+          <div className="p-8">
+            <div className="flex flex-col items-center mb-12">
+              <span className="text-2xl font-black tracking-tighter">LUXE<span className="text-[#eb4899]">.</span></span>
+            </div>
+
+            <nav className="space-y-8">
+              {nav.map((c, idx) => (
+                <div key={idx} className="space-y-3">
+                  <div className="flex items-center justify-between group cursor-pointer">
+                    <span className={`text-xs font-bold uppercase tracking-widest ${idx === 0 ? 'text-[#111827]' : 'text-[#9CA3AF]'}`}>
+                      {c.name || 'Untitled Category'}
+                    </span>
+                    {c.items.length > 0 && <ChevronRight size={14} className={`transition-transform ${idx === 0 ? 'rotate-90' : ''} text-[#D1D5DB]`} />}
+                  </div>
+                  {idx === 0 && c.items.length > 0 && (
+                    <div className="pl-4 space-y-3 border-l-2 border-[#F3F4F6]">
+                      {c.items.map((it, ii) => (
+                        <p key={ii} className="text-sm font-medium text-[#6B7280] hover:text-[#eb4899] cursor-pointer transition-colors">
+                          {it.label || 'New Item'}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+
+            <div className="mt-16 bg-[#F9FAFB] rounded-2xl p-6 border border-[#F3F4F6]">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-[#9CA3AF] text-center mb-2">Frontend Navigation Style</p>
+              <p className="text-xs font-semibold text-[#374151] text-center">Menu style: Minimalist Dropdown</p>
+            </div>
           </div>
         </div>
-      ))}
-      <div className="flex gap-3">
-        <button className="border border-gray-300 px-4 py-2 text-xs tracking-widest uppercase hover:bg-gray-50" onClick={addCategory}>Add Category</button>
-        <button className="bg-hot-pink text-white px-6 py-2 text-xs tracking-widest uppercase hover:bg-hot-pink/90" onClick={() => onSave(nav)}>Save Navigation</button>
+      </div>
+
+      {/* Footer */}
+      <div className="pt-12 border-t border-[#F3F4F6] flex justify-between items-center text-[11px] font-bold uppercase tracking-widest text-[#9CA3AF]">
+        <p>© 2024 Luxe Commerce Dashboard • NavManager v2.4</p>
+        <div className="flex gap-8">
+          <a href="#" className="hover:text-[#eb4899] transition-colors">Documentation</a>
+          <a href="#" className="hover:text-[#eb4899] transition-colors">Support</a>
+        </div>
       </div>
     </div>
   );
@@ -904,8 +1059,7 @@ export default function AdminDashboard() {
          
 
         {tab === 'navigation' && (
-          <div className="max-w-3xl">
-            <h2 className="font-serif text-2xl mb-4">Store Navigation</h2>
+          <div className="max-w-[1200px] mx-auto">
             <NavManager initial={nav} onSave={saveNavAll} />
           </div>
         )}
@@ -1051,7 +1205,7 @@ export default function AdminDashboard() {
                     className={`px-6 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all ${selectedMessageIds.length > 0 ? 'text-red-500 border-red-100 hover:bg-red-50' : 'text-gray-500 opacity-50 cursor-not-allowed'}`}
                   >
                     <LayoutGrid size={18} />
-                    Bulk Actions {selectedMessageIds.length > 0 && `(${selectedMessageIds.length})`}
+                    Bulk Delete {selectedMessageIds.length > 0 && `(${selectedMessageIds.length})`}
                   </button>
                 </div>
               </div>
