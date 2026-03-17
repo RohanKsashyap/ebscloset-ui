@@ -34,13 +34,15 @@ export default function ProductManagementModal({
 }: ProductManagementModalProps) {
   const [form, setForm] = useState<any>({
     name: '',
-    price: 0,
+    price: '',
     description: '',
     categoryId: '',
     inStock: 0,
     minStock: 5,
     size: '',
-    featured: false,
+    newarrival:false,
+    trending: false,
+    bestseller: false,
     assured: false,
     variants: []
   });
@@ -79,14 +81,15 @@ export default function ProductManagementModal({
     } else {
       setForm({
         name: '',
-        price: 0,
+        price: '',
         description: '',
         categoryId: '',
         inStock: 0,
         minStock: 5,
         size: '',
-        featured: false,
-        assured: false,
+        newarrival:false,
+        trending: false,
+        bestseller: false,
         variants: []
       });
       setPreviews({
@@ -243,7 +246,7 @@ export default function ProductManagementModal({
                       type="number" 
                       placeholder="285.00" 
                       value={form.price} 
-                      onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} 
+                      onChange={(e) => setForm({ ...form, price: e.target.value === '' ? '' : Number(e.target.value) })} 
                     />
                   </div>
                 </div>
@@ -309,7 +312,7 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Base Size</label>
                   <div className="relative">
@@ -322,14 +325,32 @@ export default function ProductManagementModal({
                     />
                   </div>
                 </div>
-                <div className="flex gap-4 pt-8">
+                <div className="col-span-2 flex flex-wrap gap-x-6 gap-y-4 pt-8">
+                  {/* newarrival */}
                   <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.featured ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.featured ? 'left-6' : 'left-1'}`} />
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.newarrival ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.newarrival ? 'left-6' : 'left-1'}`} />
                     </div>
-                    <input type="checkbox" className="hidden" checked={form.featured} onChange={(e) => setForm({...form, featured: e.target.checked})} />
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Featured</span>
+                    <input type="checkbox" className="hidden" checked={form.newarrival} onChange={(e) => setForm({...form, newarrival: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Arrival</span>
                   </label>
+                  {/* trending */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.trending ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.trending ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.trending} onChange={(e) => setForm({...form, trending: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Trending</span>
+                  </label>
+                  {/* bestseller */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.bestseller ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.bestseller ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.bestseller} onChange={(e) => setForm({...form, bestseller: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Bestseller</span>
+                  </label>
+                  {/* assured */}
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <div className={`w-11 h-6 rounded-full relative transition-all ${form.assured ? 'bg-pink-500' : 'bg-gray-200'}`}>
                       <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.assured ? 'left-6' : 'left-1'}`} />

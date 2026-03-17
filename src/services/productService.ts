@@ -10,6 +10,11 @@ export interface Product {
   image: string;
   images?: string[];
   category?: string;
+  categoryId?:{
+    _id:string;
+    name:string;
+    slug:string
+  };
   size?: string[];
   sizes?: string[];
   color?: string[];
@@ -26,8 +31,10 @@ export interface Product {
   stock?: Record<string, number>;
   type?: string;
   occasion?: string;
-  isNewArrival?: boolean;
-  isTrending?: boolean;
+  newarrival?: boolean;
+  trending?: boolean;
+  bestseller?: boolean;
+  assured?: boolean;
 }
 
 export const productService = {
@@ -48,6 +55,17 @@ export const productService = {
     const response = await apiClient.get('/products/trending');
     return response.data.products || [];
   },
+
+//best seller
+getBestSellerProducts: async (): Promise<Product[]> => {
+  if (!(await ensureBackendAvailable())) return [];
+  const response = await apiClient.get('/products/bestseller');
+  return response.data.products || [];
+},
+
+
+
+
 
   getNewArrivals: async (): Promise<Product[]> => {
     if (!(await ensureBackendAvailable())) return [];

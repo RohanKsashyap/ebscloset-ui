@@ -252,6 +252,7 @@ export default function AdminDashboard() {
   const { showToast } = useToast();
   const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'navigation'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'>('dashboard');
   const [catalog, setCatalog] = useState<Product[]>([]);
+  const [productFilter, setProductFilter] = useState('All Products');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [productEditing, setProductEditing] = useState<Product | undefined>(undefined);
   const [categoryEditing, setCategoryEditing] = useState<GalleryCategory | undefined>(undefined);
@@ -524,6 +525,15 @@ export default function AdminDashboard() {
 
   if (loading) return <div className="p-20 text-center font-serif text-2xl">Loading Magic...</div>;
 
+  const filteredCatalog = catalog.filter(p => {
+    if (productFilter === 'All Products') return true;
+    if (productFilter === 'Trending') return p.trending;
+    if (productFilter === 'New Arrivals') return p.newarrival;
+    if (productFilter === 'Best Sellers') return p.bestseller;
+    if (productFilter === 'Out of Stock') return ((p as any).inStock || 0) <= 0;
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-white flex">
       {/* Sidebar */}
@@ -667,11 +677,12 @@ export default function AdminDashboard() {
 
               {/* Tabs / Filters */}
               <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-                {['All Products', 'Trending', 'New Arrivals', 'Best Sellers', 'Out of Stock'].map((filter, i) => (
+                {['All Products', 'Trending', 'New Arrivals', 'Best Sellers', 'Out of Stock'].map((filter) => (
                   <button 
                     key={filter}
+                    onClick={() => setProductFilter(filter)}
                     className={`whitespace-nowrap px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
-                      i === 0 ? 'bg-black text-white' : 'bg-[#f1f1f1] text-[#333] hover:bg-[#e1e1e1]'
+                      productFilter === filter ? 'bg-black text-white' : 'bg-[#f1f1f1] text-[#333] hover:bg-[#e1e1e1]'
                     }`}
                   >
                     {filter}
@@ -705,7 +716,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y text-sm">
-                      {catalog.map((p) => (
+                      {filteredCatalog.map((p) => (
                         <tr key={p._id} className={`hover:bg-gray-50/50 transition-colors group ${selectedProductIds.includes(p._id!) ? 'bg-pink-50/30' : ''}`}>
                           <td className="px-6 py-4">
                             <input 
@@ -728,18 +739,20 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-600 font-medium">{p.category}</span>
+                            <span className="text-gray-600 font-medium">{p.categoryId?.name || "N/A"}</span>
                             {(p as any).size && <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Size: {(p as any).size}</p>}
                           </td>
                           <td className="px-6 py-4">
                             <span className="font-bold text-gray-900">₹{p.price.toFixed(2)}</span>
                           </td>
                           <td className="px-6 py-4">
-                            {(p as any).assured ? (
+                            {p.assured ? (
                               <span className="bg-pink-100 text-[#eb4899] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Assured</span>
-                            ) : p.isTrending ? (
+                            ) : p.trending ? (
                               <span className="bg-[#fdf2f8] text-[#be185d] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Trending</span>
-                            ) : p.isNewArrival ? (
+                            ) : p.bestseller ? (
+                              <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Bestseller</span>
+                            ) : p.newarrival ? (
                               <span className="bg-[#eff6ff] text-[#1d4ed8] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">New Arrival</span>
                             ) : (
                               <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Classic</span>
@@ -787,7 +800,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="px-6 py-5 bg-[#fcfcfc] border-t flex items-center justify-between">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                    Showing {catalog.length} of {catalog.length} Products
+                    Showing {filteredCatalog.length} of {catalog.length} Products
                   </p>
                   <div className="flex items-center gap-2">
                     <button className="p-2 border rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50" disabled>
