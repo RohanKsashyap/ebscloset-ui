@@ -400,7 +400,7 @@ function InventoryManagement({ products }: { products: Product[] }) {
   const outOfStockCount = products.filter(p => ((p as any).inStock || 0) === 0).length;
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-500 max-h-[calc(100vh-100px)] overflow-y-auto pr-2 custom-scrollbar">
+    <div className="space-y-4 animate-in fade-in duration-500 pr-2">
       {/* Top Search Bar */}
       <div className="flex justify-between items-center bg-gray-50/80 backdrop-blur-sm px-4 py-2 rounded-2xl border border-gray-100 shadow-sm">
         <div className="relative flex-1 max-w-lg">
