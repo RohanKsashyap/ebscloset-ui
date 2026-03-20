@@ -61,7 +61,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               {product.name}
             </h3>
             <p className="text-xl text-hot-pink font-semibold mb-6">
-              ₹{product.price}
+              ${product.price}
             </p>
 
             <div className="mb-8">

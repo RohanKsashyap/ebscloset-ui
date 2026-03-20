@@ -127,7 +127,7 @@ const TopSellingProducts = ({ products = [] }: { products?: any[] }) => {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm font-bold text-gray-900">₹{p.price}</p>
+              <p className="text-sm font-bold text-gray-900">${p.price}</p>
               <p className="text-[10px] font-bold text-green-500 uppercase tracking-wider mt-0.5">{p.sold || 0} Sold</p>
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function Analytics({ data }: { data?: any }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard 
           title="Total Revenue" 
-          value={`₹${Number(counts.sales).toLocaleString()}`} 
+          value={`$${Number(counts.sales).toLocaleString()}`} 
           change="0%" 
           isPositive={true} 
         />

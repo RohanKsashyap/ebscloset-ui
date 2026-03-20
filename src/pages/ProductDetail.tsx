@@ -259,7 +259,7 @@ export default function ProductDetail() {
             ) },
             { title: 'Shipping & Returns', content: (
               <div>
-                <p>Ships in 2-3 business days. Free shipping over ₹1000.</p>
+                <p>Ships in 2-3 business days. Free shipping over $100.</p>
                 <p>30-day returns for unworn items with tags.</p>
               </div>
             ) },

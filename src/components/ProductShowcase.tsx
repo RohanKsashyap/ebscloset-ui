@@ -61,7 +61,7 @@ export default function ProductShowcase() {
                 {name}
               </h3>
               <p className="text-base md:text-lg text-hot-pink font-semibold">
-                ₹{product.price}
+                ${product.price}
               </p>
             </div>
           );

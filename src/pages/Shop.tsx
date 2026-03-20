@@ -16,7 +16,7 @@ export default function Shop() {
   const [occasion, setOccasion] = useState<string>('All');
   const [size, setSize] = useState<string>('All');
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(3000);
+  const [maxPrice, setMaxPrice] = useState(500);
   const [q, setQ] = useState('');
   const [hoverId, setHoverId] = useState<number | string | null>(null);
   const [products, setProducts] = useState<Array<any>>([]);
@@ -43,12 +43,12 @@ export default function Shop() {
       const match = (site.budgets ?? []).find((x) => x.slug === b);
       if (match) { setMinPrice(match.min); setMaxPrice(match.max); }
       else {
-        if (b === 'under499') { setMinPrice(0); setMaxPrice(499); }
-        else if (b === 'under799') { setMinPrice(0); setMaxPrice(799); }
-        else if (b === 'under999') { setMinPrice(0); setMaxPrice(999); }
-        else if (b === '1000-1499') { setMinPrice(1000); setMaxPrice(1499); }
-        else if (b === '1500-1999') { setMinPrice(1500); setMaxPrice(1999); }
-        else if (b === '2000plus') { setMinPrice(2000); setMaxPrice(3000); }
+        if (b === 'under20') { setMinPrice(0); setMaxPrice(20); }
+        else if (b === 'under40') { setMinPrice(0); setMaxPrice(40); }
+        else if (b === 'under60') { setMinPrice(0); setMaxPrice(60); }
+        else if (b === '60-80') { setMinPrice(60); setMaxPrice(80); }
+        else if (b === '80-100') { setMinPrice(80); setMaxPrice(100); }
+        else if (b === '100plus') { setMinPrice(100); setMaxPrice(10000); }
       }
     }
     const qParam = sp.get('q');
@@ -266,7 +266,7 @@ export default function Shop() {
                     <input 
                       type="range" 
                       min={0} 
-                      max={3000} 
+                      max={500} 
                       value={maxPrice} 
                       onChange={(e) => setMaxPrice(Number(e.target.value))}
                       className="absolute w-full h-2 appearance-none bg-transparent cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-hot-pink [&::-webkit-slider-thumb]:shadow-lg"

@@ -74,7 +74,7 @@ export default function NewArrivalsGallery() {
                 </div>
                 <div className="px-3 py-3">
                   <p className="text-sm font-medium text-gray-900">{name}</p>
-                  <p className="text-xs text-gray-600">{isRealProduct ? `₹${it.price}` : (it.ageGroup || 'Ages 3–13')}</p>
+                  <p className="text-xs text-gray-600">{isRealProduct ? `$${it.price}` : (it.ageGroup || 'Ages 3–13')}</p>
                 </div>
               </Link>
             </div>

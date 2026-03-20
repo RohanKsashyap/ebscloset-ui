@@ -139,7 +139,7 @@ export default function DiscountsManagement({ codes, onRefresh }: { codes: Disco
                   </td>
                   <td className="px-6 py-5">
                     <span className="text-gray-900 text-sm font-bold">
-                      {discount.type === 'percent' ? `${discount.value}%` : `₹${discount.value.toFixed(2)}`}
+                      {discount.type === 'percent' ? `${discount.value}%` : `$${discount.value.toFixed(2)}`}
                     </span>
                   </td>
                   <td className="px-6 py-5">

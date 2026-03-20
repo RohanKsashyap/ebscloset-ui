@@ -59,7 +59,7 @@ export default function QuickShopGrid() {
             </div>
             <p className="text-xs tracking-widest uppercase text-millennial-pink mb-1">{p.category}</p>
             <h3 className="font-serif text-lg md:text-xl text-gray-800">{p.name}</h3>
-            <p className="text-base text-hot-pink font-semibold">₹{p.price}</p>
+            <p className="text-base text-hot-pink font-semibold">${p.price}</p>
           </button>
         ))}
       </div>

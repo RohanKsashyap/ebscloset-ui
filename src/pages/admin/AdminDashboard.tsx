@@ -1155,7 +1155,7 @@ export default function AdminDashboard() {
                             {(p as any).size && <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Size: {(p as any).size}</p>}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="font-bold text-gray-900">₹{p.price.toFixed(2)}</span>
+                            <span className="font-bold text-gray-900">${p.price.toFixed(2)}</span>
                           </td>
                           <td className="px-6 py-4">
                             {p.assured ? (
@@ -1230,7 +1230,7 @@ export default function AdminDashboard() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border space-y-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Total Value</p>
-                    <p className="text-2xl font-bold mt-1">₹{catalog.reduce((acc, p) => acc + (p.price * ((p as any).inStock || 0)), 0).toLocaleString()}</p>
+                    <p className="text-2xl font-bold mt-1">${catalog.reduce((acc, p) => acc + (p.price * ((p as any).inStock || 0)), 0).toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-1.5 text-green-600">
                     <TrendingUp size={14} />

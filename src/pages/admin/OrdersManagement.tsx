@@ -193,7 +193,7 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
                       </div>
                     </td>
                     <td className="px-6 py-5 font-bold text-gray-900 text-sm">
-                      ₹{(order.totalAmount || order.total || 0).toFixed(2)}
+                      ${(order.totalAmount || order.total || 0).toFixed(2)}
                     </td>
                     <td className="px-6 py-5">
                       <div className="relative flex justify-center" onClick={e => e.stopPropagation()}>
@@ -278,7 +278,7 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Total Sales</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-3xl font-bold text-gray-900">₹{orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0).toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">${orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0).toFixed(2)}</p>
               <span className="text-green-500 text-xs font-bold">+12% ↑</span>
             </div>
           </div>
@@ -298,7 +298,7 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Avg. Order Value</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-3xl font-bold text-gray-900">₹{(orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0) / (orders.length || 1)).toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">${(orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0) / (orders.length || 1)).toFixed(2)}</p>
               <span className="text-gray-400 text-xs font-bold">-2% ↓</span>
             </div>
           </div>

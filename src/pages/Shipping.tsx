@@ -6,7 +6,7 @@ export default function Shipping() {
     hero: { title: "EB'S CLOSET", subtitle: 'Beautiful Dresses for Girls 7-13', slides: [], backgroundImages: [], bannerImage: '', bannerTitle: '', bannerSubtitle: '', bannerCtaText: 'Discover Magic', bannerCtaHref: '/shop' },
     editorial: { image: '', kicker: '', title: '', body: '', ctaText: '', ctaHref: '/shop' },
     collections: [], footerGroups: [], social: [], newsletter: { heading: '', subtext: '' }, legalLabels: { privacy: 'Privacy Policy', terms: 'Terms of Service', cookies: 'Cookie Policy' }, infoPages: {
-      shipping: { title: 'Shipping', subtitle: 'Fast and reliable', sections: [{ body: 'Orders ship within 2-3 business days. Free standard shipping on orders over ₹1000.' }] }
+      shipping: { title: 'Shipping', subtitle: 'Fast and reliable', sections: [{ body: 'Orders ship within 2-3 business days. Free standard shipping on orders over $100.' }] }
     }
   });
   const content = site.infoPages['shipping'];

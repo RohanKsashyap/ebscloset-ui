@@ -25,20 +25,20 @@ export default function HomePage() {
       legalLabels: { privacy: '', terms: '', cookies: '' }, 
       infoPages: {}, 
       budgets: [
-        { label: 'Under ₹499', slug: 'under499', min: 0, max: 499 },
-        { label: 'Under ₹799', slug: 'under799', min: 0, max: 799 },
-        { label: 'Under ₹999', slug: 'under999', min: 0, max: 999 },
-        { label: '₹1000 – ₹1499', slug: '1000-1499', min: 1000, max: 1499 },
-        { label: '₹1500 – ₹1999', slug: '1500-1999', min: 1500, max: 1999 },
-        { label: '₹2000+ Premium', slug: '2000plus', min: 2000, max: 10000 },
+        { label: 'Under $20', slug: 'under20', min: 0, max: 20 },
+        { label: 'Under $40', slug: 'under40', min: 0, max: 40 },
+        { label: 'Under $60', slug: 'under60', min: 0, max: 60 },
+        { label: '$60 – $80', slug: '60-80', min: 60, max: 80 },
+        { label: '$80 – $100', slug: '80-100', min: 80, max: 100 },
+        { label: '$100+ Premium', slug: '100plus', min: 100, max: 10000 },
       ] 
     };
     const site = loadSite(fallback);
     return (site.budgets ?? fallback.budgets!).map((b) => {
       const label = b.slug.startsWith('under')
         ? `Under ${formatAUD(b.max)}`
-        : b.slug === '2000plus'
-          ? `${formatAUD(2000)}+ Premium`
+        : b.slug === '100plus'
+          ? `${formatAUD(100)}+ Premium`
           : `${formatAUD(b.min)} – ${formatAUD(b.max)}`;
       
       const p = products.find(p => p.price >= b.min && p.price <= b.max);

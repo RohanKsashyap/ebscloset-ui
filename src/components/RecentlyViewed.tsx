@@ -35,7 +35,7 @@ export default function RecentlyViewed() {
             </div>
             <p className="text-xs tracking-widest uppercase text-millennial-pink">{p.category}</p>
             <h4 className="font-serif text-base text-gray-800 group-hover:text-hot-pink transition-colors">{p.name}</h4>
-            <p className="text-sm text-gray-900 font-semibold">₹{p.price}</p>
+            <p className="text-sm text-gray-900 font-semibold">${p.price}</p>
           </a>
         ))}
       </div>

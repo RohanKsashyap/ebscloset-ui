@@ -55,7 +55,7 @@ export default function Party() {
                 </Link>
                 <div className="p-3 text-center">
                   <p className="text-sm text-gray-800">{p.name}</p>
-                  <p className="text-xs text-gray-600">₹{p.price}</p>
+                  <p className="text-xs text-gray-600">${p.price}</p>
                 </div>
               </div>
             );

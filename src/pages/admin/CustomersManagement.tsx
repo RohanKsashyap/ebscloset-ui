@@ -186,7 +186,7 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
                   </td>
                   <td className="px-8 py-6 text-sm text-gray-500 font-medium">{user.email}</td>
                   <td className="px-8 py-6 text-sm font-bold text-center">{user.orders?.length || 0}</td>
-                  <td className="px-8 py-6 text-sm font-bold text-center">₹{calculateTotalSpent(user).toLocaleString()}</td>
+                  <td className="px-8 py-6 text-sm font-bold text-center">${calculateTotalSpent(user).toLocaleString()}</td>
                   <td className="px-8 py-6 text-sm text-gray-500 font-medium text-center">
                     {getLastActive(user)}
                   </td>

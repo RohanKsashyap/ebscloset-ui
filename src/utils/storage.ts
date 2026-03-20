@@ -179,14 +179,17 @@ export async function deleteSubscriber(id: string) { return adminService.deleteS
 export async function deleteContactMessage(id: string) { return adminService.deleteMessage(id); }
 
 // Keep helpers
-export const INR_TO_AUD = 0.018;
-export function toAUD(inr: number): number {
-  const aud = inr * INR_TO_AUD;
-  return Math.round((aud + Number.EPSILON) * 100) / 100;
+export const INR_TO_USD = 0.012; // Example conversion if needed, but we'll focus on symbols
+export function toUSD(val: number): number {
+  return Math.round((val + Number.EPSILON) * 100) / 100;
 }
-export function formatAUD(inr: number): string {
-  return `A$${toAUD(inr).toFixed(2)}`;
+export function formatUSD(val: number): string {
+  return `$${toUSD(val).toFixed(2)}`;
 }
+
+// Keeping these for backward compatibility but redirecting to USD
+export const formatAUD = formatUSD;
+export const toAUD = toUSD;
 
 // Dummy/Legacy stubs to avoid breaking imports
 export function loadArrivalProducts() { return []; }
