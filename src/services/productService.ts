@@ -15,9 +15,9 @@ export interface Product {
     name:string;
     slug:string
   };
-  size?: string[];
+  size?: string;
   sizes?: string[];
-  color?: string[];
+  color?: string;
   rating?: number;
   reviews?: Array<{
     name: string;

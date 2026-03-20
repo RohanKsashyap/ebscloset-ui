@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCart } from '../context/CartContext';
 import Gallery from '../components/Gallery';
@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 
 export default function ArrivalsDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const { addItem } = useCart();
@@ -92,7 +93,7 @@ export default function ArrivalsDetail() {
 
             <div className="flex flex-wrap items-center gap-3">
               <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
-              <a href="/checkout" className="premium-button w-full sm:w-auto">Buy Now</a>
+              <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); navigate('/checkout'); }} className="premium-button w-full sm:w-auto text-center">Buy Now</button>
             </div>
             <div className="mt-4 text-xs text-gray-700">
               <p>Free shipping over {formatAUD(1000)} • Easy 30-day returns</p>

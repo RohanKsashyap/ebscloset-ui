@@ -100,7 +100,7 @@ function Layout({ children, sparkleRef, showPopup, setShowPopup }: {
   setShowPopup: (show: boolean) => void
 }) {
   const location = useLocation();
-  const hideNavPaths = ['/dashboard', '/orders', '/profile', '/addresses', '/wishlist', '/admin'];
+  const hideNavPaths = ['/dashboard', '/orders', '/profile', '/addresses', '/wishlist', '/admin', '/checkout'];
   const isHideNav = hideNavPaths.some(path => location.pathname.startsWith(path));
 
   return (

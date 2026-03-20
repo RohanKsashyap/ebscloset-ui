@@ -40,6 +40,8 @@ export default function ProductManagementModal({
     inStock: 0,
     minStock: 5,
     size: '',
+    sizes: '',
+    color: '',
     newarrival:false,
     trending: false,
     bestseller: false,
@@ -71,6 +73,8 @@ export default function ProductManagementModal({
       setForm({
         ...initialProduct,
         categoryId: (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '',
+        sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes.join(', ') : (initialProduct as any).sizes || '',
+        color: (initialProduct as any).color || '',
       });
       setPreviews({
         image: initialProduct.image || '',
@@ -87,6 +91,8 @@ export default function ProductManagementModal({
         inStock: 0,
         minStock: 5,
         size: '',
+        sizes: '',
+        color: '',
         newarrival:false,
         trending: false,
         bestseller: false,
@@ -168,6 +174,9 @@ export default function ProductManagementModal({
 
       if (key === 'variants') {
         formData.append(key, JSON.stringify(form[key]));
+      } else if (key === 'sizes' && typeof form[key] === 'string') {
+        const sizesArr = form[key].split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
+        sizesArr.forEach((s: string) => formData.append('sizes', s));
       } else {
         // Only append if it's defined and not null
         if (form[key] !== null && form[key] !== undefined) {
@@ -312,9 +321,36 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Sizes (comma separated)</label>
+                  <div className="relative">
+                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. S, M, L, XL or 32, 34" 
+                      value={form.sizes} 
+                      onChange={(e) => setForm({ ...form, sizes: e.target.value })} 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Color</label>
+                  <div className="relative">
+                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. Black, Rose Gold" 
+                      value={form.color} 
+                      onChange={(e) => setForm({ ...form, color: e.target.value })} 
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Base Size</label>
+                  <label className="text-sm font-bold text-gray-900">Base Size (Internal)</label>
                   <div className="relative">
                     <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 

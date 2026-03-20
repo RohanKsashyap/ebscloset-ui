@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import Gallery from '../components/Gallery';
@@ -16,6 +16,7 @@ import { formatAUD } from '../utils/storage';
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [size, setSize] = useState<string | null>(null);
@@ -171,19 +172,19 @@ export default function ProductDetail() {
 
             <div className="mb-8">
               <p className="text-xs tracking-widest uppercase text-gray-600 mb-3">Select Size</p>
-              <div className="grid grid-cols-4 gap-2 max-w-xs">
-                {(product.sizes ?? []).map((s: string) => (
+              <div className="flex flex-wrap gap-2 max-w-xs">
+                {(product.sizes && product.sizes.length > 0 ? product.sizes : (product.size ? [product.size] : [])).map((s: string) => (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
-                    className={`h-10 text-sm transition-all duration-300 border ${size===s ? 'bg-black text-white border-black' : 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'}`}
+                    className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${size===s ? 'bg-black text-white border-black' : 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'}`}
                   >
                     {s}
                   </button>
                 ))}
               </div>
               {size && (
-                <p className="mt-3 text-sm text-gray-600">{product.stock?.[size] ? `${product.stock?.[size]} left in stock` : 'In stock'}</p>
+                <p className="mt-3 text-sm text-gray-600">Selected size: {size}</p>
               )}
               <div className="mt-3">
                 <button onClick={() => setShowSizeGuide(true)} className="text-sm text-gray-700 underline flex items-center gap-2 hover:text-hot-pink transition-colors">
@@ -205,7 +206,7 @@ export default function ProductDetail() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
-              <a href="/checkout" className="premium-button w-full sm:w-auto text-center">Buy Now</a>
+              <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); navigate('/checkout'); }} className="premium-button w-full sm:w-auto text-center">Buy Now</button>
               <button onClick={() => {
                 if (navigator.share) {
                   navigator.share({ title: product.name, url: window.location.href });

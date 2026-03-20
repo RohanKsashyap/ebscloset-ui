@@ -463,6 +463,8 @@ function InventoryManagement({ products }: { products: Product[] }) {
                   <tr className="text-[9px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-50">
                     <th className="px-6 py-4">Product</th>
                     <th className="px-6 py-4">SKU</th>
+                    <th className="px-6 py-4">Size</th>
+                    <th className="px-6 py-4">Color</th>
                     <th className="px-6 py-4">Stock</th>
                     <th className="px-6 py-4">Actions</th>
                   </tr>
@@ -487,6 +489,12 @@ function InventoryManagement({ products }: { products: Product[] }) {
                       </td>
                       <td className="px-6 py-4 font-bold text-gray-400 text-xs tracking-wider">
                         {product.sku || 'VCR-882-L'}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-gray-600 text-[10px] tracking-wider uppercase">
+                        {Array.isArray((product as any).sizes) ? (product as any).sizes.join(', ') : (product as any).size || '—'}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-gray-600 text-[10px] tracking-wider uppercase">
+                        {(product as any).color || '—'}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
