@@ -26,12 +26,12 @@ export default function HomePage() {
       legalLabels: { privacy: '', terms: '', cookies: '' }, 
       infoPages: {}, 
       budgets: [
-        { label: 'Under $20', slug: 'under20', min: 0, max: 20 },
-        { label: 'Under $40', slug: 'under40', min: 0, max: 40 },
-        { label: 'Under $60', slug: 'under60', min: 0, max: 60 },
-        { label: '$60 – $80', slug: '60-80', min: 60, max: 80 },
-        { label: '$80 – $100', slug: '80-100', min: 80, max: 100 },
-        { label: '$100+ Premium', slug: '100plus', min: 100, max: 10000 },
+        { label: 'Under $20', slug: 'under20', min: 0, max: 2000 },
+        { label: 'Under $40', slug: 'under40', min: 0, max: 4000 },
+        { label: 'Under $60', slug: 'under60', min: 0, max: 6000 },
+        { label: '$60 – $80', slug: '60-80', min: 6000, max: 8000 },
+        { label: '$80 – $100', slug: '80-100', min: 8000, max: 10000 },
+        { label: '$100+ Premium', slug: '100plus', min: 10000, max: 1000000 },
       ] 
     };
     const site = loadSite(fallback);
@@ -39,7 +39,7 @@ export default function HomePage() {
       const label = b.slug.startsWith('under')
         ? `Under ${formatAUD(b.max)}`
         : b.slug === '100plus'
-          ? `${formatAUD(100)}+ Premium`
+          ? `${formatAUD(b.min)}+ Premium`
           : `${formatAUD(b.min)} – ${formatAUD(b.max)}`;
       
       const p = products.find(p => p.price >= b.min && p.price <= b.max);
