@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, 
-  Info, 
-  ShoppingBag, 
   Sparkles, 
   Image as ImageIcon,
   Video,
@@ -14,7 +12,8 @@ import {
   AlertCircle,
   FileText,
   Maximize,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import type { Product } from '../../services/productService';
@@ -67,6 +66,7 @@ export default function ProductManagementModal({
   });
 
   const [categories, setCategories] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (initialProduct) {
@@ -153,46 +153,51 @@ export default function ProductManagementModal({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData();
-    
-    // Skip fields that are being uploaded as files to avoid duplicate keys in req.body/req.files
-    const fileKeys = Object.keys(files).filter(k => files[k]);
-
-    Object.keys(form).forEach(key => {
-      // Don't send fields that are being replaced by files
-      if (fileKeys.includes(key)) return;
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
       
-      // Filter out internal MongoDB/Mongoose fields and redundant IDs
-      const skipFields = [
-        '_id', '__v', 'createdAt', 'updatedAt', 
-        'imageId', 'hoverImageId', 'image3Id', 'image4Id', 
-        'videoId', 'video2Id', 'video3Id', 'thumbnailUrl'
-      ];
-      if (skipFields.includes(key)) return;
+      // Skip fields that are being uploaded as files to avoid duplicate keys in req.body/req.files
+      const fileKeys = Object.keys(files).filter(k => files[k]);
 
-      if (key === 'variants') {
-        formData.append(key, JSON.stringify(form[key]));
-      } else if (key === 'sizes' && typeof form[key] === 'string') {
-        const sizesArr = form[key].split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
-        sizesArr.forEach((s: string) => formData.append('sizes', s));
-      } else {
-        // Only append if it's defined and not null
-        if (form[key] !== null && form[key] !== undefined) {
-          formData.append(key, form[key]);
+      Object.keys(form).forEach(key => {
+        // Don't send fields that are being replaced by files
+        if (fileKeys.includes(key)) return;
+        
+        // Filter out internal MongoDB/Mongoose fields and redundant IDs
+        const skipFields = [
+          '_id', '__v', 'createdAt', 'updatedAt', 
+          'imageId', 'hoverImageId', 'image3Id', 'image4Id', 
+          'videoId', 'video2Id', 'video3Id', 'thumbnailUrl'
+        ];
+        if (skipFields.includes(key)) return;
+
+        if (key === 'variants') {
+          formData.append(key, JSON.stringify(form[key]));
+        } else if (key === 'sizes' && typeof form[key] === 'string') {
+          const sizesArr = form[key].split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
+          sizesArr.forEach((s: string) => formData.append('sizes', s));
+        } else {
+          // Only append if it's defined and not null
+          if (form[key] !== null && form[key] !== undefined) {
+            formData.append(key, form[key]);
+          }
         }
-      }
-    });
+      });
 
-    // Append the actual files
-    Object.keys(files).forEach(key => {
-      if (files[key]) {
-        formData.append(key, files[key]!);
-      }
-    });
+      // Append the actual files
+      Object.keys(files).forEach(key => {
+        if (files[key]) {
+          formData.append(key, files[key]!);
+        }
+      });
 
-    onSave(formData);
+      await onSave(formData);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -494,9 +499,17 @@ export default function ProductManagementModal({
           <button 
             type="submit"
             form="product-form"
-            className="bg-[#ec4899] text-white px-10 py-2.5 rounded-full text-sm font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 transform hover:-translate-y-0.5"
+            disabled={isSaving}
+            className={`bg-[#ec4899] text-white px-10 py-2.5 rounded-full text-sm font-bold hover:bg-pink-600 transition-all shadow-lg shadow-pink-200 transform hover:-translate-y-0.5 flex items-center justify-center gap-2 ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
-            {initialProduct ? 'Update Product' : 'Save Product'}
+            {isSaving ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                {initialProduct ? 'Updating...' : 'Saving...'}
+              </>
+            ) : (
+              initialProduct ? 'Update Product' : 'Save Product'
+            )}
           </button>
         </div>
       </div>
