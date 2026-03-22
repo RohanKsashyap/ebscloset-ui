@@ -12,6 +12,8 @@ export default function EditorialSection() {
         src={site.editorial.image}
         alt="Beautiful Young Girl in Pink Dress"
         className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
+        decoding="async"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-hot-pink/40 to-millennial-pink/30" />
 

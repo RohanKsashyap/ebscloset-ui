@@ -164,7 +164,7 @@ export default function ProductDetail() {
               <div className="flex gap-2">
                 {(product.images ?? []).slice(0,3).map((img: string, idx: number) => (
                   <div key={idx} className={`border-2 rounded-sm p-0.5 cursor-pointer ${idx === 0 ? 'border-gray-900' : 'border-transparent hover:border-gray-300'}`}>
-                    <img src={img} alt="color variant" className="w-10 h-10 object-cover" />
+                    <img src={img} alt="color variant" className="w-10 h-10 object-cover" loading="lazy" decoding="async" />
                   </div>
                 ))}
               </div>

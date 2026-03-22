@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { loadHomeAnimations } from '../utils/storage';
 import HeroSection from './HeroSection';
 import { loadSite, type SiteSettings, formatAUD } from '../utils/storage';
+import { getOptimizedUrl } from '../utils/imageKit';
 import CollectionGrid from './CollectionGrid';
 import EditorialSection from './EditorialSection';
 import ProductShowcase from './ProductShowcase';
@@ -68,7 +69,7 @@ export default function HomePage() {
             <a key={b.q} href={`/shop?budget=${b.q}`} className="premium-card rounded-2xl overflow-hidden border bg-white/60">
               <div className="aspect-[4/3] bg-gradient-to-br from-pink-50 via-white to-peach-50 flex items-center justify-center">
                 {b.img ? (
-                  <img src={b.img} alt={b.label} className="w-full h-full object-cover" />
+                  <img src={getOptimizedUrl(b.img, 400)} alt={b.label} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-white/70 border" />
                 )}

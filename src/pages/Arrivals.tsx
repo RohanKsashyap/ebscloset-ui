@@ -5,6 +5,7 @@ import { productService } from '../services/productService';
 import { useProductContext } from '../context/ProductContext';
 import { Heart } from 'lucide-react';
 import { formatAUD } from '../utils/storage';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function Arrivals() {
   const [catalog, setCatalog] = useState<Product[]>([]);
@@ -62,7 +63,7 @@ export default function Arrivals() {
                   <div key={`${productId}-${idx}`} className="premium-card glass-card overflow-hidden">
                     <Link to={`/arrivals/${productId}`}>
                       <div className="relative aspect-[3/4] bg-gray-100 spotlight-under">
-                        <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                        <img src={getOptimizedUrl(p.image, 400)} alt={p.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                         <button
                           aria-label="Toggle wishlist"
                           onClick={() => toggleWishlist(productId)}

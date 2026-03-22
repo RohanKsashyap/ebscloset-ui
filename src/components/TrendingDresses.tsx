@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { loadTrendingDresses, type TrendingDress } from '../utils/storage';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function TrendingDresses() {
   const [items, setItems] = useState<TrendingDress[]>(() => loadTrendingDresses());
@@ -35,7 +36,7 @@ export default function TrendingDresses() {
               <div className="relative w-full max-w-lg md:max-w-xl mx-auto">
                 <div className="aspect-[3/4] rounded-3xl overflow-hidden bg-gradient-to-br from-pink-50 via-white to-peach-50 shadow-2xl" onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }} onTouchEnd={(e) => { const sx = touchX.current ?? e.changedTouches[0].clientX; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) { go(dx < 0 ? 1 : -1); } touchX.current = null; }}>
                   {visible[idx].image ? (
-                    <img src={visible[idx].image} alt={visible[idx].name || 'Dress'} className="w-full h-full object-contain" />
+                    <img src={getOptimizedUrl(visible[idx].image, 800)} alt={visible[idx].name || 'Dress'} className="w-full h-full object-contain" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="w-24 h-32 rounded-2xl bg-white/70 border" />
@@ -74,7 +75,7 @@ export default function TrendingDresses() {
             <button key={d.id} onClick={() => setIdx(i)} className={`rounded-2xl overflow-hidden border ${i===idx ? 'border-hot-pink' : ''} hover:border-hot-pink ease-lux`}>
               <div className="aspect-square bg-white/60">
                 {d.image ? (
-                  <img src={d.image} alt={d.name || 'Dress'} className="w-full h-full object-cover" />
+                  <img src={getOptimizedUrl(d.image, 100)} alt={d.name || 'Dress'} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="w-8 h-10 rounded-lg bg-white/80 border" />

@@ -2,6 +2,7 @@ import { forwardRef, useState, useEffect, useMemo } from 'react';
 import { loadSite, type SiteSettings } from '../utils/storage';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useProductContext } from '../context/ProductContext';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 type HeroSectionProps = object;
 
@@ -148,9 +149,11 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                 />
               ) : (
                 <img
-                  src={slide.url}
+                  src={getOptimizedUrl(slide.url, 1920)}
                   alt={`Hero slide ${index + 1}`}
                   className="w-full h-full object-cover object-top"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding="async"
                   onError={() => {
                     setBrokenIds((prev) => {
                       const n = new Set(prev);
@@ -236,7 +239,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               <a key={c.title} href={c.href} className="block group">
                 <div className="aspect-[3/4] overflow-hidden rounded-sm relative">
                   {c.img ? (
-                    <img src={c.img} alt={c.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img src={getOptimizedUrl(c.img, 400)} alt={c.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full bg-gray-100" />
                   )}

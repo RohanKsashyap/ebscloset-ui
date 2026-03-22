@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../services/productService';
 import { productService } from '../services/productService';
 import { formatAUD } from '../utils/storage';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function Casual() {
   const [catalog, setCatalog] = useState<Product[]>([]);
@@ -51,7 +52,7 @@ export default function Casual() {
               <div key={`${productId}-${idx}`} className="premium-card glass-card overflow-hidden">
                 <Link to={`/product/${productId}`}>
                   <div className="aspect-[3/4] bg-gray-100 spotlight-under">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    <img src={getOptimizedUrl(p.image, 400)} alt={p.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </div>
                 </Link>
                 <div className="p-3 text-center">

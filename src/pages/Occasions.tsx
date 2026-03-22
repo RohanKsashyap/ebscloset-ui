@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../services/productService';
 import { productService } from '../services/productService';
 import { formatAUD } from '../utils/storage';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function Occasions() {
   const [catalog, setCatalog] = useState<Product[]>([]);

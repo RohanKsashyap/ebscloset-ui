@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loadArrivals, type ArrivalItem } from '../utils/storage';
 import { useProductContext } from '../context/ProductContext';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function NewArrivalsGallery() {
   const { newArrivals } = useProductContext();
@@ -67,7 +68,7 @@ export default function NewArrivalsGallery() {
               <Link to={it._id ? `/product/${it._id}` : '/arrivals'} className="block overflow-hidden bg-white">
                 <div className="aspect-[3/4] overflow-hidden">
                   {imgUrl ? (
-                    <img src={imgUrl} alt={name} className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.05]" loading="lazy" decoding="async" />
+                    <img src={getOptimizedUrl(imgUrl, 400)} alt={name} className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.05]" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full bg-gray-100" />
                   )}

@@ -4,6 +4,7 @@ import ProductModal from './ProductModal';
 import { products as defaultProducts } from '../data/products';
 import { loadProducts } from '../utils/storage';
 import { useProductContext } from '../context/ProductContext';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function ProductShowcase() {
   const { products } = useProductContext();
@@ -41,7 +42,7 @@ export default function ProductShowcase() {
             >
               <div className="relative overflow-hidden aspect-[3/4] mb-4 md:mb-6 bg-gray-100" onClick={() => navigate(`/product/${id}`)} onMouseEnter={() => setHoverId(id)} onMouseLeave={(e) => { const imgEl = e.currentTarget.querySelector('img') as HTMLImageElement | null; if (imgEl) imgEl.style.transform = ''; setHoverId(null); }} onMouseMove={(e) => { const rect = (e.currentTarget as HTMLElement).getBoundingClientRect(); const px = (e.clientX - rect.left) / rect.width - 0.5; const py = (e.clientY - rect.top) / rect.height - 0.5; const imgEl = e.currentTarget.querySelector('img') as HTMLImageElement | null; if (imgEl) imgEl.style.transform = `rotateX(${(-py * 8).toFixed(2)}deg) rotateY(${(px * 8).toFixed(2)}deg) scale(1.02)`; }} style={{ perspective: 1000 }}>
                 <img
-                  src={hoverId === id ? hoverImg : img}
+                  src={getOptimizedUrl(hoverId === id ? hoverImg : img, 400)}
                   alt={name}
                   className="w-full h-full object-cover transition-transform duration-300 ease-out cursor-pointer"
                   loading="lazy"

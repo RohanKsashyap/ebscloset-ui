@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 interface GalleryProps {
   images: string[];
@@ -36,7 +37,7 @@ export default function Gallery({ images, autoplay = true, intervalMs = 3500, on
         }}
       >
         {images.length > 0 && images[current] ? (
-          <img src={images[current]} alt="Product" className="w-full h-full object-cover animate-fadeIn cursor-zoom-in" onClick={() => onImageClick?.()} loading="lazy" decoding="async" />
+          <img src={getOptimizedUrl(images[current], 1200)} alt="Product" className="w-full h-full object-cover animate-fadeIn cursor-zoom-in" onClick={() => onImageClick?.()} loading="lazy" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-peach-50">
             <div className="w-24 h-32 rounded-2xl bg-white/70 border" />
@@ -54,7 +55,7 @@ export default function Gallery({ images, autoplay = true, intervalMs = 3500, on
         {images.map((src, i) => (
           <button key={`${src}-${i}`} onClick={() => setCurrent(i)} className={`shrink-0 border ${current===i ? 'border-hot-pink' : 'border-transparent'} `}>
             {src ? (
-              <img src={src} alt="Thumb" className="w-16 h-20 object-cover" loading="lazy" decoding="async" />
+              <img src={getOptimizedUrl(src, 100)} alt="Thumb" className="w-16 h-20 object-cover" loading="lazy" decoding="async" />
             ) : (
               <div className="w-16 h-20 bg-white/70 border" />
             )}

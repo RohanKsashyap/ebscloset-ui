@@ -6,6 +6,7 @@ import { useProductContext } from '../context/ProductContext';
 import { Heart, SlidersHorizontal, X } from 'lucide-react';
 import { formatAUD } from '../utils/storage';
 import { products as defaultProducts } from '../data/products';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 const ageFilters = ['All','7-9','8-10','9-11','10-12','11-13'];
 
@@ -326,11 +327,13 @@ export default function Shop() {
                       <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden bg-gray-50 mb-6 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-hot-pink/5">
                         <Link to={`/product/${productId}`}>
                           <img 
-                            src={hoverId === productId && p.images?.[1] ? p.images[1] : p.image} 
+                            src={getOptimizedUrl(hoverId === productId && p.images?.[1] ? p.images[1] : p.image, 400)} 
                             alt={p.name} 
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             onMouseEnter={() => setHoverId(productId)}
                             onMouseLeave={() => setHoverId(null)}
+                            loading="lazy"
+                            decoding="async"
                           />
                         </Link>
                         

@@ -34,7 +34,7 @@ export default function CollectionGrid() {
             <div className="relative overflow-hidden aspect-[3/4] mb-6">
               {failed[collection.id] ? (
                 collection.image ? (
-                  <img src={collection.image} alt={collection.title} className="w-full h-full object-cover" />
+                  <img src={collection.image} alt={collection.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-full h-full bg-gray-100" />
                 )
