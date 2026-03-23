@@ -326,80 +326,52 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Sizes (comma separated)</label>
-                  <div className="relative">
-                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      placeholder="e.g. S, M, L, XL or 32, 34" 
-                      value={form.sizes} 
-                      onChange={(e) => setForm({ ...form, sizes: e.target.value })} 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Color</label>
-                  <div className="relative">
-                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      placeholder="e.g. Black, Rose Gold" 
-                      value={form.color} 
-                      onChange={(e) => setForm({ ...form, color: e.target.value })} 
-                    />
-                  </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-900">Color</label>
+                <div className="relative">
+                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input 
+                    className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                    placeholder="e.g. Black, Rose Gold" 
+                    value={form.color} 
+                    onChange={(e) => setForm({ ...form, color: e.target.value })} 
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Base Size (Internal)</label>
-                  <div className="relative">
-                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      placeholder="e.g. Medium" 
-                      value={form.size} 
-                      onChange={(e) => setForm({ ...form, size: e.target.value })} 
-                    />
+              <div className="flex flex-wrap gap-x-6 gap-y-4 pt-4">
+                {/* newarrival */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.newarrival ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.newarrival ? 'left-6' : 'left-1'}`} />
                   </div>
-                </div>
-                <div className="col-span-2 flex flex-wrap gap-x-6 gap-y-4 pt-8">
-                  {/* newarrival */}
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.newarrival ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.newarrival ? 'left-6' : 'left-1'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={form.newarrival} onChange={(e) => setForm({...form, newarrival: e.target.checked})} />
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Arrival</span>
-                  </label>
-                  {/* trending */}
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.trending ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.trending ? 'left-6' : 'left-1'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={form.trending} onChange={(e) => setForm({...form, trending: e.target.checked})} />
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Trending</span>
-                  </label>
-                  {/* bestseller */}
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.bestseller ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.bestseller ? 'left-6' : 'left-1'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={form.bestseller} onChange={(e) => setForm({...form, bestseller: e.target.checked})} />
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Bestseller</span>
-                  </label>
-                  {/* assured */}
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.assured ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.assured ? 'left-6' : 'left-1'}`} />
-                    </div>
-                    <input type="checkbox" className="hidden" checked={form.assured} onChange={(e) => setForm({...form, assured: e.target.checked})} />
-                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Assured</span>
-                  </label>
-                </div>
+                  <input type="checkbox" className="hidden" checked={form.newarrival} onChange={(e) => setForm({...form, newarrival: e.target.checked})} />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Arrival</span>
+                </label>
+                {/* trending */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.trending ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.trending ? 'left-6' : 'left-1'}`} />
+                  </div>
+                  <input type="checkbox" className="hidden" checked={form.trending} onChange={(e) => setForm({...form, trending: e.target.checked})} />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Trending</span>
+                </label>
+                {/* bestseller */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.bestseller ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.bestseller ? 'left-6' : 'left-1'}`} />
+                  </div>
+                  <input type="checkbox" className="hidden" checked={form.bestseller} onChange={(e) => setForm({...form, bestseller: e.target.checked})} />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Bestseller</span>
+                </label>
+                {/* assured */}
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.assured ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.assured ? 'left-6' : 'left-1'}`} />
+                  </div>
+                  <input type="checkbox" className="hidden" checked={form.assured} onChange={(e) => setForm({...form, assured: e.target.checked})} />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Assured</span>
+                </label>
               </div>
             </div>
 

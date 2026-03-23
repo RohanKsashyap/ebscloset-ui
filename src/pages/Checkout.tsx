@@ -146,7 +146,7 @@ export default function Checkout() {
       {/* Header */}
       <header className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-50">
         <div className="flex items-center gap-8">
-          <h1 className="text-xl font-bold tracking-tighter uppercase cursor-pointer" onClick={() => navigate('/')}>Atelier Checkout</h1>
+          <h1 className="text-xl font-bold tracking-tighter uppercase cursor-pointer" onClick={() => navigate('/')}>Checkout</h1>
           <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <a href="/shop" className="hover:text-black transition-colors">Shop</a>
             <a href="/collection" className="hover:text-black transition-colors">Collection</a>
