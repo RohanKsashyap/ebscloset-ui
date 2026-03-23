@@ -206,7 +206,11 @@ export default function ProductDetail() {
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
-              <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); navigate('/checkout'); }} className="premium-button w-full sm:w-auto text-center">Buy Now</button>
+              <button onClick={() => { 
+                if (!size) { showToast('Please select a size', 'error'); return; } 
+                const buyNowItem = { id: product.id || product._id, name: product.name, price: product.price, image: product.image, size: size ?? undefined, qty: 1 };
+                navigate('/checkout', { state: { buyNowItem } }); 
+              }} className="premium-button w-full sm:w-auto text-center">Buy Now</button>
               <button onClick={() => {
                 if (navigator.share) {
                   navigator.share({ title: product.name, url: window.location.href });

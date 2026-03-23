@@ -1,6 +1,6 @@
 import { useCart } from '../context/CartContext';
 import { useMemo, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
 import { authService, User, Address } from '../services/authService';
@@ -8,9 +8,14 @@ import { formatAUD } from '../utils/storage';
 import { ShoppingBag, X, Check, MapPin, ChevronDown } from 'lucide-react';
 
 export default function Checkout() {
-  const { items, total, clear } = useCart();
+  const { items: cartItems, total: cartTotal, clear } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  
+  const buyNowItem = location.state?.buyNowItem;
+  const items = useMemo(() => buyNowItem ? [buyNowItem] : cartItems, [buyNowItem, cartItems]);
+  const total = useMemo(() => buyNowItem ? buyNowItem.price * buyNowItem.qty : cartTotal, [buyNowItem, cartTotal]);
   
   const [email, setEmail] = useState('');
   const [shipping, setShipping] = useState({ 
@@ -115,7 +120,7 @@ export default function Checkout() {
 
     try {
       const res = await orderService.createOrder(payload);
-      clear();
+      if (!buyNowItem) clear();
       showToast('Order placed successfully!');
       navigate('/order-confirmation', { state: { orderId: res.orderId } });
     } catch (err: any) {

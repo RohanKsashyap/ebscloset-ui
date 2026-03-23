@@ -6,7 +6,8 @@ import {
   ExternalLink, 
   Calendar,
   Eye,
-  Settings
+  Settings,
+  Trash2
 } from 'lucide-react';
 
 type HeroBanner = {
@@ -31,9 +32,57 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      setSite((s: any) => ({ ...s, hero: { ...s.hero, bannerImage: String(reader.result) } }));
+      setSite((s: any) => {
+        const newSite = { ...s };
+        if (!newSite.hero) newSite.hero = {};
+        if (!newSite.hero.slides) newSite.hero.slides = [];
+        
+        // Update both legacy bannerImage and the current slide for compatibility
+        newSite.hero.bannerImage = String(reader.result);
+        
+        if (!newSite.hero.slides[activeBanner]) {
+          newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
+        }
+        newSite.hero.slides[activeBanner].url = String(reader.result);
+        
+        return newSite;
+      });
     };
     reader.readAsDataURL(file);
+  };
+
+  const currentSlide = site?.hero?.slides?.[activeBanner] || {};
+  const displayImage = currentSlide.url || (activeBanner === 0 ? site?.hero?.bannerImage : '');
+
+  const updateHeroField = (field: string, value: any) => {
+    setSite((s: any) => {
+      const newSite = { ...s };
+      if (!newSite.hero) newSite.hero = {};
+      
+      // Update the root hero field
+      newSite.hero[field] = value;
+      
+      // Also update the current slide if it exists or create it
+      if (!newSite.hero.slides) newSite.hero.slides = [];
+      if (!newSite.hero.slides[activeBanner]) {
+        newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
+      }
+      newSite.hero.slides[activeBanner][field] = value;
+      
+      return newSite;
+    });
+  };
+
+  const addBanner = () => {
+    setSite((s: any) => {
+      const newSite = { ...s };
+      if (!newSite.hero) newSite.hero = {};
+      if (!newSite.hero.slides) newSite.hero.slides = [];
+      const newIndex = newSite.hero.slides.length;
+      newSite.hero.slides.push({ id: String(newIndex + 1), type: 'image', title: '', subtitle: '', url: '' });
+      setActiveBanner(newIndex);
+      return newSite;
+    });
   };
 
   const handleSave = () => {
@@ -69,20 +118,30 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                 <h3 className="text-2xl font-bold text-gray-900">Hero Banner Management</h3>
               </div>
               
-              <div className="flex items-center bg-gray-50 p-1.5 rounded-2xl">
+              <div className="flex items-center bg-gray-50 p-1.5 rounded-2xl overflow-x-auto">
+                {(site?.hero?.slides || []).length > 0 ? (
+                  site.hero.slides.map((_: any, idx: number) => (
+                    <button 
+                      key={idx}
+                      className={`px-6 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeBanner === idx ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
+                      onClick={() => setActiveBanner(idx)}
+                    >
+                      Banner {idx + 1}
+                    </button>
+                  ))
+                ) : (
+                  <button 
+                    className="px-6 py-2 rounded-xl text-xs font-bold bg-white shadow-sm text-gray-900"
+                    onClick={() => setActiveBanner(0)}
+                  >
+                    Banner 1
+                  </button>
+                )}
                 <button 
-                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeBanner === 0 ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
-                  onClick={() => setActiveBanner(0)}
+                  className="p-2 text-gray-400 hover:text-gray-900 transition-colors"
+                  onClick={addBanner}
+                  title="Add New Banner"
                 >
-                  Banner 1
-                </button>
-                <button 
-                  className={`px-6 py-2 rounded-xl text-xs font-bold transition-all ${activeBanner === 1 ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
-                  onClick={() => setActiveBanner(1)}
-                >
-                  Banner 2
-                </button>
-                <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors">
                   <Plus size={16} />
                 </button>
               </div>
@@ -98,8 +157,8 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     flex flex-col items-center justify-center gap-4 overflow-hidden transition-all
                     group-hover:border-pink-100 group-hover:bg-pink-50/30
                   `}>
-                    {site?.hero?.bannerImage ? (
-                      <img src={site.hero.bannerImage} alt="Banner Preview" className="w-full h-full object-cover" />
+                    {displayImage ? (
+                      <img src={displayImage} alt="Banner Preview" className="w-full h-full object-cover" />
                     ) : (
                       <>
                         <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-gray-300">
@@ -130,8 +189,8 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     type="text" 
                     className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300"
                     placeholder="e.g. New Summer Collection"
-                    value={site?.hero?.title || ''}
-                    onChange={(e) => setSite({...site, hero: {...site.hero, title: e.target.value}})}
+                    value={currentSlide.title || site?.hero?.title || ''}
+                    onChange={(e) => updateHeroField('title', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,8 +199,8 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     type="text" 
                     className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300"
                     placeholder="e.g. Discover the latest trends"
-                    value={site?.hero?.subtitle || ''}
-                    onChange={(e) => setSite({...site, hero: {...site.hero, subtitle: e.target.value}})}
+                    value={currentSlide.subtitle || site?.hero?.subtitle || ''}
+                    onChange={(e) => updateHeroField('subtitle', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -150,8 +209,8 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     type="text" 
                     className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300"
                     placeholder="e.g. Shop Now"
-                    value={site?.hero?.bannerCtaText || ''}
-                    onChange={(e) => setSite({...site, hero: {...site.hero, bannerCtaText: e.target.value}})}
+                    value={currentSlide.bannerCtaText || site?.hero?.bannerCtaText || ''}
+                    onChange={(e) => updateHeroField('bannerCtaText', e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
@@ -160,8 +219,8 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     type="text" 
                     className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300"
                     placeholder="/collections/summer-2024"
-                    value={site?.hero?.bannerCtaHref || ''}
-                    onChange={(e) => setSite({...site, hero: {...site.hero, bannerCtaHref: e.target.value}})}
+                    value={currentSlide.bannerCtaHref || site?.hero?.bannerCtaHref || ''}
+                    onChange={(e) => updateHeroField('bannerCtaHref', e.target.value)}
                   />
                 </div>
               </div>
