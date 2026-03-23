@@ -181,10 +181,10 @@ export async function deleteContactMessage(id: string) { return adminService.del
 // Keep helpers
 export const INR_TO_USD = 0.012; // Example conversion if needed, but we'll focus on symbols
 export function toUSD(val: number): number {
-  return val / 100;
+  return val;
 }
 export function formatUSD(val: number): string {
-  return `$${toUSD(val).toFixed(2)}`;
+  return `$${val.toFixed(2)}`;
 }
 
 // Keeping these for backward compatibility but redirecting to USD

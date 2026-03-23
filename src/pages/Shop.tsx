@@ -391,13 +391,20 @@ export default function Shop() {
 
                       {/* Info */}
                       <div className="space-y-1 px-2">
-                        <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col gap-1">
                           <h3 className="text-sm md:text-base font-bold text-gray-900 group-hover:text-hot-pink transition-colors line-clamp-1">
                             {p.name}
                           </h3>
-                          <span className="text-sm md:text-base font-bold text-gray-900 whitespace-nowrap">
-                            {formatAUD(p.price)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm md:text-base font-bold text-hot-pink whitespace-nowrap">
+                              {formatAUD(p.price)}
+                            </span>
+                            {p.originalPrice && (
+                              <span className="text-xs md:text-sm text-gray-400 line-through decoration-hot-pink/20 whitespace-nowrap">
+                                {formatAUD(p.originalPrice)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <p className="text-xs text-gray-400 font-medium">{p.type || 'Classic Collection'}</p>
                       </div>

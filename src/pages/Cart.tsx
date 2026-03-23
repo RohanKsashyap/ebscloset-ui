@@ -63,7 +63,12 @@ export default function Cart() {
                   <img src={item.image} alt={item.name} className="w-20 h-28 md:w-24 md:h-32 object-cover bg-gray-100 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-serif text-lg md:text-xl text-gray-800 mb-1 md:mb-2 truncate">{item.name}</h3>
-                    <p className="text-hot-pink font-semibold mb-2 md:mb-3">{formatAUD(item.price)}</p>
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                      <p className="text-hot-pink font-semibold">{formatAUD(item.price)}</p>
+                      {item.originalPrice && (
+                        <p className="text-sm text-gray-400 line-through decoration-hot-pink/20">{formatAUD(item.originalPrice)}</p>
+                      )}
+                    </div>
                     {item.size && <p className="text-[11px] md:text-xs text-gray-700 mb-1">Size: {item.size}</p>}
                     <p className="text-[11px] md:text-xs text-gray-600 mb-3">
                       {checking ? 'Checking availability…' : (
