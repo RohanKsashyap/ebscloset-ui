@@ -3,12 +3,15 @@ import type { Product } from './productService';
 
 export interface Testimonial {
   _id: string;
-  name: string;
-  role?: string;
+  customerName: string;
+  tag?: string;
   content: string;
   rating: number;
-  image?: string;
-  active: boolean;
+  avatarUrl?: string;
+  product?: string;
+  status: 'visible' | 'hidden';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GalleryImage {

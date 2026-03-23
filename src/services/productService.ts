@@ -37,11 +37,27 @@ export interface Product {
   assured?: boolean;
 }
 
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  displayOrder: number;
+  imageUrl?: string;
+  description?: string;
+}
+
 export const productService = {
   getAllProducts: async (filters?: Record<string, any>): Promise<Product[]> => {
     if (!(await ensureBackendAvailable())) return [];
     const response = await apiClient.get('/products', { params: filters });
     return response.data.products || [];
+  },
+
+  getCategories: async (): Promise<Category[]> => {
+    if (!(await ensureBackendAvailable())) return [];
+    const response = await apiClient.get('/gallery/categories');
+    return response.data || [];
   },
 
   getProduct: async (id: string): Promise<Product> => {

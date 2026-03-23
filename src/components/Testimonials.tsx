@@ -56,16 +56,17 @@ export default function Testimonials() {
             </div>
             <p className="text-gray-700 italic mb-8 leading-relaxed">"{t.content}"</p>
             <div className="flex items-center gap-4">
-              {t.image ? (
-                <img src={t.image} alt={t.name} className="w-12 h-12 rounded-full object-cover" />
+              {t.avatarUrl ? (
+                <img src={t.avatarUrl} alt={t.customerName} className="w-12 h-12 rounded-full object-cover" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-hot-pink font-bold">
-                  {t.name.charAt(0)}
+                  {t.customerName.charAt(0)}
                 </div>
               )}
               <div>
-                <p className="font-bold text-gray-900">{t.name}</p>
-                {t.role && <p className="text-xs text-gray-500 uppercase tracking-widest">{t.role}</p>}
+                <p className="font-bold text-gray-900">{t.customerName}</p>
+                {t.tag && <p className="text-xs text-gray-500 uppercase tracking-widest">{t.tag}</p>}
+                {t.product && <p className="text-[10px] text-hot-pink font-medium mt-0.5">• {t.product}</p>}
               </div>
             </div>
           </div>

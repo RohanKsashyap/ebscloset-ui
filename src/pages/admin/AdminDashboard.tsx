@@ -45,6 +45,9 @@ import {
   RefreshCcw,
   ClipboardList,
   DollarSign,
+  Camera,
+  Upload,
+  Download,
 } from 'lucide-react';
 
 type NavCategory = { _id?: string; name: string; href?: string; items: { label: string; href: string }[] };
@@ -63,34 +66,178 @@ type SiteSettings = {
 };
 
 
-function TestimonialForm({ onSave }: { onSave: (data: FormData) => void }) {
-  const [form, setForm] = useState({ name: '', role: '', content: '', rating: 5 });
+function TestimonialForm({ initial, products, onSave, onCancel }: { initial?: Testimonial, products: Product[], onSave: (data: FormData) => void, onCancel?: () => void }) {
+  const [form, setForm] = useState({ 
+    customerName: '', 
+    tag: '', 
+    product: '', 
+    content: '', 
+    rating: 5,
+    status: 'visible' as 'visible' | 'hidden'
+  });
   const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initial) {
+      setForm({
+        customerName: initial.customerName || '',
+        tag: initial.tag || '',
+        product: initial.product || '',
+        content: initial.content || '',
+        rating: initial.rating || 5,
+        status: initial.status || 'visible'
+      });
+      setPreview(initial.avatarUrl || null);
+    } else {
+      setForm({ customerName: '', tag: '', product: '', content: '', rating: 5, status: 'visible' });
+      setPreview(null);
+      setFile(null);
+    }
+  }, [initial]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const fd = new FormData();
-    fd.append('name', form.name);
-    fd.append('role', form.role);
+    fd.append('customerName', form.customerName);
+    fd.append('tag', form.tag);
+    fd.append('product', form.product);
     fd.append('content', form.content);
     fd.append('rating', String(form.rating));
-    if (file) fd.append('image', file);
+    fd.append('status', form.status);
+    if (file) fd.append('avatar', file);
     onSave(fd);
-    setForm({ name: '', role: '', content: '', rating: 5 });
-    setFile(null);
+    if (!initial) {
+      setForm({ customerName: '', tag: '', product: '', content: '', rating: 5, status: 'visible' });
+      setFile(null);
+      setPreview(null);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      setFile(f);
+      setPreview(URL.createObjectURL(f));
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border p-4 space-y-3 rounded">
-      <input className="border px-3 py-2 w-full" placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
-      <input className="border px-3 py-2 w-full" placeholder="Role (e.g. Happy Customer)" value={form.role} onChange={e => setForm({...form, role: e.target.value})} />
-      <textarea className="border px-3 py-2 w-full" placeholder="Content" value={form.content} onChange={e => setForm({...form, content: e.target.value})} required />
-      <select className="border px-3 py-2 w-full" value={form.rating} onChange={e => setForm({...form, rating: Number(e.target.value)})}>
-        {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} Stars</option>)}
-      </select>
-      <input type="file" accept="image/*" onChange={e => setFile(e.target.files?.[0] || null)} />
-      <button type="submit" className="bg-hot-pink text-white px-4 py-2 text-[10px] font-bold uppercase w-full">Add Testimonial</button>
-    </form>
+    <div className="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-50/50 sticky top-8">
+      <div className="mb-8">
+        <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">
+          {initial ? 'Edit Testimonial' : 'Add New Testimonial'}
+        </h3>
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+          {initial ? 'Update existing high-value customer feedback.' : 'Manually add high-value customer feedback.'}
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex flex-col items-center justify-center mb-8">
+          <label className="relative group cursor-pointer">
+            <div className={`w-24 h-24 rounded-full border-2 border-dashed flex flex-col items-center justify-center transition-all overflow-hidden ${
+              preview ? 'border-[#eb4899]' : 'border-gray-200 group-hover:border-pink-300'
+            }`}>
+              {preview ? (
+                <img src={preview} className="w-full h-full object-cover" alt="Avatar preview" />
+              ) : (
+                <>
+                  <Camera className="text-gray-300 group-hover:text-pink-400 mb-1" size={24} />
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Upload</span>
+                </>
+              )}
+            </div>
+            <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+          </label>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-3">Customer Avatar</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Customer Name</label>
+            <input 
+              className="w-full bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 transition-all" 
+              placeholder="e.g. Julianne Smith" 
+              value={form.customerName} 
+              onChange={e => setForm({...form, customerName: e.target.value})} 
+              required 
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Tag/Title</label>
+            <input 
+              className="w-full bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 transition-all" 
+              placeholder="e.g. Verified Buyer" 
+              value={form.tag} 
+              onChange={e => setForm({...form, tag: e.target.value})} 
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Product Name</label>
+            <select 
+              className="w-full bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-pink-100 transition-all appearance-none" 
+              value={form.product} 
+              onChange={e => setForm({...form, product: e.target.value})}
+            >
+              <option value="">Select a product...</option>
+              {products.map(p => <option key={p._id} value={p.name}>{p.name}</option>)}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Rating</label>
+            <div className="flex gap-2 bg-gray-50 rounded-2xl px-5 py-3.5">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setForm({ ...form, rating: n })}
+                  className="focus:outline-none transition-transform hover:scale-110"
+                >
+                  <Star
+                    size={20}
+                    className={`${n <= form.rating ? 'text-[#eb4899] fill-[#eb4899]' : 'text-gray-200'}`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Testimonial</label>
+            <textarea 
+              className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 transition-all h-32 resize-none" 
+              placeholder="Write the customer's feedback here..." 
+              value={form.content} 
+              onChange={e => setForm({...form, content: e.target.value})} 
+              required 
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-4">
+          {initial && (
+            <button 
+              type="button"
+              onClick={onCancel}
+              className="flex-1 py-4 bg-white border border-gray-100 text-gray-500 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 transition-all"
+            >
+              Cancel
+            </button>
+          )}
+          <button 
+            type="submit" 
+            className="flex-[2] py-4 bg-[#111827] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-black transition-all shadow-xl shadow-gray-200"
+          >
+            <Upload size={14} />
+            {initial ? 'Update Testimonial' : 'Publish Testimonial'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
@@ -748,6 +895,7 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState<any[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [testimonialEditing, setTestimonialEditing] = useState<Testimonial | undefined>(undefined);
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [galleryCategories, setGalleryCategories] = useState<GalleryCategory[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -954,10 +1102,25 @@ export default function AdminDashboard() {
 
   const saveTestimonial = async (fd: FormData) => {
     try {
-      await adminService.addTestimonial(fd);
+      if (testimonialEditing?._id) {
+        await adminService.updateTestimonial(testimonialEditing._id, fd);
+        showToast('Testimonial updated successfully');
+      } else {
+        await adminService.addTestimonial(fd);
+        showToast('Testimonial added successfully');
+      }
       setTestimonials(await adminService.getAdminTestimonials());
-      alert('Testimonial added');
-    } catch { alert('Error adding testimonial'); }
+      setTestimonialEditing(undefined);
+    } catch { showToast('Error saving testimonial', 'error'); }
+  };
+
+  const toggleTestimonialStatus = async (id: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'visible' ? 'hidden' : 'visible';
+      await adminService.updateTestimonial(id, { status: newStatus });
+      setTestimonials(await adminService.getAdminTestimonials());
+      showToast(`Testimonial is now ${newStatus}`);
+    } catch { showToast('Error updating status', 'error'); }
   };
 
   const saveGalleryImage = async (fd: FormData) => {
@@ -1006,6 +1169,7 @@ export default function AdminDashboard() {
   const [inboxSearch, setInboxSearch] = useState('');
   const [inboxStatusFilter, setInboxStatusFilter] = useState('All Status');
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+  const [testimonialsSearch, setTestimonialsSearch] = useState('');
 
   const filteredMessages = messages.filter(m => {
     const matchesSearch = 
@@ -1711,33 +1875,119 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'testimonials' && (
-          <div className="space-y-6">
-             <h2 className="font-serif text-2xl">Testimonials</h2>
-             <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
-                   <h3 className="font-serif text-xl mb-4">Add New</h3>
-                   <TestimonialForm onSave={saveTestimonial} />
+          <div className="space-y-12 max-w-[1400px] mx-auto pb-24">
+            {/* Header Area */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              <div className="flex-1 max-w-2xl">
+                <div className="relative group mb-6">
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#eb4899] transition-colors" size={20} />
+                  <input 
+                    type="text" 
+                    placeholder="Search testimonials..." 
+                    className="w-full pl-16 pr-8 py-5 bg-white border-none rounded-[2rem] text-sm font-bold shadow-xl shadow-gray-100/50 focus:ring-2 focus:ring-pink-100 transition-all placeholder:text-gray-300"
+                    value={testimonialsSearch}
+                    onChange={(e) => setTestimonialsSearch(e.target.value)}
+                  />
                 </div>
-                <div className="lg:col-span-2">
-                   <h3 className="font-serif text-xl mb-4">Existing Testimonials ({testimonials.length})</h3>
-                   <div className="grid sm:grid-cols-2 gap-4">
-                      {testimonials.map(t => (
-                        <div key={t._id} className="bg-white border p-4 rounded shadow-sm flex gap-4">
-                          {t.image && <img src={t.image} className="w-16 h-16 rounded-full object-cover border shrink-0" />}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex justify-between">
-                              <p className="font-bold truncate">{t.name}</p>
-                              <button onClick={() => deleteTestimonial(t._id)} className="text-red-500 text-[10px] uppercase font-bold ml-2">Delete</button>
+                <h1 className="text-[3.5rem] font-black tracking-tighter text-gray-900 leading-[0.9] mb-4">
+                  Manage Testimonials<span className="text-[#eb4899]">.</span>
+                </h1>
+                <p className="text-lg font-bold text-gray-400 uppercase tracking-widest leading-relaxed max-w-xl">
+                  Curate and publish high-impact customer feedback to your storefront.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button className="px-8 py-5 bg-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] text-gray-900 shadow-xl shadow-gray-100/50 hover:bg-gray-50 transition-all flex items-center gap-3">
+                  <Download size={16} className="text-[#eb4899]" />
+                  Export CSV
+                </button>
+                <button className="px-10 py-5 bg-[#be185d] text-white rounded-[2rem] text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-pink-900/20 hover:bg-black transition-all">
+                  Batch Actions
+                </button>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr,420px] gap-12 items-start">
+              <div className="space-y-8">
+                {testimonials
+                  .filter(t => t.customerName.toLowerCase().includes(testimonialsSearch.toLowerCase()) || t.content.toLowerCase().includes(testimonialsSearch.toLowerCase()))
+                  .map((t) => (
+                    <div key={t._id} className="bg-white rounded-[3rem] p-10 shadow-xl shadow-gray-100/50 border border-gray-50/50 group hover:shadow-2xl hover:shadow-pink-100/20 transition-all duration-500">
+                      <div className="flex gap-8 items-start mb-8">
+                        <div className="w-24 h-24 rounded-full overflow-hidden shadow-lg shadow-gray-200 ring-4 ring-gray-50 group-hover:ring-pink-50 transition-all flex-shrink-0 bg-gray-50">
+                          <img src={t.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.customerName)}&background=fdf2f8&color=eb4899&bold=true`} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <div className="flex-1 pt-2">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h4 className="text-2xl font-black text-gray-900 tracking-tight mb-1">{t.customerName}</h4>
+                              <p className="text-[10px] font-black text-[#eb4899] uppercase tracking-[0.2em]">
+                                {t.tag} {t.product && <span className="text-gray-300 mx-1">•</span>} {t.product}
+                              </p>
                             </div>
-                            <p className="text-xs text-gray-400 mb-2">{t.role}</p>
-                            <p className="text-sm italic text-gray-600 line-clamp-3">"{t.content}"</p>
-                            <div className="text-hot-pink text-xs mt-2">{'★'.repeat(t.rating)}</div>
+                            <div className="flex gap-1 bg-pink-50/50 px-3 py-1.5 rounded-full">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} size={14} className={`${i < t.rating ? 'text-[#eb4899] fill-[#eb4899]' : 'text-gray-200'}`} />
+                              ))}
+                            </div>
+                          </div>
+                          <blockquote className="text-xl font-medium text-gray-600 leading-relaxed italic mt-4">
+                            "{t.content}"
+                          </blockquote>
+                        </div>
+                      </div>
+
+                      <div className="pt-8 border-t border-gray-50 flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Visible on Storefront</span>
+                            <button 
+                              onClick={() => toggleTestimonialStatus(t._id, t.status)}
+                              className={`w-12 h-6 rounded-full transition-all relative ${t.status === 'visible' ? 'bg-[#eb4899]' : 'bg-gray-200'}`}
+                            >
+                              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${t.status === 'visible' ? 'left-7' : 'left-1'}`} />
+                            </button>
                           </div>
                         </div>
-                      ))}
-                   </div>
-                </div>
-             </div>
+                        <div className="flex gap-4">
+                          <button 
+                            onClick={() => setTestimonialEditing(t)}
+                            className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-400 hover:bg-pink-50 hover:text-[#eb4899] transition-all flex items-center justify-center group/btn"
+                          >
+                            <Edit size={20} className="group-hover/btn:scale-110 transition-transform" />
+                          </button>
+                          <button 
+                            onClick={() => deleteTestimonial(t._id)}
+                            className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center group/btn"
+                          >
+                            <Trash2 size={20} className="group-hover/btn:scale-110 transition-transform" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                {testimonials.length === 0 && (
+                  <div className="py-32 flex flex-col items-center justify-center text-center bg-gray-50/50 rounded-[3rem] border-2 border-dashed border-gray-100">
+                    <div className="w-20 h-20 bg-white rounded-3xl shadow-xl shadow-gray-100 flex items-center justify-center text-[#eb4899] mb-6">
+                      <MessageSquare size={32} />
+                    </div>
+                    <h3 className="text-2xl font-black text-gray-900 mb-2">No testimonials found</h3>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Start by adding some feedback from your happy customers.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="sticky top-28">
+                <TestimonialForm 
+                  products={catalog} 
+                  initial={testimonialEditing} 
+                  onSave={saveTestimonial}
+                  onCancel={() => setTestimonialEditing(undefined)}
+                />
+              </div>
+            </div>
           </div>
         )}
 

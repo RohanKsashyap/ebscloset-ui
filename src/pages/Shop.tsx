@@ -1,14 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { loadSite, type SiteSettings, loadProducts } from '../utils/storage';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { productService } from '../services/productService';
+import { productService, type Category } from '../services/productService';
 import { useProductContext } from '../context/ProductContext';
 import { Heart, SlidersHorizontal, X } from 'lucide-react';
 import { formatAUD } from '../utils/storage';
 import { products as defaultProducts } from '../data/products';
 import { getOptimizedUrl } from '../utils/imageKit';
-
-const ageFilters = ['All','7-9','8-10','9-11','10-12','11-13'];
 
 export default function Shop() {
   const [age, setAge] = useState<string>('All');
@@ -21,6 +19,7 @@ export default function Shop() {
   const [q, setQ] = useState('');
   const [hoverId, setHoverId] = useState<number | string | null>(null);
   const [products, setProducts] = useState<Array<any>>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
@@ -34,6 +33,11 @@ export default function Shop() {
     else sp.set(key, value);
     navigate({ search: sp.toString() }, { replace: true });
   };
+
+  useEffect(() => {
+    // Fetch categories
+    productService.getCategories().then(setCategories);
+  }, []);
 
   useEffect(() => {
     const sp = new URLSearchParams(location.search);
@@ -53,17 +57,17 @@ export default function Shop() {
       }
     }
     const qParam = sp.get('q');
-    if (qParam) setQ(qParam);
+    setQ(qParam || '');
     const tParam = sp.get('type');
-    if (tParam) setType(tParam);
+    setType(tParam || 'All');
     const ageParam = sp.get('age');
-    if (ageParam) setAge(ageParam);
+    setAge(ageParam || 'All');
     const occParam = sp.get('occasion');
-    if (occParam) setOccasion(occParam);
+    setOccasion(occParam || 'All');
     const colorParam = sp.get('color');
-    if (colorParam) setColor(colorParam);
+    setColor(colorParam || 'All');
     const sizeParam = sp.get('size');
-    if (sizeParam) setSize(sizeParam);
+    setSize(sizeParam || 'All');
   }, [location.search]);
 
   useEffect(() => {
@@ -93,7 +97,12 @@ export default function Shop() {
       if (priceVal < minPrice || priceVal > maxPrice) return false;
       if (age !== 'All' && !(p.category ?? '').includes(age)) return false;
       if (color !== 'All' && (p.color ?? '').toLowerCase() !== color.toLowerCase()) return false;
-      if (type !== 'All' && (p.type ?? '').toLowerCase() !== type.toLowerCase()) return false;
+      
+      if (type !== 'All') {
+        const catName = p.categoryId?.name || p.category || '';
+        if (catName.toLowerCase() !== type.toLowerCase()) return false;
+      }
+
       if (occasion !== 'All' && (p.occasion ?? '').toLowerCase() !== occasion.toLowerCase()) return false;
       if (size !== 'All' && !(p.sizes ?? []).includes(size)) return false;
       if (q) {
@@ -192,20 +201,35 @@ export default function Shop() {
               <div>
                 <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Categories</h3>
                 <div className="space-y-3">
-                  {['All', 'Party', 'Western', 'Ethnic', 'Casual', 'Winter'].map((t) => (
-                    <label key={t} className="flex items-center group cursor-pointer">
+                  <label key="All" className="flex items-center group cursor-pointer">
+                    <div className="relative flex items-center justify-center">
+                      <input 
+                        type="radio" 
+                        name="type" 
+                        checked={type === 'All'} 
+                        onChange={() => updateParams('type', 'All')}
+                        className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-full checked:border-hot-pink transition-all"
+                      />
+                      <div className="absolute w-2.5 h-2.5 rounded-full bg-hot-pink scale-0 peer-checked:scale-100 transition-transform" />
+                    </div>
+                    <span className={`ml-3 text-sm transition-colors ${type === 'All' ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
+                      All
+                    </span>
+                  </label>
+                  {categories.map((cat) => (
+                    <label key={cat._id} className="flex items-center group cursor-pointer">
                       <div className="relative flex items-center justify-center">
                         <input 
                           type="radio" 
                           name="type" 
-                          checked={type === t} 
-                          onChange={() => updateParams('type', t)}
+                          checked={type === cat.name} 
+                          onChange={() => updateParams('type', cat.name)}
                           className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-full checked:border-hot-pink transition-all"
                         />
                         <div className="absolute w-2.5 h-2.5 rounded-full bg-hot-pink scale-0 peer-checked:scale-100 transition-transform" />
                       </div>
-                      <span className={`ml-3 text-sm transition-colors ${type === t ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
-                        {t}
+                      <span className={`ml-3 text-sm transition-colors ${type === cat.name ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
+                        {cat.name}
                       </span>
                     </label>
                   ))}
@@ -289,7 +313,7 @@ export default function Shop() {
                 </button>
                 <button 
                   onClick={() => {
-                    setAge('All'); setColor('All'); setType('All'); setOccasion('All'); setSize('All'); setMinPrice(0); setMaxPrice(3000); setQ('');
+                    setAge('All'); setColor('All'); setType('All'); setOccasion('All'); setSize('All'); setMinPrice(0); setMaxPrice(100000); setQ('');
                     navigate('/shop');
                     setIsFilterDrawerOpen(false);
                   }}
