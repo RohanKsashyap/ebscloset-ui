@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star } from 'lucide-react';
+import { Star, X, Plus } from 'lucide-react';
 
 export interface Review {
   name: string;
@@ -22,6 +22,7 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
   const [orderId, setOrderId] = useState('');
   const [contact, setContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     setReviews(initialReviews || []);
@@ -56,6 +57,7 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
       setComment('');
       setOrderId('');
       setContact('');
+      setIsOpen(false);
     } catch (err) {
       console.error('Review submission failed:', err);
     } finally {
@@ -89,21 +91,40 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
         ))}
       </ul>
 
-      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
-        <h3 className="font-serif text-xl mb-4 text-gray-800">Write a Review</h3>
-        <p className="text-xs text-gray-500 mb-6 uppercase tracking-widest">Only verified buyers can review products</p>
-        
-        <form onSubmit={submit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Your Name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="e.g. Julianne Smith" required />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Rating</label>
-              <div className="flex items-center gap-2 h-[44px]">
-                {[...Array(5)].map((_, i) => (
-                  <button
+      {!isOpen ? (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="flex items-center gap-3 bg-white border border-gray-200 px-6 py-4 rounded-2xl text-sm font-bold text-gray-800 hover:border-hot-pink hover:text-hot-pink transition-all group"
+        >
+          <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center group-hover:bg-hot-pink/10">
+            <Plus className="w-4 h-4" />
+          </div>
+          Write a Review
+        </button>
+      ) : (
+        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 relative animate-in fade-in slide-in-from-top-4 duration-500">
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="absolute top-6 right-6 p-2 text-gray-400 hover:text-hot-pink hover:bg-white rounded-lg transition-all"
+          >
+            <X size={20} />
+          </button>
+          <div className="mb-6">
+            <h3 className="font-serif text-xl mb-1 text-gray-800">Write a Review</h3>
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Only verified buyers can review products</p>
+          </div>
+          
+          <form onSubmit={submit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Your Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="e.g. Julianne Smith" required />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Rating</label>
+                <div className="flex items-center gap-2 h-[44px]">
+                  {[...Array(5)].map((_, i) => (
+                    <button
                     type="button"
                     key={i}
                     onMouseEnter={() => setHover(i + 1)}
@@ -111,37 +132,45 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
                     onClick={() => setRating(i + 1)}
                     className="transition-transform hover:scale-110"
                   >
-                    <Star className={`w-6 h-6 ${i < (hover ?? rating) ? 'text-hot-pink' : 'text-gray-200'}`} fill={i < (hover ?? rating) ? 'currentColor' : 'none'} />
+                    <Star
+                      className={`w-6 h-6 ${
+                        i < (hover ?? rating)
+                          ? 'text-hot-pink fill-hot-pink'
+                          : 'text-gray-200'
+                      }`}
+                      fill={i < (hover ?? rating) ? 'currentColor' : 'none'}
+                    />
                   </button>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Order ID</label>
-              <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Paste your Order ID" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Order ID</label>
+                <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Paste your Order ID" required />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Email or Phone</label>
+                <input value={contact} onChange={(e) => setContact(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Used during checkout" required />
+              </div>
             </div>
+
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Email or Phone</label>
-              <input value={contact} onChange={(e) => setContact(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Used during checkout" required />
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Review Narrative</label>
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm h-32 resize-none focus:ring-2 focus:ring-hot-pink/20" placeholder="Describe your experience with this product..." required />
             </div>
-          </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Review Narrative</label>
-            <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm h-32 resize-none focus:ring-2 focus:ring-hot-pink/20" placeholder="Describe your experience with this product..." required />
-          </div>
-
-          <button 
-            disabled={isSubmitting}
-            className="w-full bg-hot-pink text-white py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-black transition-all duration-500 disabled:opacity-50 shadow-lg shadow-hot-pink/20"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Review'}
-          </button>
-        </form>
-      </div>
+            <button 
+              disabled={isSubmitting}
+              className="w-full bg-hot-pink text-white py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-black transition-all duration-500 disabled:opacity-50 shadow-lg shadow-hot-pink/20"
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit Review'}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
