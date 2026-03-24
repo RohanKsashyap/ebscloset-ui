@@ -181,6 +181,7 @@ export default function Navigation() {
               {expanded && (
                 <div ref={panelRef} className="lg:flex items-stretch w-64 relative ">
                   <input 
+                    autoFocus
                     value={q} 
                     onChange={(e) => setQ(e.target.value)} 
                     placeholder="Search..." 
@@ -188,9 +189,46 @@ export default function Navigation() {
                       shouldShowSolid ? 'bg-gray-100 border-transparent' : 'bg-white/20 border-white/30 text-white placeholder-white/70'
                     }`} 
                   />
-                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-hot-pink" onClick={() => navigate(`/shop?q=${encodeURIComponent(q)}`)}>
+                  <button className="absolute right-3 top-1/2 -translate-y-1/2 text-hot-pink" onClick={() => {
+                    navigate(`/shop?q=${encodeURIComponent(q)}`);
+                    setExpanded(false);
+                  }}>
                     <Search className="w-4 h-4" />
                   </button>
+
+                  {/* Results Dropdown */}
+                  {results.length > 0 && (
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-100 animate-fadeIn z-[60]">
+                      <div className="py-2">
+                        {results.map((product: any) => (
+                          <button
+                            key={product._id || product.id}
+                            className="w-full flex items-center px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0"
+                            onClick={() => {
+                              navigate(`/product/${product._id || product.id}`);
+                              setExpanded(false);
+                              setQ('');
+                            }}
+                          >
+                            <img src={product.image} alt={product.name} className="w-12 h-12 object-cover rounded" />
+                            <div className="ml-3 overflow-hidden">
+                              <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                              <p className="text-xs text-gray-500">${product.price}</p>
+                            </div>
+                          </button>
+                        ))}
+                        <button
+                          className="w-full py-2 text-center text-xs font-semibold text-hot-pink hover:bg-hot-pink/5 transition-colors"
+                          onClick={() => {
+                            navigate(`/shop?q=${encodeURIComponent(q)}`);
+                            setExpanded(false);
+                          }}
+                        >
+                          View All Results
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

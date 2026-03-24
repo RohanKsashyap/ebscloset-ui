@@ -26,7 +26,10 @@ export default function ProductDetail() {
   const { addItem } = useCart();
   const { showToast } = useToast();
   const { toggleWishlist, isWishlisted } = useProductContext();
-  const avgRating = product ? ((product.reviews ?? []).reduce((s: number, r: { rating: number }) => s + r.rating, 0) / ((product.reviews ?? []).length || 1)) : 0;
+  const reviewsCount = product?.reviews?.length || 0;
+  const avgRating = reviewsCount > 0 
+    ? (product.reviews ?? []).reduce((s: number, r: { rating: number }) => s + r.rating, 0) / reviewsCount
+    : 0;
 
   useEffect(() => {
     setLoading(true);
@@ -87,17 +90,8 @@ export default function ProductDetail() {
 
   const handleReviewSubmit = async (name: string, rating: number, comment: string) => {
     try {
-      const updatedProduct = await productService.addReview(product._id || product.id, name, rating, comment);
-      if (updatedProduct) {
-        const normalized = {
-          ...updatedProduct,
-          name: updatedProduct.name || (updatedProduct as any).title,
-          images: (updatedProduct.images && updatedProduct.images.length > 0) ? updatedProduct.images : (updatedProduct.image ? [updatedProduct.image] : []),
-          image: updatedProduct.image || (updatedProduct.images && updatedProduct.images[0] ? updatedProduct.images[0] : '')
-        };
-        setProduct(normalized);
-        showToast('Review submitted successfully!');
-      }
+      await productService.addReview(product._id || product.id, name, rating, comment);
+      showToast('Review submitted for approval!');
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Failed to submit review', 'error');
       throw err;
@@ -158,7 +152,7 @@ export default function ProductDetail() {
                   <Star key={i} className={`w-5 h-5 ${i < Math.round(avgRating) ? 'text-hot-pink' : 'text-gray-300'}`} fill={i < Math.round(avgRating) ? 'currentColor' : 'none'} />
                 ))}
               </div>
-              <span className="text-sm text-gray-600">{(product.reviews ?? []).length} reviews</span>
+              <span className="text-sm text-gray-600">{reviewsCount} reviews</span>
             </div>
 
             <p className="text-gray-700 leading-relaxed mb-8">{product.description}</p>

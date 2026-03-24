@@ -30,6 +30,7 @@ import {
   Sparkles,
   Edit,
   Trash2,
+  X,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -904,6 +905,16 @@ export default function AdminDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminName, setAdminName] = useState('Administrator');
 
+  const [newReview, setNewReview] = useState({
+    productId: '',
+    customerName: '',
+    rating: 5,
+    comment: '',
+    headline: ''
+  });
+  const [reviewImages, setReviewImages] = useState<File[]>([]);
+  const [reviewVideo, setReviewVideo] = useState<File | null>(null);
+
   useEffect(() => {
     const adminStr = localStorage.getItem('admin');
     if (adminStr) {
@@ -1073,15 +1084,53 @@ export default function AdminDashboard() {
     try {
       await adminService.updateReview(id, { status });
       setReviews(await adminService.getReviews());
-    } catch { alert('Error'); }
+      showToast(`Review ${status} successfully`);
+    } catch { showToast('Error updating review', 'error'); }
   };
 
   const deleteReview = async (id: string) => {
-    if (!window.confirm('Delete review?')) return;
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
     try {
       await adminService.deleteReview(id);
+      showToast('Review deleted successfully');
       setReviews(await adminService.getReviews());
-    } catch { alert('Error'); }
+    } catch { showToast('Error deleting review', 'error'); }
+  };
+
+  const handleCreateReview = async () => {
+    if (!newReview.productId || !newReview.customerName || !newReview.comment) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    try {
+      const fd = new FormData();
+      fd.append('productId', newReview.productId);
+      fd.append('customerName', newReview.customerName);
+      fd.append('rating', String(newReview.rating));
+      fd.append('reviewText', newReview.comment);
+      fd.append('headline', newReview.headline);
+      
+      reviewImages.forEach(img => fd.append('images', img));
+      if (reviewVideo) fd.append('video', reviewVideo);
+
+      await adminService.createReview(fd);
+      showToast('Review created successfully');
+      setReviews(await adminService.getReviews());
+      
+      setNewReview({
+        productId: '',
+        customerName: '',
+        rating: 5,
+        comment: '',
+        headline: ''
+      });
+      setReviewImages([]);
+      setReviewVideo(null);
+    } catch (err) {
+      console.error('Create review error:', err);
+      showToast('Error creating review', 'error');
+    }
   };
 
   const deleteTestimonial = async (id: string) => {
@@ -1835,42 +1884,238 @@ export default function AdminDashboard() {
         )}
 
         {tab === 'reviews' && (
-          <div className="space-y-4">
-            <h2 className="font-serif text-2xl mb-4">Product Reviews ({reviews.length})</h2>
-            <div className="bg-white border rounded-2xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm whitespace-nowrap">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="px-6 py-4 font-serif">Product</th>
-                      <th className="px-6 py-4 font-serif">User</th>
-                      <th className="px-6 py-4 font-serif">Rating</th>
-                      <th className="px-6 py-4 font-serif">Comment</th>
-                      <th className="px-6 py-4 font-serif">Status</th>
-                      <th className="px-6 py-4 font-serif">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reviews.map((r) => (
-                      <tr key={r._id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 font-bold">{r.product?.name || 'N/A'}</td>
-                        <td className="px-6 py-4">{r.user?.name || 'Anonymous'}</td>
-                        <td className="px-6 py-4 text-hot-pink font-bold">{'★'.repeat(r.rating)}</td>
-                        <td className="px-6 py-4 max-w-xs truncate">{r.comment}</td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold ${r.status === 'approved' ? 'bg-green-100 text-green-700' : r.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                            {r.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 space-x-3">
-                          {r.status !== 'approved' && <button onClick={() => updateReviewStatus(r._id, 'approved')} className="text-green-600 hover:underline text-xs font-bold uppercase">Approve</button>}
-                          {r.status !== 'rejected' && <button onClick={() => updateReviewStatus(r._id, 'rejected')} className="text-orange-600 hover:underline text-xs font-bold uppercase">Reject</button>}
-                          <button onClick={() => deleteReview(r._id)} className="text-red-600 hover:underline text-xs font-bold uppercase">Delete</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div className="max-w-[1400px] mx-auto space-y-10 pb-20">
+            {/* Top Search Bar */}
+            <div className="flex justify-between items-center bg-white/50 backdrop-blur-md px-6 py-4 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/20">
+              <div className="relative flex-1 max-w-xl">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Search orders, reviews, or customers..." 
+                  className="w-full pl-12 pr-4 py-3 bg-gray-100/50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-pink-100 transition-all placeholder:text-gray-400 font-medium"
+                />
+              </div>
+              <div className="flex items-center gap-6 ml-8">
+                <button className="relative p-2 text-gray-400 hover:text-gray-900 transition-all">
+                  <Bell size={22} />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+                <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white shadow-sm ring-1 ring-gray-100">
+                  <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(adminName)}&background=fdf2f8&color=eb4899&bold=true`} alt="Admin" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr,420px] gap-12 items-start">
+              <div className="space-y-10">
+                <div className="flex flex-col gap-2">
+                  <h1 className="text-[3.5rem] font-black tracking-tighter text-gray-900 leading-none">
+                    Manage Reviews<span className="text-[#eb4899]">.</span>
+                  </h1>
+                  <p className="text-lg font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+                    Moderate and publish customer stories.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  {reviews.map((r) => (
+                    <div key={r._id} className="bg-white rounded-[3rem] p-8 shadow-xl shadow-gray-100/50 border border-gray-50/50 group hover:shadow-2xl hover:shadow-pink-100/10 transition-all duration-500">
+                      <div className="flex gap-8 items-start">
+                        {/* Left Side: Avatar & Product Info */}
+                        <div className="flex flex-col items-center gap-6 w-32 flex-shrink-0">
+                          <div className="w-20 h-20 rounded-full overflow-hidden shadow-lg shadow-gray-200 ring-4 ring-gray-50 group-hover:ring-pink-50 transition-all bg-gray-50">
+                            <img src={r.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(r.customerName || 'Anonymous')}&background=fdf2f8&color=eb4899&bold=true`} className="w-full h-full object-cover" alt="" />
+                          </div>
+                          <div className="text-center">
+                            <h4 className="text-sm font-black text-gray-900 truncate w-full px-2">{r.customerName || 'Anonymous'}</h4>
+                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Verified Buyer</p>
+                          </div>
+                          
+                          {r.product && (
+                            <div className="w-full bg-gray-50 rounded-2xl p-3 space-y-3 mt-2">
+                              <img src={r.product.image} className="w-full h-20 object-cover rounded-xl" alt="" />
+                              <div className="text-center">
+                                <p className="text-[10px] font-black text-gray-900 truncate leading-tight">{r.product.name}</p>
+                                <p className="text-[8px] font-bold text-gray-400 uppercase mt-1">Ref: #{r.product.sku || r._id.slice(-4)}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Center: Review Content */}
+                        <div className="flex-1 pt-2">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex gap-1 bg-pink-50/50 px-3 py-1.5 rounded-full">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} size={14} className={`${i < r.rating ? 'text-[#eb4899] fill-[#eb4899]' : 'text-gray-200'}`} />
+                              ))}
+                              <span className="text-[11px] font-black text-[#eb4899] ml-1">{r.rating.toFixed(1)}</span>
+                            </div>
+                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                              r.status === 'approved' ? 'bg-green-100 text-green-600' : 
+                              r.status === 'rejected' ? 'bg-gray-100 text-gray-500' : 'bg-pink-100 text-pink-500'
+                            }`}>
+                              {r.status || 'Pending'}
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-black text-gray-900 tracking-tight mb-4">
+                            {r.headline || (r.comment ? r.comment.split('.')[0] + '.' : 'No headline')}
+                          </h3>
+                          <p className="text-base font-medium text-gray-500 leading-relaxed italic">
+                            "{r.comment}"
+                          </p>
+
+                          {/* Media */}
+                          {(r.images?.length > 0 || r.video) && (
+                            <div className="flex flex-wrap gap-3 mt-8">
+                              {r.images?.map((img, idx) => (
+                                <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden ring-4 ring-gray-50 cursor-pointer hover:scale-105 transition-transform">
+                                  <img src={img} className="w-full h-full object-cover" alt="" onClick={() => window.open(img, '_blank')} />
+                                </div>
+                              ))}
+                              {r.video && (
+                                <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-200 transition-all group/play" onClick={() => window.open(r.video, '_blank')}>
+                                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-lg group-hover/play:scale-110 transition-transform">
+                                    <ChevronRight size={16} className="text-gray-900 ml-0.5 fill-gray-900" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Right: Quick Actions */}
+                        <div className="flex flex-col gap-2 pt-2">
+                          <button 
+                            onClick={() => updateReviewStatus(r._id, 'approved')}
+                            className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:bg-green-50 hover:text-green-500 transition-all flex items-center justify-center shadow-sm"
+                            title="Approve"
+                          >
+                            <Sparkles size={18} />
+                          </button>
+                          <button 
+                            onClick={() => updateReviewStatus(r._id, 'rejected')}
+                            className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:bg-gray-200 hover:text-gray-900 transition-all flex items-center justify-center shadow-sm"
+                            title="Reject"
+                          >
+                            <X size={18} />
+                          </button>
+                          <button 
+                            onClick={() => deleteReview(r._id)}
+                            className="w-10 h-10 rounded-full bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center shadow-sm"
+                            title="Delete"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Create New Review Side Panel */}
+              <div className="sticky top-24 bg-white rounded-[3rem] p-10 shadow-2xl shadow-gray-100 border border-gray-50/50">
+                <div className="mb-10">
+                  <h2 className="text-3xl font-black text-gray-900 tracking-tighter mb-2">Create New Review</h2>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">
+                    Generate manual reviews for PR or press.
+                  </p>
+                </div>
+
+                <div className="space-y-8">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Product Catalog</label>
+                    <select 
+                      value={newReview.productId}
+                      onChange={(e) => setNewReview({...newReview, productId: e.target.value})}
+                      className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-pink-100 transition-all appearance-none"
+                    >
+                      <option value="">Select a product...</option>
+                      {catalog.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Customer Identity</label>
+                    <input 
+                      value={newReview.customerName}
+                      onChange={(e) => setNewReview({...newReview, customerName: e.target.value})}
+                      className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-bold placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 transition-all" 
+                      placeholder="Full Name or Alias" 
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Experience Rating</label>
+                    <div className="flex gap-2 px-1">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star 
+                          key={n} 
+                          size={22} 
+                          className={`${n <= newReview.rating ? 'text-[#eb4899] fill-[#eb4899]' : 'text-gray-200'} cursor-pointer hover:scale-110 transition-transform`} 
+                          onClick={() => setNewReview({...newReview, rating: n})}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] ml-1">Review Narrative</label>
+                    <textarea 
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                      className="w-full bg-gray-50 border-none rounded-3xl px-6 py-5 text-sm font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 transition-all h-40 resize-none leading-relaxed" 
+                      placeholder="Write the customer's story here..." 
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 text-center">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Images ({reviewImages.length})</label>
+                      <label className="h-24 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-pink-200 transition-colors bg-gray-50/50">
+                        <ImageIcon className={reviewImages.length > 0 ? "text-[#eb4899]" : "text-gray-300"} size={20} />
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Add Gallery</span>
+                        <input 
+                          type="file" 
+                          multiple 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              setReviewImages(Array.from(e.target.files));
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <div className="space-y-2 text-center">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Videos {reviewVideo ? '(1)' : '(0)'}</label>
+                      <label className="h-24 border-2 border-dashed border-gray-100 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-pink-200 transition-colors bg-gray-50/50">
+                        <Camera className={reviewVideo ? "text-[#eb4899]" : "text-gray-300"} size={20} />
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">Add Video</span>
+                        <input 
+                          type="file" 
+                          accept="video/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              setReviewVideo(e.target.files[0]);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleCreateReview}
+                    className="w-full py-6 bg-[#be185d] text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-pink-900/20 hover:bg-black transition-all mt-4"
+                  >
+                    Publish Review
+                  </button>
+                </div>
               </div>
             </div>
           </div>

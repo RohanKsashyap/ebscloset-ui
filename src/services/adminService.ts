@@ -22,11 +22,16 @@ export interface ContactMessage {
 
 export interface Review {
   _id: string;
-  user: any;
-  product: any;
+  user?: any;
+  productId: any;
+  product?: any;
+  customerName: string;
   rating: number;
   comment: string;
+  headline?: string;
   status: 'pending' | 'approved' | 'rejected';
+  images?: string[];
+  video?: string;
   createdAt: string;
 }
 
@@ -171,6 +176,13 @@ export const adminService = {
 
   updateReview: async (id: string, data: any): Promise<Review> => {
     const response = await apiClient.put(`/reviews/admin/${id}`, data);
+    return response.data;
+  },
+
+  createReview: async (data: any): Promise<Review> => {
+    const response = await apiClient.post('/reviews/admin/add', data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
 
