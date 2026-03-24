@@ -10,7 +10,7 @@ export interface Review {
 
 interface ReviewsProps {
   initialReviews: Review[];
-  onSubmit?: (name: string, rating: number, comment: string) => Promise<void>;
+  onSubmit?: (name: string, rating: number, comment: string, orderId: string, contact: string) => Promise<void>;
 }
 
 export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
@@ -19,6 +19,8 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState<number | null>(null);
   const [comment, setComment] = useState('');
+  const [orderId, setOrderId] = useState('');
+  const [contact, setContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -33,13 +35,15 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
     setIsSubmitting(true);
     try {
       if (onSubmit) {
-        await onSubmit(name, rating, comment);
+        await onSubmit(name, rating, comment, orderId, contact);
       } else {
         setReviews([{ name, rating, comment, date: new Date().toISOString().slice(0, 10) }, ...reviews]);
       }
       setName('');
       setRating(5);
       setComment('');
+      setOrderId('');
+      setContact('');
     } catch (err) {
       console.error('Review submission failed:', err);
     } finally {
@@ -60,40 +64,72 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
 
       <ul className="space-y-4 mb-8">
         {reviews.map((r, idx) => (
-          <li key={idx} className="border p-4">
+          <li key={idx} className="border p-4 rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className={`w-4 h-4 ${i < r.rating ? 'text-hot-pink' : 'text-gray-300'}`} fill={i < r.rating ? 'currentColor' : 'none'} />
               ))}
-              <span className="text-sm text-gray-700">{r.name}</span>
-              {r.date && <span className="ml-auto text-xs text-gray-500">{r.date}</span>}
+              <span className="text-sm font-bold text-gray-800">{r.name}</span>
+              {r.date && <span className="ml-auto text-xs text-gray-400">{r.date}</span>}
             </div>
-            <p className="text-gray-800">{r.comment}</p>
+            <p className="text-gray-600 text-sm leading-relaxed">{r.comment}</p>
           </li>
         ))}
       </ul>
 
-      <form onSubmit={submit} className="space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-          <input value={name} onChange={(e) => setName(e.target.value)} className="border px-3 py-2" placeholder="Your name" required />
-          <div className="flex items-center gap-2">
-            {[...Array(5)].map((_, i) => (
-              <button
-                type="button"
-                key={i}
-                onMouseEnter={() => setHover(i + 1)}
-                onMouseLeave={() => setHover(null)}
-                onClick={() => setRating(i + 1)}
-                aria-label={`${i + 1} stars`}
-              >
-                <Star className={`w-6 h-6 ${i < (hover ?? rating) ? 'text-hot-pink' : 'text-gray-300'}`} fill={i < (hover ?? rating) ? 'currentColor' : 'none'} />
-              </button>
-            ))}
+      <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+        <h3 className="font-serif text-xl mb-4 text-gray-800">Write a Review</h3>
+        <p className="text-xs text-gray-500 mb-6 uppercase tracking-widest">Only verified buyers can review products</p>
+        
+        <form onSubmit={submit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Your Name</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="e.g. Julianne Smith" required />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Rating</label>
+              <div className="flex items-center gap-2 h-[44px]">
+                {[...Array(5)].map((_, i) => (
+                  <button
+                    type="button"
+                    key={i}
+                    onMouseEnter={() => setHover(i + 1)}
+                    onMouseLeave={() => setHover(null)}
+                    onClick={() => setRating(i + 1)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star className={`w-6 h-6 ${i < (hover ?? rating) ? 'text-hot-pink' : 'text-gray-200'}`} fill={i < (hover ?? rating) ? 'currentColor' : 'none'} />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <button className="border-2 border-hot-pink text-hot-pink px-6 py-2 text-xs tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300">Submit Review</button>
-        </div>
-        <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="border px-3 py-2 w-full h-24" placeholder="Your review" required />
-      </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Order ID</label>
+              <input value={orderId} onChange={(e) => setOrderId(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Paste your Order ID" required />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Email or Phone</label>
+              <input value={contact} onChange={(e) => setContact(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-hot-pink/20" placeholder="Used during checkout" required />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Review Narrative</label>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full border-none bg-white rounded-xl px-4 py-3 text-sm h-32 resize-none focus:ring-2 focus:ring-hot-pink/20" placeholder="Describe your experience with this product..." required />
+          </div>
+
+          <button 
+            disabled={isSubmitting}
+            className="w-full bg-hot-pink text-white py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-black transition-all duration-500 disabled:opacity-50 shadow-lg shadow-hot-pink/20"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Review'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

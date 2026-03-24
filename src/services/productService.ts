@@ -93,13 +93,17 @@ getBestSellerProducts: async (): Promise<Product[]> => {
     productId: string,
     name: string,
     rating: number,
-    comment: string
+    comment: string,
+    orderId: string,
+    contact: string
   ): Promise<Product> => {
     if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
     const response = await apiClient.post(`/products/${productId}/reviews`, {
       name,
       rating,
       comment,
+      orderId,
+      contact
     });
     return response.data.product;
   },
