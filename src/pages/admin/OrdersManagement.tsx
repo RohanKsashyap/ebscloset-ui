@@ -16,9 +16,10 @@ interface OrdersManagementProps {
   onUpdateStatus: (id: string, status: string) => void;
   onDeleteOrder: (id: string) => void;
   onBulkDeleteOrders: (ids: string[]) => void;
+  onViewDetails: (order: any) => void;
 }
 
-export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder, onBulkDeleteOrders }: OrdersManagementProps) {
+export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder, onBulkDeleteOrders, onViewDetails }: OrdersManagementProps) {
   const [activeTab, setActiveTab] = useState('All Orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
@@ -226,7 +227,10 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
                     </td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex items-center justify-end gap-2" onClick={e => e.stopPropagation()}>
-                        <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow">
+                        <button 
+                          onClick={() => onViewDetails(order)}
+                          className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow"
+                        >
                           <Eye size={18} />
                         </button>
                         <button 

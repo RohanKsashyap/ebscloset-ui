@@ -32,12 +32,24 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    // Basic client-side validation
+    const trimmedOrderId = orderId.trim();
+    const trimmedContact = contact.trim();
+    const trimmedName = name.trim();
+    const trimmedComment = comment.trim();
+
+    if (!trimmedName) return;
+    if (!trimmedOrderId) return;
+    if (!trimmedContact) return;
+    if (!trimmedComment) return;
+
     setIsSubmitting(true);
     try {
       if (onSubmit) {
-        await onSubmit(name, rating, comment, orderId, contact);
+        await onSubmit(trimmedName, rating, trimmedComment, trimmedOrderId, trimmedContact);
       } else {
-        setReviews([{ name, rating, comment, date: new Date().toISOString().slice(0, 10) }, ...reviews]);
+        setReviews([{ name: trimmedName, rating, comment: trimmedComment, date: new Date().toISOString().slice(0, 10) }, ...reviews]);
       }
       setName('');
       setRating(5);

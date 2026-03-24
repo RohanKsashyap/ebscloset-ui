@@ -12,6 +12,7 @@ import SiteSettings from './SiteSettings';
 import { useToast } from '../../context/ToastContext';
 import ProductManagementModal from '../../components/admin/ProductManagementModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
+import OrderDetailsModal from '../../components/admin/OrderDetailsModal';
 import { 
   LayoutGrid, 
   ShoppingBag, 
@@ -42,7 +43,6 @@ import {
   Search,
   GripVertical,
   ExternalLink,
-  Package,
   RefreshCcw,
   ClipboardList,
   DollarSign,
@@ -888,6 +888,8 @@ export default function AdminDashboard() {
   const [categoryEditing, setCategoryEditing] = useState<GalleryCategory | undefined>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isOrderDetailsModalOpen, setIsOrderDetailsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [nav, setNav] = useState<NavCategory[]>([]);
   const [codes, setCodes] = useState<DiscountCode[]>([]);
   const [site, setSite] = useState<SiteSettings | null>(null);
@@ -1634,6 +1636,10 @@ export default function AdminDashboard() {
             onUpdateStatus={updateOrderStatus} 
             onDeleteOrder={deleteOrder}
             onBulkDeleteOrders={bulkDeleteOrders}
+            onViewDetails={(order) => {
+              setSelectedOrder(order);
+              setIsOrderDetailsModalOpen(true);
+            }}
           />
         )}
 
@@ -2293,6 +2299,11 @@ export default function AdminDashboard() {
             onClose={() => { setCategoryEditing(undefined); setIsCategoryModalOpen(false); }}
             onSave={saveCategory}
             initialCategory={categoryEditing}
+          />
+          <OrderDetailsModal
+            isOpen={isOrderDetailsModalOpen}
+            onClose={() => { setSelectedOrder(null); setIsOrderDetailsModalOpen(false); }}
+            order={selectedOrder}
           />
     </div>
   );
