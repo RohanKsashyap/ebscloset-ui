@@ -185,12 +185,16 @@ export const adminService = {
   },
 
   addTestimonial: async (data: any): Promise<Testimonial> => {
-    const response = await apiClient.post('/testimonials/admin/add', data);
+    const response = await apiClient.post('/testimonials/admin/add', data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
 
   updateTestimonial: async (id: string, data: any): Promise<Testimonial> => {
-    const response = await apiClient.put(`/testimonials/admin/${id}`, data);
+    const response = await apiClient.put(`/testimonials/admin/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
 

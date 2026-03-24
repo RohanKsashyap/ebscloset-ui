@@ -34,6 +34,7 @@ export default function ProductManagementModal({
   const [form, setForm] = useState<any>({
     name: '',
     price: '',
+    originalPrice: '',
     description: '',
     categoryId: '',
     inStock: 0,
@@ -86,6 +87,7 @@ export default function ProductManagementModal({
       setForm({
         name: '',
         price: '',
+        originalPrice: '',
         description: '',
         categoryId: '',
         inStock: 0,
@@ -265,6 +267,22 @@ export default function ProductManagementModal({
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Original Price (USD)</label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      type="number" 
+                      placeholder="350.00" 
+                      value={form.originalPrice} 
+                      onChange={(e) => setForm({ ...form, originalPrice: e.target.value === '' ? '' : Number(e.target.value) })} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Category</label>
                   <div className="relative">
                     <LayoutGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -282,9 +300,6 @@ export default function ProductManagementModal({
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Stock Quantity</label>
                   <div className="relative">
@@ -298,7 +313,10 @@ export default function ProductManagementModal({
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2 col-span-2 sm:col-span-1">
                   <label className="text-sm font-bold text-gray-900">Min Stock Alert</label>
                   <div className="relative">
                     <AlertCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

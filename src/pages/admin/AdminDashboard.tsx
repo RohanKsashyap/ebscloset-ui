@@ -1117,7 +1117,9 @@ export default function AdminDashboard() {
   const toggleTestimonialStatus = async (id: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'visible' ? 'hidden' : 'visible';
-      await adminService.updateTestimonial(id, { status: newStatus });
+      const fd = new FormData();
+      fd.append('status', newStatus);
+      await adminService.updateTestimonial(id, fd);
       setTestimonials(await adminService.getAdminTestimonials());
       showToast(`Testimonial is now ${newStatus}`);
     } catch { showToast('Error updating status', 'error'); }
