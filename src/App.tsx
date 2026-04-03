@@ -4,6 +4,7 @@ import Navigation from './components/Navigation';
 import NewsletterPopup from './components/NewsletterPopup';
 import Footer from './components/Footer';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { hydrateBackend, loadSite } from './utils/storage';
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
@@ -175,11 +176,13 @@ function App() {
   }, [sparkleEnabled]);
 
   return (
-    <BrowserRouter>
-      <Layout sparkleRef={sparkleRef} showPopup={showPopup} setShowPopup={setShowPopup}>
-        <AppRoutes />
-      </Layout>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <Layout sparkleRef={sparkleRef} showPopup={showPopup} setShowPopup={setShowPopup}>
+          <AppRoutes />
+        </Layout>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 

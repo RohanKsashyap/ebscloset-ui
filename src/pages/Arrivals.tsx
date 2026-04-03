@@ -6,6 +6,7 @@ import { useProductContext } from '../context/ProductContext';
 import { Heart } from 'lucide-react';
 import { formatAUD } from '../utils/storage';
 import { getOptimizedUrl } from '../utils/imageKit';
+import SEO from '../components/SEO';
 
 export default function Arrivals() {
   const [catalog, setCatalog] = useState<Product[]>([]);
@@ -34,6 +35,11 @@ export default function Arrivals() {
 
   return (
     <main className="bg-white scroll-gradient-blur page-enter">
+      <SEO 
+        title="New Arrivals - Latest Girls' Dresses"
+        description="Discover the latest collection of beautiful dresses for girls aged 7-13. Shop our newest arrivals and editor's picks for every special occasion."
+        canonical="https://www.ebscloset.com.au/arrivals"
+      />
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">New Arrivals</h1>

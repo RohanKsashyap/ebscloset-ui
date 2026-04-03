@@ -7,6 +7,7 @@ import { Heart, SlidersHorizontal, X } from 'lucide-react';
 import { formatAUD } from '../utils/storage';
 import { products as defaultProducts } from '../data/products';
 import { getOptimizedUrl } from '../utils/imageKit';
+import SEO from '../components/SEO';
 
 export default function Shop() {
   const [age, setAge] = useState<string>('All');
@@ -117,6 +118,11 @@ export default function Shop() {
 
   return (
     <main className="bg-white pt-32 pb-24">
+      <SEO 
+        title={`${type !== 'All' ? type : 'Shop All'} Dresses`}
+        description={`Explore our collection of ${type !== 'All' ? type.toLowerCase() : 'beautiful'} dresses for girls aged 7-13. Find the perfect outfit for any occasion at EB's Closet.`}
+        canonical="https://www.ebscloset.com.au/shop"
+      />
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         {/* Breadcrumbs & Header */}
         <div className="mb-12">

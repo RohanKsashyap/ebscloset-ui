@@ -1,5 +1,6 @@
 import InfoPage from './InfoPage';
 import { loadSite } from '../utils/storage';
+import SEO from '../components/SEO';
 
 export default function OurStory() {
   const site = loadSite({
@@ -11,7 +12,13 @@ export default function OurStory() {
   });
   const content = site.infoPages['our-story'];
   return (
-    <InfoPage title={content.title} subtitle={content.subtitle}>
+    <>
+      <SEO 
+        title="Our Story"
+        description="Learn about the magic behind EB's Closet. We create premium, playful dresses for girls aged 7-13, celebrating their growth and individuality."
+        canonical="https://www.ebscloset.com.au/our-story"
+      />
+      <InfoPage title={content.title} subtitle={content.subtitle}>
       <div className="space-y-4">
         {content.sections.map((s, i) => (
           <div key={i}>
@@ -21,5 +28,6 @@ export default function OurStory() {
         ))}
       </div>
     </InfoPage>
+    </>
   );
 }

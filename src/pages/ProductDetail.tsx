@@ -13,6 +13,8 @@ import { useToast } from '../context/ToastContext';
 import { productService } from '../services/productService';
 import { useProductContext } from '../context/ProductContext';
 import { formatAUD } from '../utils/storage';
+import SEO from '../components/SEO';
+import { Helmet } from 'react-helmet-async';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -100,6 +102,42 @@ export default function ProductDetail() {
 
   return (
     <main className="bg-white">
+      <SEO 
+        title={product.name}
+        description={product.description?.substring(0, 160)}
+        ogImage={product.image}
+        ogType="product"
+        canonical={`https://www.ebscloset.com.au/product/${product.id}`}
+      />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.name,
+            "image": product.images || [product.image],
+            "description": product.description,
+            "sku": product.sku || product.id,
+            "brand": {
+              "@type": "Brand",
+              "name": "EB's Closet"
+            },
+            "offers": {
+              "@type": "Offer",
+              "url": `https://www.ebscloset.com.au/product/${product.id}`,
+              "priceCurrency": "AUD",
+              "price": product.price,
+              "availability": "https://schema.org/InStock",
+              "itemCondition": "https://schema.org/NewCondition"
+            },
+            "aggregateRating": reviewsCount > 0 ? {
+              "@type": "AggregateRating",
+              "ratingValue": avgRating,
+              "reviewCount": reviewsCount
+            } : undefined
+          })}
+        </script>
+      </Helmet>
       <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="mb-6 text-[10px] md:text-xs text-gray-600 overflow-x-auto whitespace-nowrap">
           <a href="/" className="hover:underline">Home</a>
@@ -110,7 +148,7 @@ export default function ProductDetail() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           <div>
-            <Gallery images={product.images ?? []} onImageClick={() => {
+            <Gallery images={product.images ?? []} productName={product.name} onImageClick={() => {
               const el = document.getElementById('details-top');
               el?.scrollIntoView({ behavior: 'smooth' });
             }} />

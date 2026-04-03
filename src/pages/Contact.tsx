@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin, Share2, Twitter, Instagram, Send } from 'lucide-react';
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
+import SEO from '../components/SEO';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -33,6 +34,11 @@ export default function Contact() {
 
   return (
     <main className="bg-white min-h-screen">
+      <SEO 
+        title="Contact Us"
+        description="Have a question about our dresses or your order? Contact the EB's Closet concierge team. We're here to help with all your inquiries."
+        canonical="https://www.ebscloset.com.au/contact"
+      />
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">

@@ -10,7 +10,7 @@ export default function EditorialSection() {
     <section className="relative min-h-[600px] md:h-screen flex items-center justify-center overflow-hidden">
       <img
         src={site.editorial.image}
-        alt="Beautiful Young Girl in Pink Dress"
+        alt={`${site.editorial.title} - ${site.editorial.kicker}`}
         className="absolute inset-0 w-full h-full object-cover"
         loading="lazy"
         decoding="async"

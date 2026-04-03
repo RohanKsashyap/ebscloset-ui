@@ -9,6 +9,8 @@ import ProductShowcase from './ProductShowcase';
 import NewArrivalsGallery from './NewArrivalsGallery';
 import Testimonials from './Testimonials';
 import { useProductContext } from '../context/ProductContext';
+import SEO from './SEO';
+import { Helmet } from 'react-helmet-async';
 
 export default function HomePage() {
   const { products } = useProductContext();
@@ -57,6 +59,43 @@ export default function HomePage() {
 
   return (
     <main className="bg-white">
+      <SEO 
+        title="Beautiful Dresses for Girls 7-13"
+        description="Shop EB's Closet for premium, stylish dresses for girls aged 7-13. Perfect for parties, weddings, and everyday elegance. Free shipping on select orders!"
+      />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "EB's Closet",
+            "url": "https://www.ebscloset.com.au",
+            "logo": "https://www.ebscloset.com.au/logo.png",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+61-XXXX-XXXX",
+              "contactType": "customer service"
+            },
+            "sameAs": [
+              "https://www.facebook.com/ebscloset",
+              "https://www.instagram.com/ebscloset"
+            ]
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "EB's Closet",
+            "url": "https://www.ebscloset.com.au",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://www.ebscloset.com.au/shop?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
+      </Helmet>
       <HeroSection ref={heroRef} />
       <CollectionGrid />
       <section className="py-12 md:py-16 px-6 lg:px-12 max-w-screen-2xl mx-auto">
@@ -69,7 +108,7 @@ export default function HomePage() {
             <a key={b.q} href={`/shop?budget=${b.q}`} className="premium-card rounded-2xl overflow-hidden border bg-white/60">
               <div className="aspect-[4/3] bg-gradient-to-br from-pink-50 via-white to-peach-50 flex items-center justify-center">
                 {b.img ? (
-                  <img src={getOptimizedUrl(b.img, 400)} alt={b.label} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                  <img src={getOptimizedUrl(b.img, 400)} alt={`${b.label} Girls Dress`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-white/70 border" />
                 )}

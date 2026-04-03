@@ -1,5 +1,7 @@
 import InfoPage from './InfoPage';
 import { loadSite } from '../utils/storage';
+import SEO from '../components/SEO';
+import { Helmet } from 'react-helmet-async';
 
 export default function FAQ() {
   const site = loadSite({
@@ -14,7 +16,29 @@ export default function FAQ() {
   });
   const content = site.infoPages['faq'];
   return (
-    <InfoPage title={content.title} subtitle={content.subtitle}>
+    <>
+      <SEO 
+        title="Frequently Asked Questions"
+        description="Find answers to common questions about EB's Closet, including shipping, returns, sizing, and dress care for girls aged 7-13."
+        canonical="https://www.ebscloset.com.au/faq"
+      />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": content.sections.map(s => ({
+              "@type": "Question",
+              "name": s.heading,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": s.body
+              }
+            }))
+          })}
+        </script>
+      </Helmet>
+      <InfoPage title={content.title} subtitle={content.subtitle}>
       <div className="space-y-4">
         {content.sections.map((s, i) => (
           <div key={i}>
@@ -24,5 +48,6 @@ export default function FAQ() {
         ))}
       </div>
     </InfoPage>
+    </>
   );
 }

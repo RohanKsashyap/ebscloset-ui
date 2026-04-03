@@ -6,6 +6,7 @@ import StickyBuyBar from '../components/StickyBuyBar';
 import { productService } from '../services/productService';
 import { formatAUD } from '../utils/storage';
 import { useToast } from '../context/ToastContext';
+import SEO from '../components/SEO';
 
 export default function ArrivalsDetail() {
   const { id } = useParams();
@@ -57,10 +58,17 @@ export default function ArrivalsDetail() {
 
   return (
     <main className="bg-white scroll-gradient-blur page-enter">
+      <SEO 
+        title={product.name}
+        description={`Check out the latest ${product.name} at EB's Closet. A beautiful addition to our new arrivals for girls aged 7-13.`}
+        ogImage={product.image}
+        ogType="product"
+        canonical={`https://www.ebscloset.com.au/arrivals/${product._id || product.id}`}
+      />
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12">
           <div>
-            <Gallery images={(product.images && product.images.length ? product.images : [product.image]).filter(Boolean)} />
+            <Gallery images={(product.images && product.images.length ? product.images : [product.image]).filter(Boolean)} productName={product.name} />
           </div>
           <div className="premium-card glass-card p-6 md:p-8">
             <p className="text-xs tracking-widest uppercase text-gray-600 mb-2">New Arrivals</p>
