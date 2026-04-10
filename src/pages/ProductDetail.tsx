@@ -208,15 +208,24 @@ export default function ProductDetail() {
             <div className="mb-8">
               <p className="text-xs tracking-widest uppercase text-gray-600 mb-3">Select Size</p>
               <div className="flex flex-wrap gap-2 max-w-xs">
-                {(product.sizes && product.sizes.length > 0 ? product.sizes : (product.size ? [product.size] : [])).map((s: string) => (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${size===s ? 'bg-black text-white border-black' : 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'}`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {(() => {
+                  const availableSizes = [
+                    ...(product.sizes && product.sizes.length > 0 ? product.sizes : []),
+                    ...(product.size ? [product.size] : []),
+                    ...(product.variants ? product.variants.map((v: any) => v.size).filter(Boolean) : [])
+                  ];
+                  const uniqueSizes = Array.from(new Set(availableSizes)) as string[];
+                  
+                  return uniqueSizes.map((s: string) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${size === s ? 'bg-black text-white border-black' : 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'}`}
+                    >
+                      {s}
+                    </button>
+                  ));
+                })()}
               </div>
               {size && (
                 <p className="mt-3 text-sm text-gray-600">Selected size: {size}</p>

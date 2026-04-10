@@ -344,16 +344,30 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-900">Color</label>
-                <div className="relative">
-                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input 
-                    className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                    placeholder="e.g. Black, Rose Gold" 
-                    value={form.color} 
-                    onChange={(e) => setForm({ ...form, color: e.target.value })} 
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Color</label>
+                  <div className="relative">
+                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. Black, Rose Gold" 
+                      value={form.color} 
+                      onChange={(e) => setForm({ ...form, color: e.target.value })} 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Sizes (comma separated)</label>
+                  <div className="relative">
+                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. S, M, L, XL or 32, 34, 36" 
+                      value={form.sizes} 
+                      onChange={(e) => setForm({ ...form, sizes: e.target.value })} 
+                    />
+                  </div>
                 </div>
               </div>
 
