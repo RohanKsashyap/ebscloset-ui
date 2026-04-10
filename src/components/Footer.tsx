@@ -19,6 +19,12 @@ export default function Footer() {
         { label: 'Ages 11-12', href: '/shop' },
         { label: 'Ages 12-13', href: '/shop' },
       ]},
+      { title: 'Quick Links', links: [
+        { label: 'New Arrival Dresses', href: '/arrivals' },
+        { label: 'Best Seller Collection', href: '/shop' },
+        { label: 'Party Dress Styles', href: '/party' },
+        { label: 'Casual Wear', href: '/casual' },
+      ]},
       { title: 'For Parents', links: [
         { label: 'Size Guide', href: '/size-guide' },
         { label: 'Care Instructions', href: '/care' },

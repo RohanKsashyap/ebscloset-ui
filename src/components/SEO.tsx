@@ -23,15 +23,11 @@ export default function SEO({
   ogTitle,
   ogDescription,
   ogImage = "https://www.ebscloset.com.au/logo.png",
-  ogUrl,
-  ogType = "website",
-  twitterCard = "summary_large_image",
-  twitterTitle,
-  twitterDescription,
   twitterImage,
   keywords = "girls dresses, teen fashion, special occasion dresses, kids clothing, 7-13 years dresses, EB's Closet",
 }: SEOProps) {
   const fullTitle = title.includes("EB's Closet") ? title : `${title} | EB's Closet`;
+  const defaultOgImage = "https://www.ebscloset.com.au/logo.png"; // Fallback to logo if no specific image is provided
   
   return (
     <Helmet>
@@ -45,14 +41,14 @@ export default function SEO({
       <meta property="og:type" content={ogType} />
       <meta property="og:title" content={ogTitle || fullTitle} />
       <meta property="og:description" content={ogDescription || description} />
-      <meta property="og:image" content={ogImage} />
+      <meta property="og:image" content={ogImage || defaultOgImage} />
       <meta property="og:url" content={ogUrl || canonical} />
 
       {/* Twitter */}
       <meta name="twitter:card" content={twitterCard} />
       <meta name="twitter:title" content={twitterTitle || ogTitle || fullTitle} />
       <meta name="twitter:description" content={twitterDescription || ogDescription || description} />
-      <meta name="twitter:image" content={twitterImage || ogImage} />
+      <meta name="twitter:image" content={twitterImage || ogImage || defaultOgImage} />
     </Helmet>
   );
 }

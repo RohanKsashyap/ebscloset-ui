@@ -45,6 +45,7 @@ import Budget from './pages/Budget';
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
+import NotFound from './pages/NotFound';
 
 function AppRoutes() {
   return (
@@ -89,6 +90,7 @@ function AppRoutes() {
         <Route path="/casual" element={<Casual />} />
         <Route path="/seasonal" element={<Seasonal />} />
         <Route path="/special-occasion" element={<SpecialOccasion />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
