@@ -23,6 +23,11 @@ export default function SEO({
   ogTitle,
   ogDescription,
   ogImage = "https://www.ebscloset.com.au/logo.png",
+  ogUrl,
+  ogType = "website",
+  twitterCard = "summary_large_image",
+  twitterTitle,
+  twitterDescription,
   twitterImage,
   keywords = "girls dresses, teen fashion, special occasion dresses, kids clothing, 7-13 years dresses, EB's Closet",
 }: SEOProps) {
