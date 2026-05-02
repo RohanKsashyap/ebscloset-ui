@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminService } from '../services/adminService';
 import { useToast } from '../context/ToastContext';
-import type { NavCategory, DiscountCode, SiteSettings } from '../types/admin';
+import type { DiscountCode, SiteSettings } from '../types/admin';
 
 export function useProducts(enabled: boolean = true) {
   return useQuery({

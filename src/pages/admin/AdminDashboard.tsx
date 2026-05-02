@@ -14,17 +14,15 @@ import ProductManagementModal from '../../components/admin/ProductManagementModa
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import OrderDetailsModal from '../../components/admin/OrderDetailsModal';
 import TestimonialForm from '../../components/admin/TestimonialForm';
-import NavManager from '../../components/admin/NavManager';
 import BudgetManager from '../../components/admin/BudgetManager';
 import GalleryImageForm from '../../components/admin/GalleryImageForm';
 import GalleryCategoryForm from '../../components/admin/GalleryCategoryForm';
 import InventoryManagement from '../../components/admin/InventoryManagement';
 import SidebarItem from '../../components/admin/SidebarItem';
-import type { NavCategory, DiscountCode, SiteSettings, Budget } from '../../types/admin';
+import type { DiscountCode, SiteSettings, Budget } from '../../types/admin';
 import { 
   useProducts, 
   useOrders, 
-  useNavigation, 
   useSiteSettings, 
   useDashboard, 
   useDiscounts, 
@@ -49,7 +47,6 @@ import {
   Star, 
   MessageSquare, 
   Image as ImageIcon, 
-  Navigation as NavIcon, 
   Settings,
   Users,
   BarChart3 as BarChart,
@@ -82,12 +79,11 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'navigation'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
+  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
   
   // React Query Hooks
   const { data: catalog = [], isLoading: productsLoading } = useProducts(tab === 'products' || tab === 'inventory' || tab === 'dashboard' || tab === 'testimonials' || tab === 'reviews');
   const { data: orders = [] } = useOrders(tab === 'orders' || tab === 'dashboard');
-  const { data: nav = [] } = useNavigation(tab === 'navigation' || tab === 'dashboard');
   const { data: site = null } = useSiteSettings(tab === 'site' || tab === 'dashboard' || tab === 'budgets');
   const { data: dashboardData = null } = useDashboard(tab === 'dashboard' || tab === 'analytics');
   const { data: codes = [] } = useDiscounts(tab === 'discounts' || tab === 'dashboard');
@@ -196,14 +192,6 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
       setSelectedProductIds([]);
     } catch { showToast('Error deleting products', 'error'); }
-  };
-
-  const saveNavAll = async (n: NavCategory[]) => {
-    try { 
-      await adminService.updateNavigation(n); 
-      queryClient.setQueryData(['admin', 'navigation'], n);
-      alert('Saved'); 
-    } catch { alert('Error'); }
   };
 
   const saveCodesAll = async (d: DiscountCode[]) => {
@@ -428,7 +416,6 @@ export default function AdminDashboard() {
             <div className="mb-8">
               <p className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Site Content</p>
               <div className="space-y-1">
-                <SidebarItem icon={NavIcon} label="Navigation" active={tab === 'navigation'} onClick={() => setTab('navigation')} />
                 <SidebarItem icon={ImageIcon} label="Gallery" active={tab === 'gallery'} onClick={() => setTab('gallery')} />
                 <SidebarItem icon={Star} label="Reviews" active={tab === 'reviews'} onClick={() => setTab('reviews')} />
                 <SidebarItem icon={MessageSquare} label="Testimonials" active={tab === 'testimonials'} onClick={() => setTab('testimonials')} />
@@ -725,12 +712,6 @@ export default function AdminDashboard() {
             {tab === 'inventory' && <InventoryManagement products={catalog} />}
 
             {tab === 'categories' && <CategoryManagement />}
-
-            {tab === 'navigation' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <NavManager initial={nav} onSave={saveNavAll} />
-              </div>
-            )}
 
             {tab === 'budgets' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
