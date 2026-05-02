@@ -335,33 +335,8 @@ export const adminService = {
 };
 ```
 
-## Key Changes in Frontend
-
-### 1. Remove Supabase imports
-Remove all references to Supabase from `src/utils/storage.ts`
-
-### 2. Update CartContext (if using backend persistence)
-```typescript
-// Optional: Save cart to backend instead of localStorage
-const saveCartToBackend = async (items) => {
-  // If you want to persist cart to database
-};
-```
-
-### 3. Update HomePage to use backend
-```typescript
-import { productService } from '../services/productService';
-
-useEffect(() => {
-  const loadProducts = async () => {
-    const trending = await productService.getTrendingProducts();
-    const arrivals = await productService.getNewArrivals();
-    setTrendingProducts(trending);
-    setNewArrivals(arrivals);
-  };
-  loadProducts();
-}, []);
-```
+## Final Verification
+Check that all components are fetching data from the API and that local storage fallback is working correctly.
 
 ## Testing the Integration
 
