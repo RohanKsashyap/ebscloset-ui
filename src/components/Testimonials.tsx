@@ -57,7 +57,7 @@ export default function Testimonials() {
             <p className="text-gray-700 italic mb-8 leading-relaxed">"{t.content}"</p>
             <div className="flex items-center gap-4">
               {t.avatarUrl ? (
-                <img src={t.avatarUrl} alt={t.customerName} className="w-12 h-12 rounded-full object-cover" />
+                <img src={t.avatarUrl} alt={t.customerName} className="w-12 h-12 rounded-full object-cover" loading="lazy" decoding="async" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-hot-pink font-bold">
                   {t.customerName.charAt(0)}
