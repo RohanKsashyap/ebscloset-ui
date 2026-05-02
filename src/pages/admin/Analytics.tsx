@@ -65,7 +65,7 @@ const RevenueChart = ({ data = [] }: { data?: any[] }) => {
         
         <div className="flex justify-between mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
           {data.length > 0 ? data.map((d, i) => (
-            <span key={i}>{d._id.split('-').slice(1).join('/')}</span>
+            <span key={i}>{String(d._id || '').split('-').slice(1).join('/') || d._id}</span>
           )) : (
             <>
               <span>Wk 1</span>
@@ -118,8 +118,14 @@ const TopSellingProducts = ({ products = [] }: { products?: any[] }) => {
         {products.map((p, i) => (
           <div key={i} className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
-                <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+              <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-50">
+                {p.image ? (
+                  <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-200">
+                    <ShoppingBag size={20} />
+                  </div>
+                )}
               </div>
               <div>
                 <h4 className="text-sm font-bold text-gray-900">{p.name}</h4>
@@ -151,7 +157,7 @@ const RecentActivity = ({ orders = [] }: { orders?: any[] }) => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-gray-900">Order #{o._id.slice(-6).toUpperCase()}</h4>
+                <h4 className="text-sm font-bold text-gray-900">Order #{String(o._id || '').slice(-6).toUpperCase()}</h4>
                 <span className="text-xs text-gray-400 font-medium">received from {o.customer?.fullName || 'Guest'}</span>
               </div>
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">

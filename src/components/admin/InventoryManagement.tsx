@@ -93,7 +93,7 @@ export default function InventoryManagement({ products }: InventoryManagementPro
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
                              {product.images?.[0] && (
-                               <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                               <img src={product.images?.[0]} alt="" className="w-full h-full object-cover" />
                              )}
                           </div>
                           <div>

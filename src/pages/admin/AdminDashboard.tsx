@@ -494,7 +494,7 @@ export default function AdminDashboard() {
                 <p className="text-[9px] font-bold text-[#eb4899] uppercase tracking-tighter mt-1">Super Admin</p>
               </div>
               <div className="w-10 h-10 rounded-2xl bg-[#eb4899] text-white flex items-center justify-center font-black shadow-lg shadow-pink-500/20">
-                {adminName.substring(0, 2).toUpperCase()}
+                {(adminName || '').substring(0, 2).toUpperCase()}
               </div>
             </div>
           </div>
@@ -507,10 +507,10 @@ export default function AdminDashboard() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
-                    { label: 'Total Revenue', value: `$${dashboardData.totalRevenue?.toLocaleString()}`, change: '+12.5%', icon: DollarSign, color: 'text-emerald-500 bg-emerald-50' },
-                    { label: 'Total Orders', value: dashboardData.totalOrders, change: '+8.2%', icon: ShoppingBag, color: 'text-blue-500 bg-blue-50' },
-                    { label: 'Total Customers', value: dashboardData.totalCustomers, change: '+15.3%', icon: Users, color: 'text-purple-500 bg-purple-50' },
-                    { label: 'Conversion Rate', value: '3.24%', change: '-1.2%', icon: TrendingUp, color: 'text-pink-500 bg-pink-50' }
+                    { label: 'Total Revenue', value: `$${Number(dashboardData.counts?.sales || 0).toLocaleString()}`, change: '+12.5%', icon: DollarSign, color: 'text-emerald-500 bg-emerald-50' },
+                    { label: 'Total Orders', value: dashboardData.counts?.orders || 0, change: '+8.2%', icon: ShoppingBag, color: 'text-blue-500 bg-blue-50' },
+                    { label: 'Total Customers', value: dashboardData.counts?.users || 0, change: '+15.3%', icon: Users, color: 'text-purple-500 bg-purple-50' },
+                    { label: 'Total Products', value: dashboardData.counts?.products || 0, change: 'Active', icon: LayoutGrid, color: 'text-pink-500 bg-pink-50' }
                   ].map((stat, i) => (
                     <div key={i} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
                       <div className="flex justify-between items-start mb-4">
@@ -538,23 +538,28 @@ export default function AdminDashboard() {
                     </div>
                     
                     <div className="space-y-6">
-                      {dashboardData.recentOrders?.map((order: any, i: number) => (
-                        <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-gray-50 hover:bg-gray-50 transition-all cursor-pointer group">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm font-black text-[#eb4899] group-hover:scale-110 transition-transform">
-                              {order.customerName.substring(0, 2).toUpperCase()}
+                      {dashboardData?.recentOrders?.map((order: any, i: number) => {
+                        const customerName = order.customer?.fullName || 'Guest';
+                        const orderNumber = order.orderId || `#${String(order._id || '').substring(0, 8)}`;
+                        
+                        return (
+                          <div key={i} className="flex items-center justify-between p-4 rounded-2xl border border-gray-50 hover:bg-gray-50 transition-all cursor-pointer group">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm font-black text-[#eb4899] group-hover:scale-110 transition-transform">
+                                {(customerName || '').substring(0, 2).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-gray-900">{customerName}</p>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Order {orderNumber}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-gray-900">{order.customerName}</p>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Order #{order.orderNumber}</p>
+                            <div className="text-right">
+                              <p className="text-sm font-black text-gray-900">${order.totalAmount}</p>
+                              <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">{order.status}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm font-black text-gray-900">${order.totalAmount}</p>
-                            <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">{order.status}</p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -674,15 +679,15 @@ export default function AdminDashboard() {
                             <td className="px-8 py-5">
                               <div className="flex items-center gap-6">
                                 <div className="w-16 h-16 rounded-[1.25rem] overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0 group-hover:scale-110 transition-transform">
-                                  {product.images[0] ? (
-                                    <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                  {product.images?.[0] || product.image ? (
+                                    <img src={product.images?.[0] || product.image} alt="" className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-200"><ImageIcon size={24} /></div>
                                   )}
                                 </div>
                                 <div>
                                   <p className="text-sm font-black text-gray-900 group-hover:text-[#eb4899] transition-colors">{product.name}</p>
-                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: {product._id?.substring(0, 8)}</p>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: {String(product._id || '').substring(0, 8)}</p>
                                 </div>
                               </div>
                             </td>
@@ -836,10 +841,10 @@ export default function AdminDashboard() {
                         <div className="flex justify-between items-start mb-6">
                           <div className="flex items-center gap-4">
                             <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center font-black text-[#eb4899] border border-gray-100 group-hover:scale-110 transition-transform">
-                              {r.customerName.substring(0, 2).toUpperCase()}
+                              {String(r.customerName || 'Anonymous').substring(0, 2).toUpperCase()}
                             </div>
                             <div>
-                              <p className="text-sm font-black text-gray-900">{r.customerName}</p>
+                              <p className="text-sm font-black text-gray-900">{r.customerName || 'Anonymous'}</p>
                               <div className="flex gap-0.5 mt-1">
                                 {[...Array(5)].map((_, i) => (
                                   <Star key={i} size={10} className={i < r.rating ? 'text-[#eb4899] fill-[#eb4899]' : 'text-gray-200'} />
@@ -1004,7 +1009,7 @@ export default function AdminDashboard() {
                   <div className="space-y-8">
                     <div className="flex items-center gap-6">
                       <div className="w-20 h-20 rounded-3xl bg-[#eb4899] text-white flex items-center justify-center text-3xl font-black shadow-lg shadow-pink-500/20">
-                        {adminName.substring(0, 2).toUpperCase()}
+                        {(adminName || '').substring(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <h3 className="text-xl font-black text-gray-900 tracking-tight">{adminName}</h3>
