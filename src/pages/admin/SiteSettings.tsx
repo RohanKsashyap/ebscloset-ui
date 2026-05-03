@@ -8,6 +8,7 @@ import {
   Eye,
   Settings,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 
 type HeroBanner = {
@@ -82,6 +83,34 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
       const newIndex = newSite.hero.slides.length;
       newSite.hero.slides.push({ id: String(newIndex + 1), type: 'image', title: '', subtitle: '', url: '' });
       setActiveBanner(newIndex);
+      return newSite;
+    });
+  };
+
+  const removeBanner = () => {
+    const slides = site?.hero?.slides || [];
+    if (slides.length <= 1) {
+      alert("You must have at least one banner.");
+      return;
+    }
+    
+    if (!window.confirm(`Are you sure you want to delete Banner ${activeBanner + 1}?`)) return;
+
+    setSite((s: any) => {
+      const newSite = { ...s };
+      const newSlides = [...(newSite.hero?.slides || [])];
+      newSlides.splice(activeBanner, 1);
+      
+      newSite.hero = {
+        ...newSite.hero,
+        slides: newSlides
+      };
+
+      // Update active banner index if it was the last one
+      if (activeBanner >= newSlides.length) {
+        setActiveBanner(Math.max(0, newSlides.length - 1));
+      }
+
       return newSite;
     });
   };
@@ -161,6 +190,13 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                   title="Add New Banner"
                 >
                   <Plus size={16} />
+                </button>
+                <button 
+                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  onClick={removeBanner}
+                  title="Delete Current Banner"
+                >
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
