@@ -7,6 +7,7 @@ import {
   Calendar,
   Eye,
   Settings,
+  Loader2,
 } from 'lucide-react';
 
 type HeroBanner = {
@@ -20,9 +21,10 @@ type HeroBanner = {
   isActive?: boolean;
 };
 
-export default function SiteSettings({ initial, onSave }: { initial: any; onSave: (s: any) => void }) {
+export default function SiteSettings({ initial, onSave }: { initial: any; onSave: (s: any) => void | Promise<void> }) {
   const [site, setSite] = useState<any>(initial);
   const [activeBanner, setActiveBanner] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => { setSite(initial); }, [initial]);
 
@@ -84,8 +86,15 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
     });
   };
 
-  const handleSave = () => {
-    onSave(site);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(site);
+    } catch (err) {
+      console.error('Error in handleSave:', err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -98,10 +107,20 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
         </div>
         <button 
           onClick={handleSave}
-          className="bg-[#eb4899] text-white px-8 py-4 rounded-3xl text-sm font-bold flex items-center gap-3 hover:bg-[#d43d8a] transition-all shadow-xl shadow-pink-500/20"
+          disabled={isSaving}
+          className="bg-[#eb4899] text-white px-8 py-4 rounded-3xl text-sm font-bold flex items-center gap-3 hover:bg-[#d43d8a] transition-all shadow-xl shadow-pink-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          <Save size={20} />
-          Save Changes
+          {isSaving ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save size={20} />
+              Save Changes
+            </>
+          )}
         </button>
       </div>
 

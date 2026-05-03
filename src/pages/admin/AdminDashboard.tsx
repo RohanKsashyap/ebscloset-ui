@@ -201,16 +201,19 @@ export default function AdminDashboard() {
         else await adminService.createDiscount(c);
       }
       queryClient.invalidateQueries({ queryKey: ['admin', 'discounts'] });
-      alert('Saved');
-    } catch { alert('Error'); }
+      showToast('Discount codes saved successfully');
+    } catch { showToast('Error saving discount codes', 'error'); }
   };
 
   const saveSiteAll = async (s: SiteSettings) => {
     try { 
       await adminService.updateSiteSettings(s); 
       queryClient.setQueryData(['admin', 'siteSettings'], s);
-      alert('Saved'); 
-    } catch { alert('Error'); }
+      showToast('Site settings saved successfully'); 
+    } catch { 
+      showToast('Error saving site settings', 'error');
+      throw new Error('Failed to save site settings');
+    }
   };
 
   const updateOrderStatus = async (id: string, status: string) => {
