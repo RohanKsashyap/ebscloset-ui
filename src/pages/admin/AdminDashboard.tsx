@@ -363,7 +363,7 @@ export default function AdminDashboard() {
             <Sparkles className="text-[#eb4899] animate-pulse" size={32} />
           </div>
         </div>
-        <p className="mt-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400 animate-pulse">Initializing Atelier Dashboard</p>
+        <p className="mt-8 text-xs font-black uppercase tracking-[0.3em] text-gray-400 animate-pulse">Initializing EB'S CLOSET Dashboard</p>
       </div>
     );
   }
@@ -394,7 +394,7 @@ export default function AdminDashboard() {
               <div className="w-10 h-10 bg-[#eb4899] rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/20">
                 <Sparkles className="text-white" size={20} />
               </div>
-              <h1 className="text-2xl font-black text-[#111827] tracking-tighter">Atelier<span className="text-[#eb4899]">.</span></h1>
+              <h1 className="text-2xl font-black text-[#111827] tracking-tighter">EB'S CLOSET<span className="text-[#eb4899]">.</span></h1>
             </div>
             <button className="lg:hidden text-gray-400 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
               <X size={24} />
@@ -577,7 +577,7 @@ export default function AdminDashboard() {
                       <div className="relative z-10">
                         <Sparkles className="text-[#eb4899] mb-4" size={24} />
                         <h4 className="text-lg font-black tracking-tight mb-2 leading-tight">Pro Features<br/>Unlocked.</h4>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">You have full access to Atelier's premium suite.</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">You have full access to EB'S CLOSET's premium suite.</p>
                       </div>
                     </div>
                   </div>

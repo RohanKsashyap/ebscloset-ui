@@ -7,7 +7,6 @@ import {
   Calendar,
   Eye,
   Settings,
-  Trash2
 } from 'lucide-react';
 
 type HeroBanner = {
