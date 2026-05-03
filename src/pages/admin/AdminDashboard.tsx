@@ -209,9 +209,9 @@ export default function AdminDashboard() {
     try { 
       await adminService.updateSiteSettings(s); 
       queryClient.setQueryData(['admin', 'siteSettings'], s);
-      showToast('Site settings saved successfully'); 
+      showToast('Banner  saved successfully'); 
     } catch { 
-      showToast('Error saving site settings', 'error');
+      showToast('Error saving Banner', 'error');
       throw new Error('Failed to save site settings');
     }
   };

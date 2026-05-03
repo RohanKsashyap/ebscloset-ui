@@ -102,7 +102,7 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-[#111827]">Site Customization</h2>
+          <h2 className="text-4xl font-extrabold tracking-tight text-[#111827]">Hero Section Customization</h2>
           <p className="text-gray-500 mt-2 text-lg">Manage your store's homepage layout, messaging, and visual banners.</p>
         </div>
         <button 
