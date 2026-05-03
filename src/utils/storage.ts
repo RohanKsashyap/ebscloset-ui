@@ -13,6 +13,11 @@ export type HeroSlide = {
   id: string;
   type: 'image' | 'video';
   url: string;
+  title?: string;
+  subtitle?: string;
+  bannerCtaText?: string;
+  bannerCtaHref?: string;
+  isActive?: boolean;
 };
 export type HeroSettings = {
   title: string;

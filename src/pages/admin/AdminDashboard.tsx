@@ -37,6 +37,7 @@ import {
   useUpdateProduct
 } from '../../hooks/useAdminData';
 import { useQueryClient } from '@tanstack/react-query';
+import { saveSite } from '../../utils/storage';
 
 import { 
   LayoutGrid, 
@@ -83,17 +84,34 @@ export default function AdminDashboard() {
   
   // React Query Hooks
   const { data: catalog = [], isLoading: productsLoading } = useProducts(tab === 'products' || tab === 'inventory' || tab === 'dashboard' || tab === 'testimonials' || tab === 'reviews');
-  const { data: orders = [] } = useOrders(tab === 'orders' || tab === 'dashboard');
-  const { data: site = null } = useSiteSettings(tab === 'site' || tab === 'dashboard' || tab === 'budgets');
-  const { data: dashboardData = null } = useDashboard(tab === 'dashboard' || tab === 'analytics');
-  const { data: codes = [] } = useDiscounts(tab === 'discounts' || tab === 'dashboard');
-  const { data: galleryCategories = [] } = useGalleryCategories(tab === 'categories' || tab === 'gallery');
-  const { data: subscribers = [] } = useSubscribers(tab === 'newsletter');
-  const { data: messages = [] } = useMessages(tab === 'inbox');
-  const { data: reviews = [] } = useReviews(tab === 'reviews');
-  const { data: testimonials = [] } = useTestimonials(tab === 'testimonials');
-  const { data: galleryImages = [] } = useGalleryImages(tab === 'gallery');
-  const { data: users = [] } = useUsers(tab === 'customers');
+  const { data: orders = [], isLoading: ordersLoading } = useOrders(tab === 'orders' || tab === 'dashboard');
+  const { data: site = null, isLoading: siteLoading } = useSiteSettings(tab === 'site' || tab === 'dashboard' || tab === 'budgets');
+  const { data: dashboardData = null, isLoading: dashboardLoading } = useDashboard(tab === 'dashboard' || tab === 'analytics');
+  const { data: codes = [], isLoading: codesLoading } = useDiscounts(tab === 'discounts' || tab === 'dashboard');
+  const { data: galleryCategories = [], isLoading: galleryCategoriesLoading } = useGalleryCategories(tab === 'categories' || tab === 'gallery');
+  const { data: subscribers = [], isLoading: subscribersLoading } = useSubscribers(tab === 'newsletter');
+  const { data: messages = [], isLoading: messagesLoading } = useMessages(tab === 'inbox');
+  const { data: reviews = [], isLoading: reviewsLoading } = useReviews(tab === 'reviews');
+  const { data: testimonials = [], isLoading: testimonialsLoading } = useTestimonials(tab === 'testimonials');
+  const { data: galleryImages = [], isLoading: galleryImagesLoading } = useGalleryImages(tab === 'gallery');
+  const { data: users = [], isLoading: usersLoading } = useUsers(tab === 'customers');
+
+  const isPageLoading = 
+    (tab === 'dashboard' && (dashboardLoading || productsLoading || ordersLoading || siteLoading || codesLoading)) ||
+    (tab === 'products' && productsLoading) ||
+    (tab === 'categories' && galleryCategoriesLoading) ||
+    (tab === 'budgets' && siteLoading) ||
+    (tab === 'discounts' && codesLoading) ||
+    (tab === 'site' && siteLoading) ||
+    (tab === 'orders' && ordersLoading) ||
+    (tab === 'newsletter' && subscribersLoading) ||
+    (tab === 'inbox' && messagesLoading) ||
+    (tab === 'reviews' && reviewsLoading) ||
+    (tab === 'testimonials' && testimonialsLoading) ||
+    (tab === 'gallery' && (galleryImagesLoading || galleryCategoriesLoading)) ||
+    (tab === 'customers' && usersLoading) ||
+    (tab === 'analytics' && dashboardLoading) ||
+    (tab === 'inventory' && productsLoading);
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
@@ -209,7 +227,9 @@ export default function AdminDashboard() {
     try { 
       await adminService.updateSiteSettings(s); 
       queryClient.setQueryData(['admin', 'siteSettings'], s);
-      showToast('Banner  saved successfully'); 
+      saveSite(s as any);
+      window.dispatchEvent(new Event('backend-hydrated'));
+      showToast('Banner saved successfully'); 
     } catch { 
       showToast('Error saving Banner', 'error');
       throw new Error('Failed to save site settings');
@@ -357,7 +377,7 @@ export default function AdminDashboard() {
     navigate('/admin/login');
   };
 
-  if (productsLoading && catalog.length === 0) {
+  if (isPageLoading) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
         <div className="relative">

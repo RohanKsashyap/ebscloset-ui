@@ -68,7 +68,13 @@ const defaultSite: SiteSettings = {
 const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
   (_, ref) => {
     const { products } = useProductContext();
-    const site = loadSite(defaultSite);
+    const [site, setSite] = useState<SiteSettings>(() => loadSite(defaultSite));
+
+    useEffect(() => {
+      const refresh = () => setSite(loadSite(defaultSite));
+      window.addEventListener('backend-hydrated', refresh);
+      return () => window.removeEventListener('backend-hydrated', refresh);
+    }, []);
     
     const categoryImages = useMemo(() => {
       const getFirstImage = (cat: string) => {
@@ -76,7 +82,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
         return p?.image || (p?.images && p.images[0]) || null;
       };
 
-      const fallbackImages = site.hero.slides.map(s => s.url);
+      const fallbackImages = (site.hero.slides || []).map(s => s.url);
 
       return {
         party: getFirstImage('jewelery') || getFirstImage('women\'s clothing') || fallbackImages[0],
@@ -86,10 +92,12 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
       };
     }, [products, site.hero.slides]);
 
-    const baseSlides = site.hero.slides && site.hero.slides.length > 0 
+    const baseSlides = (site.hero.slides && site.hero.slides.length > 0 
       ? site.hero.slides 
-      : (site.hero.backgroundImages || []).map((url, i) => ({ id: String(i), type: 'image' as const, url }));
-    const slides = baseSlides.filter((s) => !(s.type === 'video' && /w3schools\.com\/html\/mov_bbb\.mp4/i.test(s.url)));
+      : (site.hero.backgroundImages || []).map((url: string, i: number) => ({ id: String(i), type: 'image' as const, url }))
+    ).filter((s: any) => s.isActive !== false);
+
+    const slides = baseSlides.filter((s: any) => !(s.type === 'video' && /w3schools\.com\/html\/mov_bbb\.mp4/i.test(s.url)));
     
     if (slides.length === 0 && site.hero.bannerImage) {
       slides.push({ id: 'fallback', type: 'image', url: site.hero.bannerImage });
@@ -98,14 +106,15 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [brokenIds, setBrokenIds] = useState<Set<string>>(new Set());
 
-    const displaySlides = slides.filter((s) => !brokenIds.has(s.id));
+    const displaySlides = slides.filter((s: any) => !brokenIds.has(s.id));
     const effectiveSlides = displaySlides.length > 0
       ? displaySlides
       : (site.hero.bannerImage ? [{ id: 'fallback', type: 'image', url: site.hero.bannerImage }] : slides);
 
     useEffect(() => {
+      if (effectiveSlides.length <= 1) return;
       const interval = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % (effectiveSlides.length || 1));
+        setCurrentImageIndex((prev) => (prev + 1) % effectiveSlides.length);
       }, 5000);
       return () => clearInterval(interval);
     }, [effectiveSlides.length]);
@@ -119,13 +128,17 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     const nextSlide = () => setCurrentImageIndex((prev) => (prev + 1) % (effectiveSlides.length || 1));
     const prevSlide = () => setCurrentImageIndex((prev) => (prev - 1 + (effectiveSlides.length || 1)) % (effectiveSlides.length || 1));
 
+    if (site.hero.isActive === false) return null;
+
+    const currentSlide = effectiveSlides[currentImageIndex] || {};
+
     return (
       <div ref={ref} className="relative bg-white">
         <section className="relative h-[90vh] md:h-screen w-full overflow-hidden">
           {/* Background Slider */}
-          {effectiveSlides.map((slide, index) => (
+          {effectiveSlides.map((slide: any, index: number) => (
             <div
-              key={slide.id}
+              key={slide.id || index}
               className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
                 index === currentImageIndex ? 'opacity-100' : 'opacity-0'
               }`}
@@ -150,7 +163,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               ) : (
                 <img
                   src={getOptimizedUrl(slide.url, 1920)}
-                  alt={`Hero slide ${index + 1}`}
+                  alt={slide.title || `Hero slide ${index + 1}`}
                   className="w-full h-full object-cover object-top"
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"
@@ -189,24 +202,35 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
             <div className="animate-fadeIn w-full max-w-4xl">
               <p className="text-white text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-4 font-medium drop-shadow-md">
-                {site.hero.subtitle}
+                {currentSlide.subtitle || site.hero.subtitle}
               </p>
-              <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight">
-                {site.hero.title}
+              <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
+                {currentSlide.title || site.hero.title}
               </h1>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <a 
-                  href="/shop" 
-                  className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
-                >
-                  Shop Now
-                </a>
-                <a 
-                  href="/arrivals" 
-                  className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
-                >
-                  New Arrivals
-                </a>
+                {currentSlide.bannerCtaText ? (
+                  <a 
+                    href={currentSlide.bannerCtaHref || "/shop"} 
+                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                  >
+                    {currentSlide.bannerCtaText}
+                  </a>
+                ) : (
+                  <>
+                    <a 
+                      href="/shop" 
+                      className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                    >
+                      Shop Now
+                    </a>
+                    <a 
+                      href="/arrivals" 
+                      className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                    >
+                      New Arrivals
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
