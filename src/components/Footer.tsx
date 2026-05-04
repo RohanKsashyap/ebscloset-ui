@@ -63,14 +63,14 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-gradient-to-r from-hot-pink to-millennial-pink text-white">
+    <footer className="bg-[#f6f3f2] text-black">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-20">
         <div className="border-b border-white/20 pb-16 mb-16">
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="font-serif text-3xl md:text-4xl mb-6">
               {site.newsletter.heading}
             </h3>
-            <p className="text-sm tracking-wider text-white/80 mb-8">
+            <p className="text-sm tracking-wider text-black/80 mb-8">
               {site.newsletter.subtext}
             </p>
 
@@ -81,11 +81,11 @@ export default function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your email address"
                 required
-                className="flex-1 bg-transparent border-b border-white py-3 px-4 text-sm focus:outline-none focus:border-white/60 transition-colors duration-300 placeholder-white/70"
+                className="flex-1 bg-transparent border-b border-black py-3 px-4 text-sm focus:outline-none focus:border-white/60 transition-colors duration-300 placeholder-black"
               />
               <button
                 type="submit"
-                className="border-b border-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-hot-pink transition-all duration-500"
+                className="border-b border-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-all duration-500"
               >
                 Subscribe
               </button>
@@ -103,11 +103,11 @@ export default function Footer() {
                 {group.links.map((l, li) => (
                   <li key={li}>
                     {l.href.startsWith('/') ? (
-                      <Link to={l.href} className="text-sm text-white/80 hover:text-white transition-colors duration-300">
+                      <Link to={l.href} className="text-sm text-black/80 hover:text-black transition-colors duration-300">
                         {l.label}
                       </Link>
                     ) : (
-                      <a href={l.href} className="text-sm text-white/80 hover:text-white transition-colors duration-300">
+                      <a href={l.href} className="text-sm text-black/80 hover:text-black transition-colors duration-300">
                         {l.label}
                       </a>
                     )}
@@ -123,7 +123,7 @@ export default function Footer() {
             <h4 className="text-sm tracking-widest uppercase mb-6 font-medium">Follow Us</h4>
             <div className="flex space-x-6">
               {site.social.map((s, si) => (
-                <a key={si} href={s.href} className="text-white/80 hover:text-white transition-colors duration-300">
+                <a key={si} href={s.href} className="text-black/80 hover:text-black transition-colors duration-300">
                   {s.kind === 'instagram' && <Instagram className="w-5 h-5" />}
                   {s.kind === 'facebook' && <Facebook className="w-5 h-5" />}
                   {s.kind === 'youtube' && <Youtube className="w-5 h-5" />}
@@ -136,18 +136,18 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex space-x-8">
-            <Link to="/privacy" className="text-xs text-white/80 hover:text-white transition-colors duration-300">
+            <Link to="/privacy" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
               {site.legalLabels.privacy}
             </Link>
-            <Link to="/terms" className="text-xs text-white/80 hover:text-white transition-colors duration-300">
+            <Link to="/terms" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
               {site.legalLabels.terms}
             </Link>
-            <Link to="/cookies" className="text-xs text-white/80 hover:text-white transition-colors duration-300">
+            <Link to="/cookies" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
               {site.legalLabels.cookies}
             </Link>
           </div>
 
-          <p className="text-xs text-white/80">
+          <p className="text-xs text-black/80">
             © 2025 EB'S CLOSET. All rights reserved.
           </p>
         </div>

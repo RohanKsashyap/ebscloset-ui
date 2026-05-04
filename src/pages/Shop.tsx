@@ -62,13 +62,14 @@ export default function Shop() {
     const tParam = sp.get('type');
     setType(tParam || 'All');
     const ageParam = sp.get('age');
-    setAge(ageParam || 'All');
+    const sizeParam = sp.get('size');
+    const combinedSize = sizeParam || ageParam || 'All';
+    setSize(combinedSize);
+    setAge(combinedSize);
     const occParam = sp.get('occasion');
     setOccasion(occParam || 'All');
     const colorParam = sp.get('color');
     setColor(colorParam || 'All');
-    const sizeParam = sp.get('size');
-    setSize(sizeParam || 'All');
   }, [location.search]);
 
   useEffect(() => {
@@ -96,7 +97,12 @@ export default function Shop() {
     return products.filter((p) => {
       const priceVal = p.price;
       if (priceVal < minPrice || priceVal > maxPrice) return false;
-      if (age !== 'All' && !(p.category ?? '').includes(age)) return false;
+      const effectiveSize = size !== 'All' ? size : (age !== 'All' ? age : 'All');
+      if (effectiveSize !== 'All') {
+        const inCategory = (p.category ?? '').includes(effectiveSize);
+        const inSizes = (p.sizes ?? []).includes(effectiveSize);
+        if (!inCategory && !inSizes) return false;
+      }
       if (color !== 'All' && (p.color ?? '').toLowerCase() !== color.toLowerCase()) return false;
       
       if (type !== 'All') {
@@ -105,7 +111,6 @@ export default function Shop() {
       }
 
       if (occasion !== 'All' && (p.occasion ?? '').toLowerCase() !== occasion.toLowerCase()) return false;
-      if (size !== 'All' && !(p.sizes ?? []).includes(size)) return false;
       if (q) {
         const text = `${p.name} ${p.description} ${p.materials ?? ''}`.toLowerCase();
         const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);

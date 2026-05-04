@@ -20,10 +20,10 @@ const defaultCategories = [
     name: 'By Age', 
     href: '/age',
     items: [
-      { label: 'Ages 7-8', href: '/shop?age=7-8' },
-      { label: 'Ages 9-10', href: '/shop?age=9-10' },
-      { label: 'Ages 11-12', href: '/shop?age=11-12' },
-      { label: 'Ages 12-13', href: '/shop?age=12-13' }
+      { label: 'Ages 7-8', href: '/shop?size=7-8' },
+      { label: 'Ages 9-10', href: '/shop?size=9-10' },
+      { label: 'Ages 11-12', href: '/shop?size=11-12' },
+      { label: 'Ages 12-13', href: '/shop?size=12-13' }
     ] 
   },
   { 
@@ -327,7 +327,7 @@ export default function Navigation() {
                 {loadNav(defaultCategories).map((category) => (
                   <div key={category.name}>
                     <Link 
-                      to={category.href} 
+                      to={category.href || '#'} 
                       className="block text-sm tracking-[0.2em] uppercase text-gray-900 font-semibold mb-4"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
