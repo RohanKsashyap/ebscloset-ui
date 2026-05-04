@@ -22,7 +22,7 @@ export default function TrendingDresses() {
     <section className="py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="rounded-3xl p-6 bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-serif text-2xl md:text-3xl text-gray-800">Trending Dresses</h2>
+          <h2 className="font-headline text-2xl md:text-3xl text-gray-800">Trending Dresses</h2>
           <div className="text-sm text-gray-600">{visible.length} items</div>
         </div>
 

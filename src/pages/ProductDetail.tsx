@@ -66,7 +66,7 @@ export default function ProductDetail() {
     return (
       <main className="bg-white">
         <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Loading</h1>
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Loading</h1>
           <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Please wait</p>
         </section>
       </main>
@@ -77,7 +77,7 @@ export default function ProductDetail() {
     return (
       <main className="bg-white">
         <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto text-center">
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Product Not Found</h1>
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Product Not Found</h1>
           <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Please return to the shop</p>
           <a href="/shop" className="inline-block mt-8 border-2 border-hot-pink text-hot-pink px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-500">Back to Shop</a>
         </section>
@@ -156,7 +156,7 @@ export default function ProductDetail() {
           <div id="details-top" className="premium-card p-5 sm:p-6 md:p-8">
             <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-2">{product.category}</p>
             <div className="flex items-start justify-between gap-3">
-              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl mb-2 text-gray-800 leading-tight">{product.name}</h1>
+              <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-2 text-gray-800 leading-tight">{product.name}</h1>
               <button
                 aria-label="Toggle wishlist"
                 onClick={() => toggleWishlist(product.id)}
@@ -275,7 +275,7 @@ export default function ProductDetail() {
         <TrustBadges />
 
         <div className="mt-12 bg-rose-50 p-6 md:p-8 rounded-2xl border border-rose-100">
-          <h3 className="font-serif text-xl md:text-2xl text-gray-800 mb-4 flex items-center gap-2">
+          <h3 className="font-headline text-xl md:text-2xl text-gray-800 mb-4 flex items-center gap-2">
             <Heart className="w-5 h-5 text-hot-pink fill-current" /> Why We Love It
           </h3>
           <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-6">
@@ -316,7 +316,7 @@ export default function ProductDetail() {
         </div>
 
         <div className="mt-16">
-          <h2 className="font-serif text-2xl mb-6 text-gray-800">Reviews</h2>
+          <h2 className="font-headline text-2xl mb-6 text-gray-800">Reviews</h2>
           <Reviews initialReviews={product.reviews} onSubmit={handleReviewSubmit} />
         </div>
 
@@ -337,7 +337,7 @@ export default function ProductDetail() {
                 <X className="w-6 h-6" />
               </button>
               
-              <h3 className="font-serif text-2xl mb-2 text-center">Size Guide</h3>
+              <h3 className="font-headline text-2xl mb-2 text-center">Size Guide</h3>
               <p className="text-center text-gray-500 text-sm mb-6">Find the perfect fit for your little one</p>
               
               <div className="overflow-x-auto">

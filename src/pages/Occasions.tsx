@@ -30,7 +30,7 @@ export default function Occasions() {
     <main className="bg-white scroll-gradient-blur page-enter">
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Occasions</h1>
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Occasions</h1>
           <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Party-ready and special picks</p>
         </div>
         {loading && (

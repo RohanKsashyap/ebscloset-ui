@@ -20,7 +20,7 @@ export default function QuickShopGrid() {
   return (
     <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="text-center mb-12">
-        <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">
+        <h2 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">
           Quick Shop
         </h2>
         <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">
@@ -58,7 +58,7 @@ export default function QuickShopGrid() {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
             </div>
             <p className="text-xs tracking-widest uppercase text-millennial-pink mb-1">{p.category}</p>
-            <h3 className="font-serif text-lg md:text-xl text-gray-800">{p.name}</h3>
+            <h3 className="font-headline text-lg md:text-xl text-gray-800">{p.name}</h3>
             <p className="text-base text-hot-pink font-semibold">${p.price}</p>
           </button>
         ))}

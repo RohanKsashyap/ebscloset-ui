@@ -46,7 +46,7 @@ export default function Cart() {
     <main className="bg-white">
       <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-10 md:mb-16">
-          <h1 className="font-serif text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">Your Bag</h1>
+          <h1 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">Your Bag</h1>
           <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Premium picks for magical moments</p>
         </div>
 
@@ -62,7 +62,7 @@ export default function Cart() {
                 <div key={`${item.id}:${item.size ?? ''}`} className="flex gap-4 md:gap-6 border-b pb-6 md:border-none md:pb-0">
                   <img src={item.image} alt={item.name} className="w-20 h-28 md:w-24 md:h-32 object-cover bg-gray-100 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-lg md:text-xl text-gray-800 mb-1 md:mb-2 truncate">{item.name}</h3>
+                    <h3 className="font-headline text-lg md:text-xl text-gray-800 mb-1 md:mb-2 truncate">{item.name}</h3>
                     <div className="flex items-center gap-2 mb-2 md:mb-3">
                       <p className="text-hot-pink font-semibold">{formatAUD(item.price)}</p>
                       {item.originalPrice && (
@@ -115,7 +115,7 @@ export default function Cart() {
               </div>
             </div>
             <div className="lg:border lg:p-8 bg-gray-50 lg:bg-transparent rounded-2xl p-6 h-fit sticky top-32">
-              <h2 className="font-serif text-xl mb-6 text-gray-900">Order Summary</h2>
+              <h2 className="font-headline text-xl mb-6 text-gray-900">Order Summary</h2>
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>

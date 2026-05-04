@@ -32,7 +32,7 @@ export default function SimilarProducts({ currentId, category }: SimilarProducts
 
   return (
     <section ref={ref} className={`mt-16 ${visible ? 'animate-fadeIn' : 'opacity-0'}`}>
-      <h3 className="font-serif text-2xl mb-6 text-gray-800">You May Also Love</h3>
+      <h3 className="font-headline text-2xl mb-6 text-gray-800">You May Also Love</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {list.map((p) => (
           <a key={p.id} href={`/product/${p.id}`} className="group block">
@@ -41,7 +41,7 @@ export default function SimilarProducts({ currentId, category }: SimilarProducts
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
             </div>
             <p className="text-xs tracking-widest uppercase text-millennial-pink">{p.category}</p>
-            <h4 className="font-serif text-base text-gray-800">{p.name}</h4>
+            <h4 className="font-headline text-base text-gray-800">{p.name}</h4>
             <p className="text-sm text-hot-pink font-semibold">{formatAUD(p.price)}</p>
           </a>
         ))}

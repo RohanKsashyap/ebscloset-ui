@@ -21,7 +21,7 @@ export default function EditorialSection() {
         <p className="text-xs md:text-sm lg:text-base tracking-[0.5em] uppercase mb-8 animate-fadeIn ">
           {site.editorial.kicker}
         </p>
-        <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-8xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
+        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-8xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
         <p className="text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-12 leading-relaxed animate-fadeIn">
           {site.editorial.body}
         </p>

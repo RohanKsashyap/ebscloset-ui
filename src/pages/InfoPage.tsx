@@ -9,7 +9,7 @@ export default function InfoPage({ title, subtitle, children }: InfoPageProps) {
     <main className="bg-white">
       <section className="py-20 sm:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-10 sm:mb-16">
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-6xl lg:text-7xl mb-4 sm:mb-6 text-gray-800">{title}</h1>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-6xl lg:text-7xl mb-4 sm:mb-6 text-gray-800">{title}</h1>
           {subtitle && (
             <p className="text-xs sm:text-sm tracking-[0.25em] sm:tracking-[0.3em] uppercase text-rose-gold">{subtitle}</p>
           )}

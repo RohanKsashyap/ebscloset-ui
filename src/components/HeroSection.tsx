@@ -204,7 +204,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               <p className="text-white text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-4 font-medium drop-shadow-md">
                 {currentSlide.subtitle || site.hero.subtitle}
               </p>
-              <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
+              <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
                 {currentSlide.title || site.hero.title}
               </h1>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -252,7 +252,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
         </section>
 
         <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-          <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-center text-gray-900 mb-10">Find the Perfect Dress for Every Moment</h2>
+          <h2 className="font-headline text-2xl md:text-3xl lg:text-4xl text-center text-gray-900 mb-10">Find the Perfect Dress for Every Moment</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {[
               { title: 'Party Dresses', href: '/party', img: categoryImages.party },
@@ -270,7 +270,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
                 <div className="text-center mt-4">
-                  <p className="font-serif text-lg text-gray-900 group-hover:text-hot-pink transition-colors">{c.title}</p>
+                  <p className="font-headline text-lg text-gray-900 group-hover:text-hot-pink transition-colors">{c.title}</p>
                   <span className="text-xs text-gray-500 uppercase tracking-wider mt-1 block group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                     Shop Now <ChevronRight className="w-3 h-3" />
                   </span>

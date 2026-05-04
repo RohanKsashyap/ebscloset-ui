@@ -100,7 +100,7 @@ export default function HomePage() {
       <CollectionGrid />
       <section className="py-12 md:py-16 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="font-serif text-2xl md:text-5xl text-hot-pink">Shop by Budget</h2>
+          <h2 className="font-headline text-2xl md:text-5xl text-hot-pink">Shop by Budget</h2>
           <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Quick picks for parents</p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -126,7 +126,7 @@ export default function HomePage() {
       {animations.filter(a => !!a.video).length > 0 && (
         <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Homepage Animations</h2>
+            <h2 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Homepage Animations</h2>
             <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Auto‑playing showcase from Admin</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
@@ -148,7 +148,7 @@ export default function HomePage() {
                     <div className="absolute inset-0 bg-hot-pink opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
                   </div>
                   {title && (
-                    <h3 className="font-serif text-2xl md:text-3xl text-gray-800">{title}</h3>
+                    <h3 className="font-headline text-2xl md:text-3xl text-gray-800">{title}</h3>
                   )}
                 </div>
               );

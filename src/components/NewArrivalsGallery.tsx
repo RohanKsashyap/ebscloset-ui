@@ -34,7 +34,7 @@ export default function NewArrivalsGallery() {
     <section className="relative py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto" onClick={() => navigate('/arrivals')}>
       <div className="flex items-center justify-between mb-6">
         <Link to="/arrivals" className="group">
-          <h2 className="font-serif text-2xl md:text-3xl text-gray-800 group-hover:text-hot-pink transition-colors">New Arrivals</h2>
+          <h2 className="font-headline text-2xl md:text-3xl text-gray-800 group-hover:text-hot-pink transition-colors">New Arrivals</h2>
           <p className="text-xs tracking-widest uppercase text-gray-600">Editor's Picks</p>
         </Link>
         <div className="flex items-center gap-3">

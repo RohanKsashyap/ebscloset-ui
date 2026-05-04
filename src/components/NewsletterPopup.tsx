@@ -49,7 +49,7 @@ export default function NewsletterPopup({ onClose }: NewsletterPopupProps) {
           </div>
 
           <div className="p-12 md:p-16 flex flex-col justify-center">
-            <h2 className="font-serif text-3xl md:text-4xl mb-4 text-hot-pink">
+            <h2 className="font-headline text-3xl md:text-4xl mb-4 text-hot-pink">
               Join Our Magic Circle
             </h2>
             <p className="text-sm tracking-wider text-gray-600 mb-8">

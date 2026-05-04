@@ -20,7 +20,7 @@ export default function ProductShowcase() {
   return (
     <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="text-center mb-12 md:mb-20">
-        <h2 className="font-serif text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
+        <h2 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
           Magical New Arrivals
         </h2>
         <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">
@@ -58,7 +58,7 @@ export default function ProductShowcase() {
               <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-1 md:mb-2">
                 {product.category}
               </p>
-              <h3 className="font-serif text-base md:text-2xl mb-1 md:mb-3 text-gray-800 line-clamp-1 md:line-clamp-none">
+              <h3 className="font-headline text-base md:text-2xl mb-1 md:mb-3 text-gray-800 line-clamp-1 md:line-clamp-none">
                 {name}
               </h3>
               <p className="text-base md:text-lg text-hot-pink font-semibold">

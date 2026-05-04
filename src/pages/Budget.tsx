@@ -54,7 +54,7 @@ export default function Budget() {
     <main className="bg-white">
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Shop by Budget</h1>
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Shop by Budget</h1>
           <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Quick picks for parents</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-10">

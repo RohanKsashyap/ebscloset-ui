@@ -57,7 +57,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <p className="text-xs tracking-widest uppercase text-millennial-pink mb-2">
               {product.category}
             </p>
-            <h3 className="font-serif text-2xl md:text-3xl mb-3 text-gray-800">
+            <h3 className="font-headline text-2xl md:text-3xl mb-3 text-gray-800">
               {product.name}
             </h3>
             <p className="text-xl text-hot-pink font-semibold mb-6">
@@ -94,7 +94,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
 
             <div className="mt-8">
-              <h4 className="font-serif text-xl mb-4 text-gray-800">Reviews</h4>
+              <h4 className="font-headline text-xl mb-4 text-gray-800">Reviews</h4>
               <Reviews initialReviews={(product as DataProduct).reviews ?? []} />
             </div>
           </div>

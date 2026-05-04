@@ -19,8 +19,8 @@ export default function NotFound() {
       />
       
       <div className="max-w-2xl w-full text-center">
-        <span className="text-hot-pink font-serif text-8xl md:text-9xl mb-8 block opacity-20">404</span>
-        <h1 className="font-serif text-4xl md:text-6xl text-gray-900 mb-6">Lost in the Magic?</h1>
+        <span className="text-hot-pink font-headline text-8xl md:text-9xl mb-8 block opacity-20">404</span>
+        <h1 className="font-headline text-4xl md:text-6xl text-gray-900 mb-6">Lost in the Magic?</h1>
         <p className="text-gray-600 text-lg mb-12 max-w-md mx-auto">
           It seems the page you're looking for has wandered off. Don't worry, there's plenty more to discover in our closet.
         </p>

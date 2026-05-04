@@ -110,7 +110,7 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
             <X size={20} />
           </button>
           <div className="mb-6">
-            <h3 className="font-serif text-xl mb-1 text-gray-800">Write a Review</h3>
+            <h3 className="font-headline text-xl mb-1 text-gray-800">Write a Review</h3>
             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Only verified buyers can review products</p>
           </div>
           

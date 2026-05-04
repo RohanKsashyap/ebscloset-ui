@@ -17,7 +17,7 @@ export default function CollectionGrid() {
   return (
     <section className="py-12 md:py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="text-center mb-12 md:mb-20">
-        <h2 className="font-serif text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
+        <h2 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
           Shop by Age
         </h2>
         <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">
@@ -56,7 +56,7 @@ export default function CollectionGrid() {
             <p className="text-xs tracking-widest uppercase text-millennial-pink mb-2">
               {collection.category}
             </p>
-            <h3 className="font-serif text-2xl md:text-3xl text-gray-800">
+            <h3 className="font-headline text-2xl md:text-3xl text-gray-800">
               {collection.title}
             </h3>
           </div>

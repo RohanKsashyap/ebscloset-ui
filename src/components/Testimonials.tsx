@@ -38,7 +38,7 @@ export default function Testimonials() {
   return (
     <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto bg-white">
       <div className="text-center mb-16">
-        <h2 className="font-serif text-4xl md:text-5xl text-hot-pink mb-4">What Parents Say</h2>
+        <h2 className="font-headline text-4xl md:text-5xl text-hot-pink mb-4">What Parents Say</h2>
         <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Trusted by families everywhere</p>
       </div>
 

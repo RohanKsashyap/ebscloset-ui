@@ -87,7 +87,7 @@ export default function Dress3DViewer() {
         {/* 2) Right column: thumbnails only; upload moved to admin */}
         <div className="space-y-4">
           <div className="rounded-3xl p-6 bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl">
-            <h3 className="font-serif text-xl text-hot-pink mb-3">3D Dress Preview</h3>
+            <h3 className="font-headline text-xl text-hot-pink mb-3">3D Dress Preview</h3>
             {!image && (
               <p className="text-sm text-gray-700">No dress uploaded. Go to Admin → 3D Dress to upload a PNG.</p>
             )}
@@ -100,7 +100,7 @@ export default function Dress3DViewer() {
 
           {/* 3) Thumbnails of saved rotations */}
           <div className="rounded-3xl p-4 bg-white/40 backdrop-blur-xl border border-white/30 shadow-xl">
-            <h4 className="font-serif text-lg text-gray-800 mb-3">Saved Rotations</h4>
+            <h4 className="font-headline text-lg text-gray-800 mb-3">Saved Rotations</h4>
             {snapshots.length === 0 ? (
               <p className="text-sm text-gray-600">No saved angles yet.</p>
             ) : (

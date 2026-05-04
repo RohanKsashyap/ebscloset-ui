@@ -134,7 +134,7 @@ export default function Navigation() {
             {/* Center Section: Logo */}
             <div className="flex-none flex justify-center items-center h-full px-2">
               {shouldShowSolid ? (
-                <Link to="/" className="font-serif tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap">
+                <Link to="/" className="font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap">
                   EB'S CLOSET
                 </Link>
               ) : (
@@ -314,7 +314,7 @@ export default function Navigation() {
           <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white shadow-2xl animate-slideInLeft h-full flex flex-col">
             <div className="p-6 flex-shrink-0 flex items-center justify-between border-b">
-              <Link to="/" className="font-serif text-xl text-hot-pink" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link to="/" className="font-headline text-xl text-hot-pink" onClick={() => setIsMobileMenuOpen(false)}>
                 <img src="/logo.png" alt="Eb's Closet" className="h-8 w-auto object-contain" />
               </Link>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2">

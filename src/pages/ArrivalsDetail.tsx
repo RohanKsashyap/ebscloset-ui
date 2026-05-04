@@ -37,7 +37,7 @@ export default function ArrivalsDetail() {
   if (loading) return (
     <main className="bg-white scroll-gradient-blur page-enter">
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <h1 className="font-serif text-3xl">Loading</h1>
+        <h1 className="font-headline text-3xl">Loading</h1>
       </section>
     </main>
   );
@@ -45,7 +45,7 @@ export default function ArrivalsDetail() {
   if (!product) return (
     <main className="bg-white scroll-gradient-blur page-enter">
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <h1 className="font-serif text-3xl">Item not found</h1>
+        <h1 className="font-headline text-3xl">Item not found</h1>
       </section>
     </main>
   );
@@ -72,7 +72,7 @@ export default function ArrivalsDetail() {
           </div>
           <div className="premium-card glass-card p-6 md:p-8">
             <p className="text-xs tracking-widest uppercase text-gray-600 mb-2">New Arrivals</p>
-            <h1 className="font-serif text-3xl md:text-4xl mb-2 text-gray-800">{product.name}</h1>
+            <h1 className="font-headline text-3xl md:text-4xl mb-2 text-gray-800">{product.name}</h1>
             <div className="flex items-baseline gap-3 mb-4">
               <p className="text-2xl font-semibold">{formatAUD(product.price)}</p>
               <span className="text-xs tracking-widest uppercase text-gray-500">Inclusive of taxes</span>

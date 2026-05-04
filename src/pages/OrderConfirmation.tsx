@@ -12,7 +12,7 @@ export default function OrderConfirmation() {
           <CheckCircle className="w-20 h-20 text-hot-pink" />
         </div>
         
-        <h1 className="font-serif text-4xl md:text-5xl mb-6 text-gray-900">Thank You!</h1>
+        <h1 className="font-headline text-4xl md:text-5xl mb-6 text-gray-900">Thank You!</h1>
         <p className="text-xl text-gray-600 mb-8">Your order has been successfully placed.</p>
         
         {orderId && (

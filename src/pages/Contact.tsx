@@ -50,7 +50,7 @@ export default function Contact() {
           <div className="absolute inset-0 bg-black/30" />
         </div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <h1 className="font-serif text-5xl md:text-8xl text-white mb-6 drop-shadow-lg">Contact Us</h1>
+          <h1 className="font-headline text-5xl md:text-8xl text-white mb-6 drop-shadow-lg">Contact Us</h1>
           <p className="text-white text-lg md:text-xl font-light leading-relaxed drop-shadow-md">
             We're here to help you with your premium wardrobe needs and any inquiries about our curated collections.
           </p>
@@ -64,7 +64,7 @@ export default function Contact() {
           <div className="bg-white rounded-[2rem] p-8 md:p-12 shadow-2xl border border-gray-100">
             <div className="flex items-center gap-4 mb-8">
               <div className="h-[2px] w-8 bg-hot-pink" />
-              <h2 className="text-3xl font-serif text-gray-900">Send us a Message</h2>
+              <h2 className="text-3xl font-headline text-gray-900">Send us a Message</h2>
             </div>
             
             <form onSubmit={onSubmit} className="space-y-8">
@@ -126,7 +126,7 @@ export default function Contact() {
           {/* Right Column: Info */}
           <div className="space-y-12 py-8">
             <div>
-              <h2 className="text-4xl font-serif text-gray-900 mb-12">Get in Touch</h2>
+              <h2 className="text-4xl font-headline text-gray-900 mb-12">Get in Touch</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="flex gap-6 items-start">
@@ -204,7 +204,7 @@ export default function Contact() {
       {/* FAQ Section */}
       <section className="py-24 bg-pink-50/50 mt-12 text-center">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl font-serif text-gray-900 mb-4">Looking for quick answers?</h2>
+          <h2 className="text-4xl font-headline text-gray-900 mb-4">Looking for quick answers?</h2>
           <p className="text-gray-600 mb-10 text-lg">Browse our frequently asked questions about shipping, returns, sizing, and more.</p>
           <a 
             href="/faq" 
