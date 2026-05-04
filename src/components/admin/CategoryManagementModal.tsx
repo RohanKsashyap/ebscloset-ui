@@ -9,13 +9,13 @@ import {
   ChevronDown,
   Hash
 } from 'lucide-react';
-import type { GalleryCategory } from '../../services/adminService';
+import type { Category } from '../../services/adminService';
 
 interface CategoryManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (formData: FormData) => void;
-  initialCategory?: GalleryCategory;
+  initialCategory?: Category;
 }
 
 export default function CategoryManagementModal({ 

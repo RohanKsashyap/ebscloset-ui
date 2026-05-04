@@ -59,6 +59,14 @@ export function useGalleryCategories(enabled: boolean = true) {
   });
 }
 
+export function useCategories(enabled: boolean = true) {
+  return useQuery({
+    queryKey: ['admin', 'categories'],
+    queryFn: () => adminService.getCategories(),
+    enabled,
+  });
+}
+
 export function useSubscribers(enabled: boolean = true) {
   return useQuery({
     queryKey: ['admin', 'subscribers'],

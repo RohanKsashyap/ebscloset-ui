@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../../services/productService';
-import { adminService, type Review, type GalleryCategory } from '../../services/adminService';
+import { adminService, type Review, type GalleryCategory, type Category } from '../../services/adminService';
 import type { Testimonial, GalleryImage } from '../../services/siteService';
 import { useNavigate } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
@@ -26,6 +26,7 @@ import {
   useSiteSettings, 
   useDashboard, 
   useDiscounts, 
+  useCategories,
   useGalleryCategories, 
   useSubscribers, 
   useMessages, 
@@ -88,7 +89,8 @@ export default function AdminDashboard() {
   const { data: site = null, isLoading: siteLoading } = useSiteSettings(tab === 'site' || tab === 'dashboard' || tab === 'budgets');
   const { data: dashboardData = null, isLoading: dashboardLoading } = useDashboard(tab === 'dashboard' || tab === 'analytics');
   const { data: codes = [], isLoading: codesLoading } = useDiscounts(tab === 'discounts' || tab === 'dashboard');
-  const { data: galleryCategories = [], isLoading: galleryCategoriesLoading } = useGalleryCategories(tab === 'categories' || tab === 'gallery');
+  const { data: productCategories = [], isLoading: productCategoriesLoading } = useCategories(tab === 'categories' || tab === 'products');
+  const { data: galleryCategories = [], isLoading: galleryCategoriesLoading } = useGalleryCategories(tab === 'gallery');
   const { data: subscribers = [], isLoading: subscribersLoading } = useSubscribers(tab === 'newsletter');
   const { data: messages = [], isLoading: messagesLoading } = useMessages(tab === 'inbox');
   const { data: reviews = [], isLoading: reviewsLoading } = useReviews(tab === 'reviews');
@@ -98,8 +100,8 @@ export default function AdminDashboard() {
 
   const isPageLoading = 
     (tab === 'dashboard' && (dashboardLoading || productsLoading || ordersLoading || siteLoading || codesLoading)) ||
-    (tab === 'products' && productsLoading) ||
-    (tab === 'categories' && galleryCategoriesLoading) ||
+    (tab === 'products' && (productsLoading || productCategoriesLoading)) ||
+    (tab === 'categories' && productCategoriesLoading) ||
     (tab === 'budgets' && siteLoading) ||
     (tab === 'discounts' && codesLoading) ||
     (tab === 'site' && siteLoading) ||
@@ -119,7 +121,7 @@ export default function AdminDashboard() {
   const [productFilter, setProductFilter] = useState('All Products');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [productEditing, setProductEditing] = useState<Product | undefined>(undefined);
-  const [categoryEditing, setCategoryEditing] = useState<GalleryCategory | undefined>(undefined);
+  const [categoryEditing, setCategoryEditing] = useState<Category | undefined>(undefined);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isOrderDetailsModalOpen, setIsOrderDetailsModalOpen] = useState(false);
@@ -175,13 +177,13 @@ export default function AdminDashboard() {
   const saveCategory = async (formData: FormData) => {
     try {
       if (categoryEditing?._id) {
-        await adminService.updateGalleryCategory(categoryEditing._id, formData);
+        await adminService.updateCategory(categoryEditing._id, formData);
         showToast('Category updated successfully');
       } else {
-        await adminService.createGalleryCategory(formData);
+        await adminService.createCategory(formData);
         showToast('Category created successfully');
       }
-      queryClient.invalidateQueries({ queryKey: ['admin', 'galleryCategories'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
       setIsCategoryModalOpen(false);
       setCategoryEditing(undefined);
     } catch (err: any) {
@@ -430,6 +432,7 @@ export default function AdminDashboard() {
               <div className="space-y-1">
                 <SidebarItem icon={LayoutGrid} label="Dashboard" active={tab === 'dashboard'} onClick={() => setTab('dashboard')} />
                 <SidebarItem icon={ShoppingBag} label="Products" active={tab === 'products'} onClick={() => setTab('products')} />
+                <SidebarItem icon={LayoutGrid} label="Categories" active={tab === 'categories'} onClick={() => setTab('categories')} />
                 <SidebarItem icon={ShoppingCart} label="Orders" active={tab === 'orders'} onClick={() => setTab('orders')} />
                 <SidebarItem icon={Users} label="Customers" active={tab === 'customers'} onClick={() => setTab('customers')} />
                 <SidebarItem icon={BarChart} label="Analytics" active={tab === 'analytics'} onClick={() => setTab('analytics')} />
@@ -734,7 +737,20 @@ export default function AdminDashboard() {
 
             {tab === 'inventory' && <InventoryManagement products={catalog} />}
 
-            {tab === 'categories' && <CategoryManagement />}
+            {tab === 'categories' && (
+              <CategoryManagement 
+                categories={productCategories}
+                onRefresh={() => queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })}
+                onEdit={(cat) => {
+                  setCategoryEditing(cat);
+                  setIsCategoryModalOpen(true);
+                }}
+                onAdd={() => {
+                  setCategoryEditing(undefined);
+                  setIsCategoryModalOpen(true);
+                }}
+              />
+            )}
 
             {tab === 'budgets' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">

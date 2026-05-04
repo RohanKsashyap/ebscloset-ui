@@ -1,8 +1,9 @@
-import { forwardRef, useState, useEffect, useMemo } from 'react';
+import { forwardRef, useState, useEffect, useMemo, useRef } from 'react';
 import { loadSite, type SiteSettings } from '../utils/storage';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Image as ImageIcon } from 'lucide-react';
 import { useProductContext } from '../context/ProductContext';
 import { getOptimizedUrl } from '../utils/imageKit';
+import { productService, type Category } from '../services/productService';
 
 type HeroSectionProps = object;
 
@@ -69,12 +70,44 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
   (_, ref) => {
     const { products } = useProductContext();
     const [site, setSite] = useState<SiteSettings>(() => loadSite(defaultSite));
+    const [realCategories, setRealCategories] = useState<Category[]>([]);
+    const carouselRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       const refresh = () => setSite(loadSite(defaultSite));
       window.addEventListener('backend-hydrated', refresh);
+      
+      const fetchRealCats = async () => {
+        try {
+          const cats = await productService.getCategories();
+          setRealCategories(cats);
+        } catch (e) {
+          console.error('Error fetching categories:', e);
+        }
+      };
+      fetchRealCats();
+
       return () => window.removeEventListener('backend-hydrated', refresh);
     }, []);
+
+    // Auto-slider for categories carousel
+    useEffect(() => {
+      if (realCategories.length <= 4) return;
+      
+      const interval = setInterval(() => {
+        if (carouselRef.current) {
+          const container = carouselRef.current;
+          const scrollAmount = container.clientWidth / 2; // Scroll half a container
+          if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+            container.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          }
+        }
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }, [realCategories]);
     
     const categoryImages = useMemo(() => {
       const getFirstImage = (cat: string) => {
@@ -257,26 +290,37 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
 {/* Find the Perfect Dress for Every Moment section */}
 
-        <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
+        <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden">
           <h2 className="font-headline text-2xl md:text-3xl lg:text-4xl text-center text-gray-900 mb-10">Find the Perfect Dress for Every Moment</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-            {[
-              { title: 'Party Dresses', href: '/shop?occasion=party', img: categoryImages.party },
-              { title: 'Casual Dresses', href: '/shop?type=casual', img: categoryImages.casual },
-              { title: 'Seasonal Dresses', href: '/shop?type=seasonal', img: categoryImages.seasonal },
-              { title: 'Special Occasion', href: '/shop?occasion=special', img: categoryImages.special },
-            ].map((c) => (
-              <a key={c.title} href={c.href} className="block group">
-                <div className="aspect-[3/4] overflow-hidden rounded-sm relative">
-                  {c.img ? (
-                    <img src={getOptimizedUrl(c.img, 400)} alt={c.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
+          
+          <div 
+            ref={carouselRef}
+            className="flex gap-4 md:gap-8 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory touch-pan-x no-scrollbar"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {(realCategories.length > 0 ? realCategories : [
+              { _id: '1', title: 'Party Dresses', slug: 'party', imageUrl: categoryImages.party, name: 'Party Dresses' },
+              { _id: '2', title: 'Casual Dresses', slug: 'casual', imageUrl: categoryImages.casual, name: 'Casual Dresses' },
+              { _id: '3', title: 'Seasonal Dresses', slug: 'seasonal', imageUrl: categoryImages.seasonal, name: 'Seasonal Dresses' },
+              { _id: '4', title: 'Special Occasion', slug: 'special', imageUrl: categoryImages.special, name: 'Special Occasion' },
+            ]).map((c: any) => (
+              <a 
+                key={c._id || c.slug} 
+                href={`/shop?category=${c.slug}`} 
+                className="block group flex-shrink-0 w-[70%] sm:w-[45%] md:w-[23%] snap-start"
+              >
+                <div className="aspect-[3/4] overflow-hidden rounded-sm relative shadow-sm">
+                  {c.imageUrl ? (
+                    <img src={getOptimizedUrl(c.imageUrl, 400)} alt={c.name || c.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" decoding="async" />
                   ) : (
-                    <div className="w-full h-full bg-gray-100" />
+                    <div className="w-full h-full bg-pink-50 flex items-center justify-center text-pink-200">
+                      <ImageIcon size={48} />
+                    </div>
                   )}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                 </div>
                 <div className="text-center mt-4">
-                  <p className="font-headline text-lg text-gray-900 group-hover:text-hot-pink transition-colors">{c.title}</p>
+                  <p className="font-headline text-lg text-gray-900 group-hover:text-hot-pink transition-colors">{c.name || c.title}</p>
                   <span className="text-xs text-gray-500 uppercase tracking-wider mt-1 block group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                     Shop Now <ChevronRight className="w-3 h-3" />
                   </span>

@@ -112,7 +112,7 @@ export default function ProductManagementModal({
   useEffect(() => {
     const fetchCats = async () => {
       try {
-        const res = await adminService.getAdminGalleryCategories();
+        const res = await adminService.getCategories();
         setCategories(res);
       } catch (e) {
         console.error('Error fetching categories:', e);

@@ -13,13 +13,13 @@ import {
   XCircle,
   Clock
 } from 'lucide-react';
-import { adminService, type GalleryCategory } from '../../services/adminService';
+import { adminService, type Category } from '../../services/adminService';
 import { useToast } from '../../context/ToastContext';
 
 interface CategoryManagementProps {
-  categories: GalleryCategory[];
+  categories: Category[];
   onRefresh: () => void;
-  onEdit: (category: GalleryCategory) => void;
+  onEdit: (category: Category) => void;
   onAdd: () => void;
 }
 
@@ -62,7 +62,7 @@ export default function CategoryManagement({ categories, onRefresh, onEdit, onAd
     if (!window.confirm(`Are you sure you want to delete the category "${name}"?`)) return;
     
     try {
-      await adminService.deleteGalleryCategory(id);
+      await adminService.deleteCategory(id);
       showToast(`Category "${name}" deleted successfully`);
       onRefresh();
     } catch (err: any) {

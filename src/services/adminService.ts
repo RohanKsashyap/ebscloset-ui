@@ -46,6 +46,19 @@ export interface GalleryCategory {
   productCount?: number;
 }
 
+export interface Category {
+  _id: string;
+  name: string;
+  description?: string;
+  slug: string;
+  isActive: boolean;
+  displayOrder: number;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  imageId?: string;
+  createdAt: string;
+}
+
 export const adminService = {
   getOrders: async (): Promise<Order[]> => {
     const response = await apiClient.get('/admin/orders');
@@ -259,5 +272,29 @@ export const adminService = {
 
   deleteGalleryCategory: async (id: string): Promise<void> => {
     await apiClient.delete(`/gallery/admin/categories/${id}`);
+  },
+
+  // Product Categories
+  getCategories: async (): Promise<Category[]> => {
+    const response = await apiClient.get('/admin/categories');
+    return response.data || [];
+  },
+
+  createCategory: async (formData: FormData): Promise<Category> => {
+    const response = await apiClient.post('/admin/categories', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  updateCategory: async (id: string, formData: FormData): Promise<Category> => {
+    const response = await apiClient.put(`/admin/categories/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  deleteCategory: async (id: string): Promise<void> => {
+    await apiClient.delete(`/admin/categories/${id}`);
   },
 };

@@ -56,7 +56,7 @@ export const productService = {
 
   getCategories: async (): Promise<Category[]> => {
     if (!(await ensureBackendAvailable())) return [];
-    const response = await apiClient.get('/gallery/categories');
+    const response = await apiClient.get('/categories');
     return response.data || [];
   },
 
