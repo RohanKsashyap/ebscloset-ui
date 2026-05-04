@@ -14,7 +14,9 @@ export default function Shop() {
   const [color, setColor] = useState<string>('All');
   const [type, setType] = useState<string>('All');
   const [occasion, setOccasion] = useState<string>('All');
+  const [style, setStyle] = useState<string>('All');
   const [size, setSize] = useState<string>('All');
+  const [newArrivalOnly, setNewArrivalOnly] = useState(false);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(100000);
   const [q, setQ] = useState('');
@@ -68,8 +70,12 @@ export default function Shop() {
     setAge(combinedSize);
     const occParam = sp.get('occasion');
     setOccasion(occParam || 'All');
+    const styleParam = sp.get('style');
+    setStyle(styleParam || 'All');
     const colorParam = sp.get('color');
     setColor(colorParam || 'All');
+    const naParam = sp.get('newarrival');
+    setNewArrivalOnly(naParam === 'true');
   }, [location.search]);
 
   useEffect(() => {
@@ -78,7 +84,9 @@ export default function Shop() {
     if (color !== 'All') filters.color = color;
     if (type !== 'All') filters.type = type;
     if (occasion !== 'All') filters.occasion = occasion;
+    if (style !== 'All') filters.style = style;
     if (size !== 'All') filters.size = size;
+    if (newArrivalOnly) filters.newarrival = true;
     if (q) filters.q = q;
     filters.minPrice = minPrice;
     filters.maxPrice = maxPrice;
@@ -91,7 +99,7 @@ export default function Shop() {
         setProducts(loadProducts(defaultProducts));
       })
       .finally(() => setLoading(false));
-  }, [age, color, type, occasion, size, minPrice, maxPrice, q]);
+  }, [age, color, type, occasion, style, size, newArrivalOnly, minPrice, maxPrice, q]);
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -105,12 +113,33 @@ export default function Shop() {
       }
       if (color !== 'All' && (p.color ?? '').toLowerCase() !== color.toLowerCase()) return false;
       
+      if (newArrivalOnly && !p.newarrival) return false;
+
       if (type !== 'All') {
         const catName = p.categoryId?.name || p.category || '';
-        if (catName.toLowerCase() !== type.toLowerCase()) return false;
+        const pType = p.type || '';
+        if (
+          catName.toLowerCase() !== type.toLowerCase() && 
+          !pType.toLowerCase().includes(type.toLowerCase())
+        ) return false;
       }
 
-      if (occasion !== 'All' && (p.occasion ?? '').toLowerCase() !== occasion.toLowerCase()) return false;
+      if (occasion !== 'All') {
+        const pOccasion = p.occasion || '';
+        const pType = p.type || '';
+        const pCat = p.category || '';
+        if (
+          !pOccasion.toLowerCase().includes(occasion.toLowerCase()) &&
+          !pType.toLowerCase().includes(occasion.toLowerCase()) &&
+          !pCat.toLowerCase().includes(occasion.toLowerCase())
+        ) return false;
+      }
+
+      if (style !== 'All') {
+        const text = `${p.name} ${p.description} ${p.type} ${p.category} ${p.occasion}`.toLowerCase();
+        if (!text.includes(style.toLowerCase())) return false;
+      }
+      
       if (q) {
         const text = `${p.name} ${p.description} ${p.materials ?? ''}`.toLowerCase();
         const tokens = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -118,7 +147,7 @@ export default function Shop() {
       }
       return true;
     });
-  }, [age, color, type, occasion, size, minPrice, maxPrice, q, products]);
+  }, [age, color, type, occasion, style, size, newArrivalOnly, minPrice, maxPrice, q, products]);
 
 
   return (
@@ -241,6 +270,52 @@ export default function Shop() {
                       </div>
                       <span className={`ml-3 text-sm transition-colors ${type === cat.name ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
                         {cat.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Occasion */}
+              <div>
+                <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Occasion</h3>
+                <div className="space-y-3">
+                  {['Birthday', 'Dance', 'Holiday', 'Everyday', 'Casual', 'Party', 'Seasonal', 'Special'].map((occ) => (
+                    <label key={occ} className="flex items-center group cursor-pointer">
+                      <div className="relative flex items-center justify-center">
+                        <input 
+                          type="checkbox" 
+                          checked={occasion === occ} 
+                          onChange={() => updateParams('occasion', occasion === occ ? 'All' : occ)}
+                          className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-lg checked:border-hot-pink transition-all"
+                        />
+                        <div className="absolute w-2.5 h-2.5 rounded-sm bg-hot-pink scale-0 peer-checked:scale-100 transition-transform" />
+                      </div>
+                      <span className={`ml-3 text-sm transition-colors ${occasion === occ ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
+                        {occ}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Style */}
+              <div>
+                <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Style</h3>
+                <div className="space-y-3">
+                  {['Princess', 'Sparkle', 'Floral', 'Unicorn'].map((s) => (
+                    <label key={s} className="flex items-center group cursor-pointer">
+                      <div className="relative flex items-center justify-center">
+                        <input 
+                          type="checkbox" 
+                          checked={style === s} 
+                          onChange={() => updateParams('style', style === s ? 'All' : s)}
+                          className="peer appearance-none w-5 h-5 border-2 border-gray-200 rounded-lg checked:border-hot-pink transition-all"
+                        />
+                        <div className="absolute w-2.5 h-2.5 rounded-sm bg-hot-pink scale-0 peer-checked:scale-100 transition-transform" />
+                      </div>
+                      <span className={`ml-3 text-sm transition-colors ${style === s ? 'text-black font-medium' : 'text-gray-500 group-hover:text-black'}`}>
+                        {s}
                       </span>
                     </label>
                   ))}

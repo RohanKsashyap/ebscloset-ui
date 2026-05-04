@@ -31,9 +31,9 @@ export default function NewArrivalsGallery() {
   const displayProducts = newArrivals && newArrivals.length > 0 ? newArrivals : visible;
 
   return (
-    <section className="relative py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto" onClick={() => navigate('/arrivals')}>
+    <section className="relative py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto" onClick={() => navigate('/shop?newarrival=true')}>
       <div className="flex items-center justify-between mb-6">
-        <Link to="/arrivals" className="group">
+        <Link to="/shop?newarrival=true" className="group">
           <h2 className="font-headline text-2xl md:text-3xl text-gray-800 group-hover:text-hot-pink transition-colors">New Arrivals</h2>
           <p className="text-xs tracking-widest uppercase text-gray-600">Editor's Picks</p>
         </Link>
@@ -44,7 +44,7 @@ export default function NewArrivalsGallery() {
           <button aria-label="next" onClick={(e) => { e.stopPropagation(); scrollBy(360); }} className="px-4 py-3 rounded-full bg-white border shadow-sm hover:shadow-md ease-lux">
             <ChevronRight className="w-5 h-5 text-hot-pink" />
           </button>
-          <Link to="/arrivals" className="premium-button">View All</Link>
+          <Link to="/shop?newarrival=true" className="premium-button">View All</Link>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ export default function NewArrivalsGallery() {
 
           return (
             <div key={it.id || i} className="snap-start shrink-0 w-[220px] sm:w-[280px] md:w-[340px]">
-              <Link to={it._id ? `/product/${it._id}` : '/arrivals'} className="block overflow-hidden bg-white">
+              <Link to={it._id ? `/product/${it._id}` : '/shop?newarrival=true'} className="block overflow-hidden bg-white">
                 <div className="aspect-[3/4] overflow-hidden">
                   {imgUrl ? (
                     <img src={getOptimizedUrl(imgUrl, 400)} alt={name} className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.05]" loading="lazy" decoding="async" />

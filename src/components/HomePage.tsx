@@ -105,12 +105,12 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {budgetItems.map((b) => (
-            <a key={b.q} href={`/shop?budget=${b.q}`} className="premium-card rounded-2xl overflow-hidden border bg-white/60">
+            <a key={b.q} href={`/shop?budget=${b.q}`} className="premium-card   overflow-hidden border bg-white/60">
               <div className="aspect-[4/3] bg-gradient-to-br from-pink-50 via-white to-peach-50 flex items-center justify-center">
                 {b.img ? (
                   <img src={getOptimizedUrl(b.img, 400)} alt={`${b.label} Girls Dress`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-white/70 border" />
+                  <div className="w-20 h-20   bg-white/70 border" />
                 )}
               </div>
               <div className="p-4 text-center">
@@ -120,7 +120,7 @@ export default function HomePage() {
           ))}
         </div>
         <div className="text-center mt-8">
-          <a href="/budget" className="premium-button">Explore Budget Zone</a>
+          <a href="/shop" className="premium-button">Explore All Dresses</a>
         </div>
       </section>
       {animations.filter(a => !!a.video).length > 0 && (

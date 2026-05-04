@@ -5,9 +5,9 @@ import { ArrowRight, ShoppingBag, Heart, Sparkles } from 'lucide-react';
 
 export default function NotFound() {
   const popularCategories = [
-    { name: 'New Arrivals', href: '/arrivals', icon: <Sparkles className="w-5 h-5" /> },
-    { name: 'Party Dresses', href: '/party', icon: <ShoppingBag className="w-5 h-5" /> },
-    { name: 'Special Occasion', href: '/special-occasion', icon: <Heart className="w-5 h-5" /> },
+    { name: 'New Arrivals', href: '/shop?newarrival=true', icon: <Sparkles className="w-5 h-5" /> },
+    { name: 'Party Dresses', href: '/shop?occasion=party', icon: <ShoppingBag className="w-5 h-5" /> },
+    { name: 'Special Occasion', href: '/shop?occasion=special', icon: <Heart className="w-5 h-5" /> },
     { name: 'Shop All', href: '/shop', icon: <ArrowRight className="w-5 h-5" /> },
   ];
 

@@ -26,22 +26,11 @@ import GiftCards from './pages/GiftCards';
 import OurStory from './pages/OurStory';
 import Contact from './pages/Contact';
 import Shipping from './pages/Shipping';
-import Arrivals from './pages/Arrivals';
-import ArrivalsDetail from './pages/ArrivalsDetail';
-import Age from './pages/Age';
-import Occasions from './pages/Occasions';
-import Styles from './pages/Styles';
-import Parents from './pages/Parents';
-import Party from './pages/Party';
-import Casual from './pages/Casual';
-import Seasonal from './pages/Seasonal';
-import SpecialOccasion from './pages/SpecialOccasion';
 import Returns from './pages/Returns';
 import FAQ from './pages/FAQ';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import Cookies from './pages/Cookies';
-import Budget from './pages/Budget';
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
@@ -75,21 +64,10 @@ function AppRoutes() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/cookies" element={<Cookies />} />
-        <Route path="/budget" element={<Budget />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/signup" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/arrivals" element={<Arrivals />} />
-        <Route path="/arrivals/:id" element={<ArrivalsDetail />} />
-        <Route path="/age" element={<Age />} />
-        <Route path="/occasions" element={<Occasions />} />
-        <Route path="/styles" element={<Styles />} />
-        <Route path="/parents" element={<Parents />} />
-        <Route path="/party" element={<Party />} />
-        <Route path="/casual" element={<Casual />} />
-        <Route path="/seasonal" element={<Seasonal />} />
-        <Route path="/special-occasion" element={<SpecialOccasion />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

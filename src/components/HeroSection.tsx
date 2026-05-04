@@ -211,7 +211,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                 {currentSlide.bannerCtaText ? (
                   <a 
                     href={currentSlide.bannerCtaHref || "/shop"} 
-                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-black rounded-full hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
                   >
                     {currentSlide.bannerCtaText}
                   </a>
@@ -224,7 +224,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                       Shop Now
                     </a>
                     <a 
-                      href="/arrivals" 
+                      href="/shop?newarrival=true" 
                       className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
                     >
                       New Arrivals
@@ -251,14 +251,20 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
           )}
         </section>
 
+
+
+
+
+{/* Find the Perfect Dress for Every Moment section */}
+
         <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
           <h2 className="font-headline text-2xl md:text-3xl lg:text-4xl text-center text-gray-900 mb-10">Find the Perfect Dress for Every Moment</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {[
-              { title: 'Party Dresses', href: '/party', img: categoryImages.party },
-              { title: 'Casual Dresses', href: '/casual', img: categoryImages.casual },
-              { title: 'Seasonal Dresses', href: '/seasonal', img: categoryImages.seasonal },
-              { title: 'Special Occasion', href: '/special-occasion', img: categoryImages.special },
+              { title: 'Party Dresses', href: '/shop?occasion=party', img: categoryImages.party },
+              { title: 'Casual Dresses', href: '/shop?type=casual', img: categoryImages.casual },
+              { title: 'Seasonal Dresses', href: '/shop?type=seasonal', img: categoryImages.seasonal },
+              { title: 'Special Occasion', href: '/shop?occasion=special', img: categoryImages.special },
             ].map((c) => (
               <a key={c.title} href={c.href} className="block group">
                 <div className="aspect-[3/4] overflow-hidden rounded-sm relative">

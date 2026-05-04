@@ -20,10 +20,10 @@ export default function Footer() {
         { label: 'Ages 12-13', href: '/shop' },
       ]},
       { title: 'Quick Links', links: [
-        { label: 'New Arrival Dresses', href: '/arrivals' },
+        { label: 'New Arrival Dresses', href: '/shop?newarrival=true' },
         { label: 'Best Seller Collection', href: '/shop' },
-        { label: 'Party Dress Styles', href: '/party' },
-        { label: 'Casual Wear', href: '/casual' },
+        { label: 'Party Dress Styles', href: '/shop?occasion=party' },
+        { label: 'Casual Wear', href: '/shop?type=casual' },
       ]},
       { title: 'For Parents', links: [
         { label: 'Size Guide', href: '/size-guide' },

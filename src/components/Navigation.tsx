@@ -9,26 +9,26 @@ import { useCart } from '../context/CartContext';
 const defaultCategories = [
   { 
     name: 'New Arrivals', 
-    href: '/arrivals',
+    href: '/shop?newarrival=true',
     items: [
-      { label: 'Latest Dresses', href: '/arrivals' },
+      { label: 'Latest Dresses', href: '/shop?newarrival=true' },
       { label: "Editor's Picks", href: '/shop?tag=editors-pick' },
       { label: 'Trending Now', href: '/shop?sort=trending' }
     ] 
   },
   { 
     name: 'By Age', 
-    href: '/age',
+    href: '/shop',
     items: [
-      { label: 'Ages 7-8', href: '/shop?size=7-8' },
-      { label: 'Ages 9-10', href: '/shop?size=9-10' },
-      { label: 'Ages 11-12', href: '/shop?size=11-12' },
-      { label: 'Ages 12-13', href: '/shop?size=12-13' }
+      { label: 'Ages 7-8', href: '/shop?age=7-8' },
+      { label: 'Ages 9-10', href: '/shop?age=9-10' },
+      { label: 'Ages 11-12', href: '/shop?age=11-12' },
+      { label: 'Ages 12-13', href: '/shop?age=12-13' }
     ] 
   },
   { 
     name: 'Occasions', 
-    href: '/occasions',
+    href: '/shop',
     items: [
       { label: 'Birthday Parties', href: '/shop?occasion=birthday' },
       { label: 'School Dances', href: '/shop?occasion=dance' },
@@ -38,7 +38,7 @@ const defaultCategories = [
   },
   { 
     name: 'Styles', 
-    href: '/styles',
+    href: '/shop',
     items: [
       { label: 'Princess Gowns', href: '/shop?style=princess' },
       { label: 'Sparkle Dresses', href: '/shop?style=sparkle' },
@@ -46,8 +46,7 @@ const defaultCategories = [
       { label: 'Unicorn Dreams', href: '/shop?style=unicorn' }
     ] 
   },
-  { name: 'Size Guide', href: '/size-guide', items: [] },
-  { name: 'Parents', href: '/parents', items: [] },
+  
 ];
 
 export default function Navigation() {
@@ -127,7 +126,7 @@ export default function Navigation() {
                 to="/"
                 className={`transition-colors duration-300 hidden lg:block ${shouldShowSolid ? 'text-black' : 'text-white hover:text-white/70'}`} 
               >
-                {/* <img src="/logo.png" alt="Eb's Closet" className="h-14 w-auto object-contain" /> */}
+                <img src="/logo.png" alt="Eb's Closet" className="h-14 w-auto object-contain" />
               </Link>
             </div>
 
