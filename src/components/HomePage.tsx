@@ -101,7 +101,7 @@ export default function HomePage() {
       <section className="py-12 md:py-16 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="font-headline text-2xl md:text-5xl text-hot-pink">Shop by Budget</h2>
-          <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Quick picks for parents</p>
+          <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold mt-4">Quick picks for parents</p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {budgetItems.map((b) => (

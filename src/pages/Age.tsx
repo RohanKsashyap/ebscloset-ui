@@ -13,8 +13,8 @@ export default function Age() {
     <main className="bg-white scroll-gradient-blur page-enter">
       <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">By Age</h1>
-          <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Curated picks by age groups</p>
+          <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-black">By Age</h1>
+          <p className="text-sm tracking-[0.3em] uppercase text-">Curated picks by age groups</p>
         </div>
         {loadingProducts && (
           <div className="text-center text-gray-700">Loading...</div>
