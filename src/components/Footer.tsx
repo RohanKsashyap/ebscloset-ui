@@ -79,15 +79,15 @@ export default function Footer() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
+                placeholder="EMAIL ADDRESS"
                 required
-                className="flex-1 bg-transparent border-b border-black py-3 px-4 text-sm focus:outline-none focus:border-white/60 transition-colors duration-300 placeholder-black"
+                className="flex-1 bg-transparent border rounded-full border-black py-3 px-4 text-sm focus:outline-none focus:border-white/60 transition-colors duration-300 placeholder-black"
               />
               <button
                 type="submit"
-                className="border-b border-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-all duration-500"
+                className="border rounded-full border-white px-8 py-3  ml-2 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-all duration-500"
               >
-                Subscribe
+                Join
               </button>
             </form>
           </div>
