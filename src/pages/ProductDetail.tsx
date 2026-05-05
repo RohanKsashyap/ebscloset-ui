@@ -144,7 +144,7 @@ export default function ProductDetail() {
           <span className="mx-2">/</span>
           <a href="/shop" className="hover:underline">Shop</a>
           <span className="mx-2">/</span>
-          <span className="text-gray-800">{product.category}</span>
+          <span className="text-gray-800">{product.categoryId.name}</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           <div>
@@ -172,7 +172,7 @@ export default function ProductDetail() {
             <div className="flex items-baseline gap-3 mb-3">
               <p className="text-xl md:text-2xl font-semibold text-hot-pink">{formatAUD(product.price)}</p>
               {product.originalPrice && (
-                <p className="text-base md:text-lg text-gray-400 line-through decoration-hot-pink/30">{formatAUD(product.originalPrice)}</p>
+                <p className="text-base md:text-lg text-gray-400 line-through decoration-red-500">{formatAUD(product.originalPrice)}</p>
               )}
               {product.sku && (
                 <span className="text-[10px] md:text-xs tracking-widest uppercase text-gray-500 ml-auto">Inclusive of taxes</span>
