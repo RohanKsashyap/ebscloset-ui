@@ -22,7 +22,7 @@ export default function Footer() {
       { title: 'Quick Links', links: [
         { label: 'New Arrival Dresses', href: '/shop?newarrival=true' },
         { label: 'Best Seller Collection', href: '/shop' },
-        { label: 'Party Dress Styles', href: '/shop?occasion=party' },
+        { label: 'Party Dress Styles', href: '/shop?type=party' },
         { label: 'Casual Wear', href: '/shop?type=casual' },
       ]},
       { title: 'For Parents', links: [

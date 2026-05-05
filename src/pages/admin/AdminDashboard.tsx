@@ -611,6 +611,10 @@ export default function AdminDashboard() {
               </div>
             )}
 
+
+{/* product tab starts here */}
+
+
             {tab === 'products' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -707,7 +711,7 @@ export default function AdminDashboard() {
                             <td className="px-8 py-5 font-black text-sm text-gray-900">${product.price}</td>
                             <td className="px-8 py-5">
                               <span className="px-4 py-1.5 bg-gray-50 text-gray-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100">
-                                {product.category || 'Uncategorized'}
+                                {product.categoryId?.name || 'Uncategorized'}
                               </span>
                             </td>
                             <td className="px-8 py-5 text-right">

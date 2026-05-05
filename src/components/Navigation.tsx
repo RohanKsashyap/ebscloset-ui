@@ -30,20 +30,20 @@ const defaultCategories = [
     name: 'Occasions', 
     href: '/shop',
     items: [
-      { label: 'Birthday Parties', href: '/shop?occasion=birthday' },
-      { label: 'School Dances', href: '/shop?occasion=dance' },
-      { label: 'Holidays', href: '/shop?occasion=holiday' },
-      { label: 'Everyday Magic', href: '/shop?occasion=everyday' }
+      { label: 'Birthday Parties', href: '/shop?type=birthday' },
+      { label: 'School Dances', href: '/shop?type=dance' },
+      { label: 'Holidays', href: '/shop?type=holiday' },
+      { label: 'Everyday Magic', href: '/shop?type=everyday' }
     ] 
   },
   { 
     name: 'Styles', 
     href: '/shop',
     items: [
-      { label: 'Princess Gowns', href: '/shop?style=princess' },
-      { label: 'Sparkle Dresses', href: '/shop?style=sparkle' },
-      { label: 'Floral Prints', href: '/shop?style=floral' },
-      { label: 'Unicorn Dreams', href: '/shop?style=unicorn' }
+      { label: 'Princess Gowns', href: '/shop?type=princess' },
+      { label: 'Sparkle Dresses', href: '/shop?type=sparkle' },
+      { label: 'Floral Prints', href: '/shop?type=floral' },
+      { label: 'Unicorn Dreams', href: '/shop?type=unicorn' }
     ] 
   },
   
