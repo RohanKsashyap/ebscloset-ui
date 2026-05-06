@@ -1,56 +1,19 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadHomeAnimations } from '../utils/storage';
 import HeroSection from './HeroSection';
-import { loadSite, type SiteSettings, formatAUD } from '../utils/storage';
-import { getOptimizedUrl } from '../utils/imageKit';
 import { Link } from 'react-router-dom';
 import CollectionGrid from './CollectionGrid';
 import EditorialSection from './EditorialSection';
 import ProductShowcase from './ProductShowcase';
 import NewArrivalsGallery from './NewArrivalsGallery';
 import Testimonials from './Testimonials';
-import { useProductContext } from '../context/ProductContext';
+import BudgetSection from './BudgetSection';
 import SEO from './SEO';
 import { Helmet } from 'react-helmet-async';
 
 export default function HomePage() {
-  const { products } = useProductContext();
   const heroRef = useRef<HTMLDivElement>(null);
   const [animations, setAnimations] = useState(loadHomeAnimations());
-
-  const budgetItems = useMemo(() => {
-    const fallback: SiteSettings = { 
-      hero: { title: '', subtitle: '', slides: [], bannerImage: '', bannerTitle: '', bannerSubtitle: '', bannerCtaText: '', bannerCtaHref: '' }, 
-      editorial: { image: '', kicker: '', title: '', body: '', ctaText: '', ctaHref: '' }, 
-      collections: [], 
-      footerGroups: [], 
-      social: [], 
-      newsletter: { heading: '', subtext: '' }, 
-      legalLabels: { privacy: '', terms: '', cookies: '' }, 
-      infoPages: {}, 
-      budgets: [
-        { label: 'Under $20', slug: 'under20', min: 0, max: 2000 },
-        { label: 'Under $40', slug: 'under40', min: 0, max: 4000 },
-        { label: 'Under $60', slug: 'under60', min: 0, max: 6000 },
-        { label: '$60 – $80', slug: '60-80', min: 6000, max: 8000 },
-        { label: '$80 – $100', slug: '80-100', min: 8000, max: 10000 },
-        { label: '$100+ Premium', slug: '100plus', min: 10000, max: 1000000 },
-      ] 
-    };
-    const site = loadSite(fallback);
-    return (site.budgets ?? fallback.budgets!).map((b) => {
-      const label = b.slug.startsWith('under')
-        ? `Under ${formatAUD(b.max)}`
-        : b.slug === '100plus'
-          ? `${formatAUD(b.min)}+ Premium`
-          : `${formatAUD(b.min)} – ${formatAUD(b.max)}`;
-      
-      const p = products.find(p => p.price >= b.min && p.price <= b.max);
-      const img = p?.image || (p?.images && p.images[0]) || null;
-      
-      return { label, q: b.slug, img };
-    });
-  }, [products]);
 
   useEffect(() => {
     const onUpdate = () => setAnimations(loadHomeAnimations());
@@ -99,31 +62,7 @@ export default function HomePage() {
       </Helmet>
       <HeroSection ref={heroRef} />
       <CollectionGrid />
-      <section className="py-12 md:py-16 px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="font-headline text-2xl md:text-5xl text-hot-pink">Shop by Budget</h2>
-          <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold mt-4">Quick picks for parents</p>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {budgetItems.map((b) => (
-            <Link key={b.q} to={`/shop?budget=${b.q}`} className="premium-card   overflow-hidden border bg-white/60">
-              <div className="aspect-[4/3] bg-gradient-to-br from-pink-50 via-white to-peach-50 flex items-center justify-center">
-                {b.img ? (
-                  <img src={getOptimizedUrl(b.img, 400)} alt={`${b.label} Girls Dress`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-                ) : (
-                  <div className="w-20 h-20   bg-white/70 border" />
-                )}
-              </div>
-              <div className="p-4 text-center">
-                <p className="text-sm text-gray-800">{b.label}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <div className="text-center mt-8">
-          <Link to="/shop" className="premium-button">Explore All Dresses</Link>
-        </div>
-      </section>
+      <BudgetSection />
       {animations.filter(a => !!a.video).length > 0 && (
         <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
           <div className="text-center mb-12">
