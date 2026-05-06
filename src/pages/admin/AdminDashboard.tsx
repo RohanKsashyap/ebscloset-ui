@@ -776,16 +776,17 @@ export default function AdminDashboard() {
 
             {tab === 'orders' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <OrdersManagement 
-                  orders={orders} 
-                  onUpdateStatus={updateOrderStatus} 
-                  onDelete={deleteOrder}
-                  onBulkDelete={bulkDeleteOrders}
-                  onViewDetails={(order) => {
-                    setSelectedOrder(order);
-                    setIsOrderDetailsModalOpen(true);
-                  }}
-                />
+               <OrdersManagement 
+  orders={orders} 
+  onUpdateStatus={updateOrderStatus} 
+  onDeleteOrder={deleteOrder}
+  onBulkDeleteOrders={bulkDeleteOrders}
+  onViewDetails={(order) => {
+    setSelectedOrder(order);
+    setIsOrderDetailsModalOpen(true);
+    setIsOrderDetailsModalOpen(true);
+  }}
+/>
               </div>
             )}
 
