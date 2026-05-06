@@ -20,10 +20,14 @@ const defaultCategories = [
     name: 'By Age', 
     href: '/shop',
     items: [
-      { label: 'Ages 7-8', href: '/shop?age=7-8' },
-      { label: 'Ages 9-10', href: '/shop?age=9-10' },
-      { label: 'Ages 11-12', href: '/shop?age=11-12' },
-      { label: 'Ages 12-13', href: '/shop?age=12-13' }
+      { label: '0-1 Yrs', href: '/shop?age=0-1' },
+      { label: '1-2 Yrs', href: '/shop?age=1-2' },
+      { label: '3-4 Yrs', href: '/shop?age=3-4' },
+      { label: '5-6 Yrs', href: '/shop?age=5-6' },
+      { label: '7-8 Yrs', href: '/shop?age=7-8' },
+      { label: '9-10 Yrs', href: '/shop?age=9-10' },
+      { label: '11-12 Yrs', href: '/shop?age=11-12' },
+      { label: '13-14 Yrs', href: '/shop?age=13-14' }
     ] 
   },
   { 

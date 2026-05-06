@@ -62,10 +62,9 @@ export default function Shop() {
     const tParam = sp.get('type');
     setType(tParam || 'All');
     const ageParam = sp.get('age');
+    setAge(ageParam || 'All');
     const sizeParam = sp.get('size');
-    const combinedSize = sizeParam || ageParam || 'All';
-    setSize(combinedSize);
-    setAge(combinedSize);
+    setSize(sizeParam || 'All');
     const colorParam = sp.get('color');
     setColor(colorParam || 'All');
     const naParam = sp.get('newarrival');
@@ -97,12 +96,17 @@ export default function Shop() {
     return products.filter((p) => {
       const priceVal = p.price;
       if (priceVal < minPrice || priceVal > maxPrice) return false;
-      const effectiveSize = size !== 'All' ? size : (age !== 'All' ? age : 'All');
-      if (effectiveSize !== 'All') {
-        const inCategory = (p.category ?? '').includes(effectiveSize);
-        const inSizes = (p.sizes ?? []).includes(effectiveSize);
-        if (!inCategory && !inSizes) return false;
+      
+      if (size !== 'All') {
+        const inSizes = (p.sizes ?? []).includes(size);
+        if (!inSizes) return false;
       }
+
+      if (age !== 'All') {
+        const inAgeGroups = (p.ageGroups ?? []).includes(age);
+        if (!inAgeGroups) return false;
+      }
+
       if (color !== 'All' && (p.color ?? '').toLowerCase() !== color.toLowerCase()) return false;
       
       if (newArrivalOnly && !p.newarrival) return false;
@@ -252,21 +256,21 @@ export default function Shop() {
                 </div>
               </div>
 
-              {/* Size */}
+              {/* Age Group */}
               <div>
-                <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Size</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {['7-8', '9-10', '11-12', '12-13'].map((s) => (
+                <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Age Group</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {["0-1", "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14"].map((a) => (
                     <button
-                      key={s}
-                      onClick={() => updateParams('size', size === s ? 'All' : s)}
+                      key={a}
+                      onClick={() => updateParams('age', age === a ? 'All' : a)}
                       className={`py-2 text-xs border rounded-lg transition-all ${
-                        size === s 
+                        age === a 
                           ? 'bg-hot-pink border-hot-pink text-white shadow-lg shadow-hot-pink/20' 
                           : 'border-gray-100 text-gray-500 hover:border-gray-300'
                       }`}
                     >
-                      {s}
+                      {a} Yrs
                     </button>
                   ))}
                 </div>

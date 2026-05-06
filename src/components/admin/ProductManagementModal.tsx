@@ -46,6 +46,7 @@ export default function ProductManagementModal({
     trending: false,
     bestseller: false,
     assured: false,
+    ageGroups: [],
     variants: []
   });
   
@@ -75,6 +76,7 @@ export default function ProductManagementModal({
         ...initialProduct,
         categoryId: (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '',
         sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes.join(', ') : (initialProduct as any).sizes || '',
+        ageGroups: (initialProduct as any).ageGroups || [],
         color: (initialProduct as any).color || '',
       });
       setPreviews({
@@ -94,10 +96,12 @@ export default function ProductManagementModal({
         minStock: 5,
         size: '',
         sizes: '',
+        ageGroups: [],
         color: '',
         newarrival:false,
         trending: false,
         bestseller: false,
+        assured: false,
         variants: []
       });
       setPreviews({
@@ -181,6 +185,8 @@ export default function ProductManagementModal({
         } else if (key === 'sizes' && typeof form[key] === 'string') {
           const sizesArr = form[key].split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
           sizesArr.forEach((s: string) => formData.append('sizes', s));
+        } else if (key === 'ageGroups' && Array.isArray(form[key])) {
+          form[key].forEach((a: string) => formData.append('ageGroups', a));
         } else {
           // Only append if it's defined and not null
           if (form[key] !== null && form[key] !== undefined) {
@@ -368,6 +374,33 @@ export default function ProductManagementModal({
                       onChange={(e) => setForm({ ...form, sizes: e.target.value })} 
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Age Groups */}
+              <div className="space-y-3">
+                <label className="text-sm font-bold text-gray-900">Age Groups</label>
+                <div className="flex flex-wrap gap-2">
+                  {["0-1", "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14"].map((age) => (
+                    <button
+                      key={age}
+                      type="button"
+                      onClick={() => {
+                        const current = form.ageGroups || [];
+                        const updated = current.includes(age)
+                          ? current.filter((a: string) => a !== age)
+                          : [...current, age];
+                        setForm({ ...form, ageGroups: updated });
+                      }}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        (form.ageGroups || []).includes(age)
+                          ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
+                          : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'
+                      }`}
+                    >
+                      {age} Yrs
+                    </button>
+                  ))}
                 </div>
               </div>
 

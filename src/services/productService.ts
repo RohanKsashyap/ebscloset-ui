@@ -17,6 +17,7 @@ export interface Product {
   };
   size?: string;
   sizes?: string[];
+  ageGroups?: string[];
   color?: string;
   rating?: number;
   reviews?: Array<{
