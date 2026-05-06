@@ -31,18 +31,40 @@ export default function BudgetSection() {
     const site = loadSite(fallback);
     const budgets = site.budgets?.length ? site.budgets : fallback.budgets!;
     
-    return budgets.map((b) => {
-      const priceLabel = b.slug.startsWith('under')
-        ? `Under ${formatAUD(b.max / 100)}`
-        : b.slug === '100plus'
-          ? `${formatAUD(b.min / 100)}+`
-          : `${formatAUD(b.min / 100)} – ${formatAUD(b.max / 100)}`;
+    const items: any[] = [];
+    budgets.forEach((b) => {
+      const matchingProducts = products.filter(p => p.price >= b.min && p.price <= b.max);
       
-      const p = products.find(p => p.price >= b.min && p.price <= b.max);
-      const img = p?.image || (p?.images && p.images[0]) || null;
-      
-      return { ...b, priceLabel, img };
+      if (matchingProducts.length === 0) {
+        const priceLabel = b.slug.startsWith('under')
+          ? `Under ${formatAUD(b.max / 100)}`
+          : b.slug === '100plus'
+            ? `${formatAUD(b.min / 100)}+`
+            : `${formatAUD(b.min / 100)} – ${formatAUD(b.max / 100)}`;
+            
+        items.push({ ...b, priceLabel, img: null, badge: 'Essentials' });
+      } else {
+        // Show up to 3 different products for each budget tier to provide variety
+        matchingProducts.slice(0, 3).forEach((p, idx) => {
+          const priceLabel = b.slug.startsWith('under')
+            ? `Under ${formatAUD(b.max / 100)}`
+            : b.slug === '100plus'
+              ? `${formatAUD(b.min / 100)}+`
+              : `${formatAUD(b.min / 100)} – ${formatAUD(b.max / 100)}`;
+          
+          items.push({
+            ...b,
+            id: p._id || p.id,
+            label: p.name, // Show product name for variety
+            categoryLabel: b.label, // Keep original budget label (e.g. Playground Chic)
+            priceLabel,
+            img: p.image || (p.images && p.images[0]) || null,
+            badge: idx === 0 ? 'Best Deal' : idx === 1 ? 'Trending' : 'New'
+          });
+        });
+      }
     });
+    return items;
   }, [products]);
 
   // Auto-scroll logic
@@ -80,7 +102,6 @@ export default function BudgetSection() {
           </p>
         </div>
 
-        {/* Carousel */}
         <div 
           className="relative group"
           onMouseEnter={() => setIsPaused(true)}
@@ -93,7 +114,7 @@ export default function BudgetSection() {
           >
             {budgetItems.map((item, idx) => (
               <Link 
-                key={item.slug}
+                key={`${item.slug}-${item.id || idx}`}
                 to={`/shop?budget=${item.slug}`}
                 className="flex-shrink-0 w-[280px] md:w-[350px] snap-start"
               >
@@ -113,7 +134,7 @@ export default function BudgetSection() {
                   {/* Badge */}
                   <div className="absolute top-6 right-6">
                     <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                      {idx === 0 ? 'Best Deal' : 'Trending'}
+                      {item.badge}
                     </span>
                   </div>
 
@@ -122,7 +143,8 @@ export default function BudgetSection() {
                     <h3 className="text-hot-pink text-2xl md:text-3xl font-black mb-1 uppercase italic">
                       {item.priceLabel}
                     </h3>
-                    <p className="text-gray-900 font-bold text-lg mb-4">{item.label}</p>
+                    <p className="text-gray-900 font-bold text-lg leading-tight mb-1">{item.label}</p>
+                    <p className="text-gray-500 text-sm mb-4 uppercase tracking-widest">{item.categoryLabel}</p>
                     <div className="flex items-center gap-2 text-hot-pink font-bold text-sm uppercase tracking-widest group-hover/card:gap-4 transition-all">
                       Explore Budget Deals <ArrowRight className="w-4 h-4" />
                     </div>
@@ -168,7 +190,7 @@ export default function BudgetSection() {
               <Zap className="w-10 h-10 text-white" />
             </div>
             <div className="aspect-square bg-hot-pink rounded-3xl flex flex-col items-center justify-center text-center p-4">
-              <span className="text-2xl font-black">V.A</span>
+              <span className="text-2xl font-black">E.B'S</span>
               <span className="text-[10px] uppercase font-bold tracking-widest">Limited</span>
             </div>
           </div>
