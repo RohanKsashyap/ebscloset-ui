@@ -1,25 +1,44 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { adminService, type AgeCollection } from '../services/adminService';
 
-const AGE_GROUPS = [
-  { id: 1, age: '0-1', title: '0-1 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4' },
-  { id: 2, age: '1-2', title: '1-2 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4' },
-  { id: 3, age: '3-4', title: '3-4 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v1.mp4' },
-  { id: 4, age: '5-6', title: '5-6 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4' },
-  { id: 5, age: '7-8', title: '7-8 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4' },
-  { id: 6, age: '9-10', title: '9-10 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v1.mp4' },
-  { id: 7, age: '11-12', title: '11-12 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4' },
-  { id: 8, age: '13-14', title: '13-14 Yrs', video: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4' },
+const DEFAULT_AGE_GROUPS = [
+  { id: 1, ageGroup: '0-1', categoryLabel: '0-1 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4', mediaType: 'video' },
+  { id: 2, ageGroup: '1-2', categoryLabel: '1-2 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4', mediaType: 'video' },
+  { id: 3, ageGroup: '3-4', categoryLabel: '3-4 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v1.mp4', mediaType: 'video' },
+  { id: 4, ageGroup: '5-6', categoryLabel: '5-6 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4', mediaType: 'video' },
+  { id: 5, ageGroup: '7-8', categoryLabel: '7-8 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4', mediaType: 'video' },
+  { id: 6, ageGroup: '9-10', categoryLabel: '9-10 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v1.mp4', mediaType: 'video' },
+  { id: 7, ageGroup: '11-12', categoryLabel: '11-12 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v3.mp4', mediaType: 'video' },
+  { id: 8, ageGroup: '13-14', categoryLabel: '13-14 Yrs', mediaUrl: 'https://ik.imagekit.io/rohanKashyap/ebs-closet/v2.mp4', mediaType: 'video' },
 ];
 
 export default function CollectionGrid() {
   const navigate = useNavigate();
-  const [failed, setFailed] = useState<Record<number, boolean>>({});
+  const [collections, setCollections] = useState<any[]>([]);
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (isPaused) return;
+    const fetchCollections = async () => {
+      try {
+        const data = await adminService.getAgeCollections();
+        if (data && data.length > 0) {
+          setCollections(data);
+        } else {
+          setCollections(DEFAULT_AGE_GROUPS);
+        }
+      } catch (err) {
+        console.error('Error fetching age collections:', err);
+        setCollections(DEFAULT_AGE_GROUPS);
+      }
+    };
+    fetchCollections();
+  }, []);
+
+  useEffect(() => {
+    if (isPaused || collections.length === 0) return;
 
     const interval = setInterval(() => {
       if (scrollRef.current) {
@@ -54,43 +73,72 @@ export default function CollectionGrid() {
         onMouseLeave={() => setIsPaused(false)}
         className="flex gap-6 md:gap-8 overflow-x-auto snap-x snap-mandatory pb-8 custom-scrollbar scroll-smooth"
       >
-        {AGE_GROUPS.map((group) => (
-          <div
-            key={group.id}
-            onClick={() => navigate(`/shop?age=${group.age}`)}
-            className="group cursor-pointer snap-start shrink-0 w-[260px] md:w-[320px] lg:w-[380px]"
-          >
-            <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-2xl">
-              {failed[group.id] ? (
-                <div className="w-full h-full bg-pink-50 flex items-center justify-center">
-                  <span className="text-hot-pink font-headline text-2xl">{group.title}</span>
-                </div>
-              ) : (
-                <video
-                  src={group.video}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="metadata"
-                  onError={() => setFailed((prev) => ({ ...prev, [group.id]: true }))}
-                  className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+        {collections.map((group) => {
+          const id = group._id || group.id;
+          const isVideo = group.mediaType === 'video' || group.video;
+          
+          return (
+            <div
+              key={id}
+              onClick={() => navigate(`/shop?age=${group.ageGroup}`)}
+              className="group cursor-pointer snap-start shrink-0 w-[260px] md:w-[320px] lg:w-[380px]"
+            >
+              <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-2xl">
+                {failed[id] || !group.mediaUrl ? (
+                  <div className="w-full h-full bg-pink-50 flex items-center justify-center">
+                    <span className="text-hot-pink font-headline text-2xl">{group.categoryLabel || group.ageGroup}</span>
+                  </div>
+                ) : (
+                  <>
+                    {isVideo ? (
+                      <video
+                        src={group.mediaUrl}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="metadata"
+                        onError={() => setFailed((prev) => ({ ...prev, [id]: true }))}
+                        className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                      />
+                    ) : (
+                      <img 
+                        src={group.mediaUrl} 
+                        alt={group.categoryLabel}
+                        onError={() => setFailed((prev) => ({ ...prev, [id]: true }))}
+                        className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                      />
+                    )}
+                  </>
+                )}
+                
+                {/* Overlay with dynamic opacity */}
+                <div 
+                  className="absolute inset-0 bg-black transition-opacity duration-500" 
+                  style={{ opacity: (group.overlayOpacity || 0) / 100 }}
                 />
-              )}
-              <div className="absolute inset-0 bg-hot-pink opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
-              
-              {/* Overlay for age group title on mobile/hover */}
-              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
-                <h3 className="font-headline text-2xl md:text-3xl text-white">
-                  {group.title}
-                </h3>
+                
+                <div className="absolute inset-0 bg-hot-pink opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+                
+                {/* Content Overlay */}
+                <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
+                  <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[8px] font-black uppercase tracking-widest mb-2 border border-white/10 text-white/90">
+                    {group.categoryLabel || 'Collection'}
+                  </span>
+                  <h3 className="font-headline text-2xl md:text-3xl text-white">
+                    {group.headline || `${group.ageGroup} Yrs`}
+                  </h3>
+                  <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-white/70 mt-1">
+                    {group.subtext || 'Explore Collection'}
+                  </p>
+                </div>
               </div>
+              <p className="text-xs tracking-widest uppercase text-hot-pink font-bold text-center">
+                View Collection
+              </p>
             </div>
-            <p className="text-xs tracking-widest uppercase text-hot-pink font-bold text-center">
-              Explore Collection
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

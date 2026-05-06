@@ -115,6 +115,14 @@ export function useUsers(enabled: boolean = true) {
   });
 }
 
+export function useAgeCollections(enabled: boolean = true) {
+  return useQuery({
+    queryKey: ['admin', 'ageCollections'],
+    queryFn: () => adminService.getAgeCollections(),
+    enabled,
+  });
+}
+
 // Mutations
 export function useUpdateProduct() {
   const queryClient = useQueryClient();

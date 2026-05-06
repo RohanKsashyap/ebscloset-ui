@@ -7,6 +7,7 @@ import OrdersManagement from './OrdersManagement';
 import DiscountsManagement from './DiscountsManagement';
 import CustomersManagement from './CustomersManagement';
 import CategoryManagement from './CategoryManagement';
+import AgeCategoryManager from './AgeCategoryManager';
 import Analytics from './Analytics';
 import SiteSettingsComp from './SiteSettings';
 import { useToast } from '../../context/ToastContext';
@@ -33,6 +34,7 @@ import {
   useReviews, 
   useTestimonials, 
   useGalleryImages, 
+  useAgeCollections,
   useUsers,
   useCreateProduct,
   useUpdateProduct
@@ -50,6 +52,7 @@ import {
   MessageSquare, 
   Image as ImageIcon, 
   Settings,
+  Layers,
   Users,
   BarChart3 as BarChart,
   Plus,
@@ -81,7 +84,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
+  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
   
   // React Query Hooks
   const { data: catalog = [], isLoading: productsLoading } = useProducts(tab === 'products' || tab === 'inventory' || tab === 'dashboard' || tab === 'testimonials' || tab === 'reviews');
@@ -96,12 +99,14 @@ export default function AdminDashboard() {
   const { data: reviews = [], isLoading: reviewsLoading } = useReviews(tab === 'reviews');
   const { data: testimonials = [], isLoading: testimonialsLoading } = useTestimonials(tab === 'testimonials');
   const { data: galleryImages = [], isLoading: galleryImagesLoading } = useGalleryImages(tab === 'gallery');
+  const { data: ageCollections = [], isLoading: ageCollectionsLoading } = useAgeCollections(tab === 'age-categories' || tab === 'dashboard');
   const { data: users = [], isLoading: usersLoading } = useUsers(tab === 'customers');
 
   const isPageLoading = 
-    (tab === 'dashboard' && (dashboardLoading || productsLoading || ordersLoading || siteLoading || codesLoading)) ||
+    (tab === 'dashboard' && (dashboardLoading || productsLoading || ordersLoading || siteLoading || codesLoading || ageCollectionsLoading)) ||
     (tab === 'products' && (productsLoading || productCategoriesLoading)) ||
     (tab === 'categories' && productCategoriesLoading) ||
+    (tab === 'age-categories' && ageCollectionsLoading) ||
     (tab === 'budgets' && siteLoading) ||
     (tab === 'discounts' && codesLoading) ||
     (tab === 'site' && siteLoading) ||
@@ -433,6 +438,7 @@ export default function AdminDashboard() {
                 <SidebarItem icon={LayoutGrid} label="Dashboard" active={tab === 'dashboard'} onClick={() => setTab('dashboard')} />
                 <SidebarItem icon={ShoppingBag} label="Products" active={tab === 'products'} onClick={() => setTab('products')} />
                 <SidebarItem icon={LayoutGrid} label="Categories" active={tab === 'categories'} onClick={() => setTab('categories')} />
+                <SidebarItem icon={Layers} label="Age Categories" active={tab === 'age-categories'} onClick={() => setTab('age-categories')} />
                 <SidebarItem icon={ShoppingCart} label="Orders" active={tab === 'orders'} onClick={() => setTab('orders')} />
                 <SidebarItem icon={Users} label="Customers" active={tab === 'customers'} onClick={() => setTab('customers')} />
                 <SidebarItem icon={BarChart} label="Analytics" active={tab === 'analytics'} onClick={() => setTab('analytics')} />
@@ -754,6 +760,10 @@ export default function AdminDashboard() {
                   setIsCategoryModalOpen(true);
                 }}
               />
+            )}
+
+            {tab === 'age-categories' && (
+              <AgeCategoryManager />
             )}
 
             {tab === 'budgets' && (

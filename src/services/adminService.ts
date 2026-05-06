@@ -59,6 +59,21 @@ export interface Category {
   createdAt: string;
 }
 
+export interface AgeCollection {
+  _id: string;
+  ageGroup: string;
+  mediaUrl: string;
+  mediaId: string;
+  mediaType: 'image' | 'video';
+  headline?: string;
+  categoryLabel?: string;
+  subtext?: string;
+  overlayOpacity?: number;
+  duration?: number;
+  transition?: string;
+  displayOrder?: number;
+}
+
 export const adminService = {
   getOrders: async (): Promise<Order[]> => {
     const response = await apiClient.get('/admin/orders');
@@ -296,5 +311,29 @@ export const adminService = {
 
   deleteCategory: async (id: string): Promise<void> => {
     await apiClient.delete(`/admin/categories/${id}`);
+  },
+
+  // Age Collections
+  getAgeCollections: async (): Promise<AgeCollection[]> => {
+    const response = await apiClient.get('/age-collections');
+    return response.data || [];
+  },
+
+  createAgeCollection: async (formData: FormData): Promise<AgeCollection> => {
+    const response = await apiClient.post('/age-collections', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  updateAgeCollection: async (id: string, formData: FormData): Promise<AgeCollection> => {
+    const response = await apiClient.put(`/age-collections/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  deleteAgeCollection: async (id: string): Promise<void> => {
+    await apiClient.delete(`/age-collections/${id}`);
   },
 };
