@@ -208,7 +208,7 @@ export default function Navigation() {
                             key={product._id || product.id}
                             className="w-full flex items-center px-4 py-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-50 last:border-0"
                             onClick={() => {
-                              navigate(`/product/${product._id || product.id}`);
+                              navigate(`/product/${product.slug || product._id || product.id}`);
                               setExpanded(false);
                               setQ('');
                             }}

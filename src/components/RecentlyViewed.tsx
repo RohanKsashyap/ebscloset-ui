@@ -28,7 +28,7 @@ export default function RecentlyViewed() {
       <h3 className="font-headline text-2xl mb-8 text-gray-800 text-center">Recently Viewed</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {recent.map((p) => (
-          <a key={p.id} href={`/product/${p.id}`} className="group block">
+          <a key={p.id} href={`/product/${p.slug || p.id}`} className="group block">
             <div className="relative overflow-hidden aspect-[3/4] mb-3 bg-gray-100 rounded-lg">
               <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />

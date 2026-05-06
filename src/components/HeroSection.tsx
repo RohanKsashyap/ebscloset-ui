@@ -127,7 +127,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
     const baseSlides = (site.hero.slides && site.hero.slides.length > 0 
       ? site.hero.slides 
-      : (site.hero.backgroundImages || []).map((url: string, i: number) => ({ id: String(i), type: 'image' as const, url }))
+      : (site.hero.backgroundImages || []).map((url: string, i: number) => ({ id: `slide-${i}`, type: 'image' as const, url }))
     ).filter((s: any) => s.isActive !== false);
 
     const slides = baseSlides.filter((s: any) => !(s.type === 'video' && /w3schools\.com\/html\/mov_bbb\.mp4/i.test(s.url)));

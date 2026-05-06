@@ -185,7 +185,7 @@ const Wishlist = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
               {suggestedProducts.map((product) => (
-                <div key={(product._id || product.id) as string | number} className="group cursor-pointer" onClick={() => navigate(`/product/${product._id || product.id}`)}>
+                <div key={(product._id || product.id) as string | number} className="group cursor-pointer" onClick={() => navigate(`/product/${product.slug || product._id || product.id}`)}>
                   <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden mb-4 bg-gray-50 shadow-sm">
                     <img 
                       src={product.image} 

@@ -50,7 +50,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
 
         <div className="grid md:grid-cols-2">
           <div className="p-4">
-            <Gallery images={galleryImages} onImageClick={() => { navigate(`/product/${product._id || product.id}`); onClose(); }} />
+            <Gallery images={galleryImages} onImageClick={() => { navigate(`/product/${product.slug || product._id || product.id}`); onClose(); }} />
           </div>
 
           <div className="p-8 md:p-12">

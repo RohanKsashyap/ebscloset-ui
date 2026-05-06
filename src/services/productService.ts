@@ -3,6 +3,7 @@ import apiClient, { ensureBackendAvailable } from './api';
 export interface Product {
   _id?: string;
   id?: string | number;
+  slug?: string;
   name: string;
   description: string;
   price: number;
@@ -61,9 +62,9 @@ export const productService = {
     return response.data || [];
   },
 
-  getProduct: async (id: string): Promise<Product> => {
+  getProduct: async (idOrSlug: string): Promise<Product> => {
     if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
-    const response = await apiClient.get(`/products/${id}`);
+    const response = await apiClient.get(`/products/${idOrSlug}`);
     return response.data.product;
   },
 

@@ -3,6 +3,7 @@ import { loadHomeAnimations } from '../utils/storage';
 import HeroSection from './HeroSection';
 import { loadSite, type SiteSettings, formatAUD } from '../utils/storage';
 import { getOptimizedUrl } from '../utils/imageKit';
+import { Link } from 'react-router-dom';
 import CollectionGrid from './CollectionGrid';
 import EditorialSection from './EditorialSection';
 import ProductShowcase from './ProductShowcase';
@@ -105,7 +106,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {budgetItems.map((b) => (
-            <a key={b.q} href={`/shop?budget=${b.q}`} className="premium-card   overflow-hidden border bg-white/60">
+            <Link key={b.q} to={`/shop?budget=${b.q}`} className="premium-card   overflow-hidden border bg-white/60">
               <div className="aspect-[4/3] bg-gradient-to-br from-pink-50 via-white to-peach-50 flex items-center justify-center">
                 {b.img ? (
                   <img src={getOptimizedUrl(b.img, 400)} alt={`${b.label} Girls Dress`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
@@ -116,11 +117,11 @@ export default function HomePage() {
               <div className="p-4 text-center">
                 <p className="text-sm text-gray-800">{b.label}</p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
         <div className="text-center mt-8">
-          <a href="/shop" className="premium-button">Explore All Dresses</a>
+          <Link to="/shop" className="premium-button">Explore All Dresses</Link>
         </div>
       </section>
       {animations.filter(a => !!a.video).length > 0 && (
@@ -154,7 +155,13 @@ export default function HomePage() {
               );
               return (
                 <div key={anim.id ?? i}>
-                  {href ? <a href={href}>{content}</a> : content}
+                  {href ? (
+                    href.startsWith('http') ? (
+                      <a href={href}>{content}</a>
+                    ) : (
+                      <Link to={href}>{content}</Link>
+                    )
+                  ) : content}
                 </div>
               );
             })}

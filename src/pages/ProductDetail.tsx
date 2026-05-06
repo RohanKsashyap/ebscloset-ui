@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import Gallery from '../components/Gallery';
@@ -17,7 +17,7 @@ import SEO from '../components/SEO';
 import { Helmet } from 'react-helmet-async';
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     setLoading(true);
-    productService.getProduct(String(id))
+    productService.getProduct(String(slug))
       .then((p) => {
         if (p) {
           const normalized = {
@@ -51,7 +51,7 @@ export default function ProductDetail() {
       })
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [slug]);
 
   useEffect(() => {
     if (product?.id) {
@@ -79,7 +79,7 @@ export default function ProductDetail() {
         <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto text-center">
           <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Product Not Found</h1>
           <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Please return to the shop</p>
-          <a href="/shop" className="inline-block mt-8 border-2 border-hot-pink text-hot-pink px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-500">Back to Shop</a>
+          <Link to="/shop" className="inline-block mt-8 border-2 border-hot-pink text-hot-pink px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-500">Back to Shop</Link>
         </section>
       </main>
     );
@@ -107,7 +107,7 @@ export default function ProductDetail() {
         description={product.description?.substring(0, 160)}
         ogImage={product.image}
         ogType="product"
-        canonical={`https://www.ebscloset.com.au/product/${product.id}`}
+        canonical={`https://www.ebscloset.com.au/product/${product.slug || product.id}`}
       />
       <Helmet>
         <script type="application/ld+json">
@@ -124,7 +124,7 @@ export default function ProductDetail() {
             },
             "offers": {
               "@type": "Offer",
-              "url": `https://www.ebscloset.com.au/product/${product.id}`,
+              "url": `https://www.ebscloset.com.au/product/${product.slug || product.id}`,
               "priceCurrency": "AUD",
               "price": product.price,
               "availability": "https://schema.org/InStock",
@@ -140,9 +140,9 @@ export default function ProductDetail() {
       </Helmet>
       <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
         <div className="mb-6 text-[10px] md:text-xs text-gray-600 overflow-x-auto whitespace-nowrap">
-          <a href="/" className="hover:underline">Home</a>
+          <Link to="/" className="hover:underline">Home</Link>
           <span className="mx-2">/</span>
-          <a href="/shop" className="hover:underline">Shop</a>
+          <Link to="/shop" className="hover:underline">Shop</Link>
           <span className="mx-2">/</span>
           <span className="text-gray-800">{product.categoryId.name}</span>
         </div>
@@ -154,7 +154,7 @@ export default function ProductDetail() {
             }} />
           </div>
           <div id="details-top" className="premium-card p-5 sm:p-6 md:p-8">
-            <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-2">{product.category}</p>
+            <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-2">{product.categoryId.name}</p>
             <div className="flex items-start justify-between gap-3">
               <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-2 text-gray-800 leading-tight">{product.name}</h1>
               <button

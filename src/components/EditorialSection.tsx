@@ -1,4 +1,5 @@
 import { loadSite } from '../utils/storage';
+import { Link } from 'react-router-dom';
 
 export default function EditorialSection() {
   const site = loadSite({
@@ -25,9 +26,9 @@ export default function EditorialSection() {
         <p className="text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-12 leading-relaxed animate-fadeIn">
           {site.editorial.body}
         </p>
-        <a href={site.editorial.ctaHref ?? '/shop'} className="border-2 border-white px-16 py-5 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-700 animate-fadeIn">
+        <Link to={site.editorial.ctaHref ?? '/shop'} className="border-2 border-white px-16 py-5 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-700 animate-fadeIn">
           {site.editorial.ctaText}
-        </a>
+        </Link>
       </div>
     </section>
   );

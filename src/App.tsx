@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import HomePage from './components/HomePage';
 import Navigation from './components/Navigation';
 import NewsletterPopup from './components/NewsletterPopup';
+import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/Footer';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -45,7 +46,7 @@ function AppRoutes() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/product/:slug" element={<ProductDetail />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -158,6 +159,7 @@ function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Layout sparkleRef={sparkleRef} showPopup={showPopup} setShowPopup={setShowPopup}>
           <AppRoutes />
         </Layout>

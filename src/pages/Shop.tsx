@@ -370,7 +370,7 @@ export default function Shop() {
                     <div key={`${productId}-${idx}`} className="group relative">
                       {/* Image Card */}
                       <div className="relative aspect-[3/4]  overflow-hidden bg-gray-50 mb-6 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-hot-pink/5">
-                        <Link to={`/product/${productId}`}>
+                        <Link to={`/product/${p.slug || productId}`}>
                           <img 
                             src={getOptimizedUrl(hoverId === productId && p.images?.[1] ? p.images[1] : p.image, 400)} 
                             alt={p.name} 

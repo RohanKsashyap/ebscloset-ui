@@ -31,7 +31,7 @@ export default function NewArrivalsGallery() {
   const displayProducts = newArrivals && newArrivals.length > 0 ? newArrivals : visible;
 
   return (
-    <section className="relative py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto" onClick={() => navigate('/shop?newarrival=true')}>
+    <section className="relative py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <Link to="/shop?newarrival=true" className="group">
           <h2 className="font-headline text-2xl md:text-3xl text-gray-800 group-hover:text-hot-pink transition-colors">New Arrivals</h2>
@@ -65,7 +65,7 @@ export default function NewArrivalsGallery() {
 
           return (
             <div key={it.id || i} className="snap-start shrink-0 w-[220px] sm:w-[280px] md:w-[340px]">
-              <Link to={it._id ? `/product/${it._id}` : '/shop?newarrival=true'} className="block overflow-hidden bg-white">
+              <Link to={it.slug ? `/product/${it.slug}` : it._id ? `/product/${it._id}` : '/shop?newarrival=true'} className="block overflow-hidden bg-white">
                 <div className="aspect-[3/4] overflow-hidden">
                   {imgUrl ? (
                     <img src={getOptimizedUrl(imgUrl, 400)} alt={name} className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-[1.05]" loading="lazy" decoding="async" />
