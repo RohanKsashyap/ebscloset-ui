@@ -4,19 +4,47 @@ import type { Product } from '../../services/productService';
 
 interface InventoryManagementProps {
   products: Product[];
+  onEdit: (product: Product) => void;
 }
 
-export default function InventoryManagement({ products }: InventoryManagementProps) {
+export default function InventoryManagement({ products, onEdit }: InventoryManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<'all' | 'low' | 'out'>('all');
   
-  // const totalProducts = products.length;
-  // const inStockCount = products.filter(p => ((p as any).inStock || 0) > 0).length;
-  // const outOfStockCount = products.filter(p => ((p as any).inStock || 0) === 0).length;
+  const getTotalStock = (p: Product) => {
+    if (p.stock && Object.keys(p.stock).length > 0) {
+      return Object.values(p.stock).reduce((acc, val) => acc + (Number(val) || 0), 0);
+    }
+    return Number((p as any).inStock) || 0;
+  };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const lowStockThreshold = 10;
+
+  const stats = {
+    total: products.length,
+    low: products.filter(p => {
+      const stock = getTotalStock(p);
+      return stock > 0 && stock < lowStockThreshold;
+    }).length,
+    out: products.filter(p => getTotalStock(p) === 0).length,
+    optimal: products.filter(p => getTotalStock(p) >= lowStockThreshold).length
+  };
+
+  const filteredProducts = products.filter(p => {
+    const stock = getTotalStock(p);
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    if (!matchesSearch) return false;
+
+    if (filter === 'low') return stock > 0 && stock < lowStockThreshold;
+    if (filter === 'out') return stock === 0;
+    return true;
+  });
+
+  const optimalPercentage = Math.round((stats.optimal / stats.total) * 100) || 0;
+  const lowPercentage = Math.round((stats.low / stats.total) * 100) || 0;
+  const outPercentage = Math.round((stats.out / stats.total) * 100) || 0;
 
   return (
     <div className="space-y-4 animate-in fade-in duration-500 pr-2">
@@ -49,15 +77,25 @@ export default function InventoryManagement({ products }: InventoryManagementPro
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl">
-            <button className="px-4 py-1.5 bg-white text-gray-900 rounded-lg text-xs font-bold shadow-sm transition-all">Stock Control</button>
-            <button className="px-4 py-1.5 text-gray-500 hover:text-gray-900 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
-              <ClipboardList size={14} /> Bulk Restock
+            <button 
+              onClick={() => setFilter('all')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all ${filter === 'all' ? 'bg-white text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              All Stock
             </button>
-            <button className="px-4 py-1.5 text-gray-500 hover:text-gray-900 rounded-lg text-xs font-bold transition-all">Inventory Reports</button>
+            <button 
+              onClick={() => setFilter('low')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${filter === 'low' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              <AlertCircle size={14} className={filter === 'low' ? 'text-red-500' : ''} /> Low Stock
+            </button>
+            <button 
+              onClick={() => setFilter('out')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === 'out' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+            >
+              Out of Stock
+            </button>
           </div>
-          <button className="px-4 py-2 bg-[#eb4899] text-white rounded-xl text-xs font-bold shadow-lg shadow-pink-500/20 flex items-center gap-1.5 hover:bg-[#d43f8a] transition-all">
-            <Filter size={14} /> Out of Stock
-          </button>
         </div>
       </div>
 
@@ -87,46 +125,55 @@ export default function InventoryManagement({ products }: InventoryManagementPro
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {filteredProducts.map((product) => (
-                    <tr key={product._id} className="group hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
-                             {product.images?.[0] && (
-                               <img src={product.images?.[0]} alt="" className="w-full h-full object-cover" />
-                             )}
+                  {filteredProducts.map((product) => {
+                    const stock = getTotalStock(product);
+                    const isLow = stock > 0 && stock < lowStockThreshold;
+                    const isOut = stock === 0;
+                    
+                    return (
+                      <tr key={product._id} className="group hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
+                               {(product.image || product.images?.[0]) && (
+                                 <img src={product.image || product.images?.[0]} alt="" className="w-full h-full object-cover" />
+                               )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-gray-900 line-clamp-1">{product.name}</p>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${product.price}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-gray-900 line-clamp-1">{product.name}</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${product.price}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                          {product.category || 'Uncategorized'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold ${((product as any).inStock || 0) < 10 ? 'text-red-500' : 'text-emerald-500'}`}>
-                            {(product as any).inStock || 0}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                            {(product.categoryId as any)?.name || product.category || 'Uncategorized'}
                           </span>
-                          <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full rounded-full ${((product as any).inStock || 0) < 10 ? 'bg-red-500' : 'bg-emerald-500'}`} 
-                              style={{ width: `${Math.min(((product as any).inStock || 0), 100)}%` }}
-                            ></div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${isOut || isLow ? 'text-red-500' : 'text-emerald-500'}`}>
+                              {stock}
+                            </span>
+                            <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full ${isOut || isLow ? 'bg-red-500' : 'bg-emerald-500'}`} 
+                                style={{ width: `${Math.min(stock, 100)}%` }}
+                              ></div>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="p-2 text-gray-400 hover:text-[#eb4899] hover:bg-pink-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                          <Edit size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button 
+                            onClick={() => onEdit(product)}
+                            className="p-2 text-gray-400 hover:text-[#eb4899] hover:bg-pink-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Edit size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -138,33 +185,42 @@ export default function InventoryManagement({ products }: InventoryManagementPro
             <h3 className="text-lg font-black text-gray-900 tracking-tight mb-6">Stock Health</h3>
             
             <div className="space-y-6">
-              <div>
+              <div 
+                className="cursor-pointer group"
+                onClick={() => setFilter('all')}
+              >
                 <div className="flex justify-between items-end mb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Optimal Stock</p>
-                  <p className="text-sm font-black text-gray-900">84%</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">Optimal Stock</p>
+                  <p className="text-sm font-black text-gray-900">{optimalPercentage}%</p>
                 </div>
                 <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
-                  <div className="w-[84%] h-full bg-emerald-500 rounded-full"></div>
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: `${optimalPercentage}%` }}></div>
                 </div>
               </div>
 
-              <div>
+              <div 
+                className="cursor-pointer group"
+                onClick={() => setFilter('low')}
+              >
                 <div className="flex justify-between items-end mb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Low Stock Items</p>
-                  <p className="text-sm font-black text-red-500">12</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">Low Stock Items</p>
+                  <p className="text-sm font-black text-red-500">{stats.low}</p>
                 </div>
                 <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
-                  <div className="w-[12%] h-full bg-red-500 rounded-full"></div>
+                  <div className="h-full bg-red-500 rounded-full transition-all duration-1000" style={{ width: `${lowPercentage}%` }}></div>
                 </div>
               </div>
 
-              <div>
+              <div 
+                className="cursor-pointer group"
+                onClick={() => setFilter('out')}
+              >
                 <div className="flex justify-between items-end mb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Out of Stock</p>
-                  <p className="text-sm font-black text-gray-300">3</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 group-hover:text-gray-900 transition-colors">Out of Stock</p>
+                  <p className="text-sm font-black text-gray-300">{stats.out}</p>
                 </div>
                 <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
-                  <div className="w-[3%] h-full bg-gray-200 rounded-full"></div>
+                  <div className="h-full bg-gray-200 rounded-full transition-all duration-1000" style={{ width: `${outPercentage}%` }}></div>
                 </div>
               </div>
             </div>

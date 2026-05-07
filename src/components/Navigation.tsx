@@ -136,11 +136,14 @@ export default function Navigation() {
 
             {/* Center Section: Logo */}
             <div className="flex-none flex justify-center items-center h-full px-2">
-              {shouldShowSolid ? (
-                <Link to="/" className="font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap">
-                  EB'S CLOSET
-                </Link>
-              ) : (
+              <Link 
+                to="/" 
+                className={`font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
+              >
+                EB'S CLOSET
+              </Link>
+              
+              {!shouldShowSolid && (
                 <div className="hidden lg:flex items-center space-x-8 xl:space-x-12 h-full">
                   {loadNav(defaultCategories).map((category) => (
                     <div
@@ -244,12 +247,12 @@ export default function Navigation() {
                 </button>
               )}
 
-              <button 
+              {/* <button 
                 className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
                 onClick={() => navigate(isAuthenticated() ? '/dashboard' : '/login')}
               >
                 <User className="w-5 h-5 lg:w-6 lg:h-6" />
-              </button>
+              </button> */}
 
               <button 
                 className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`} 

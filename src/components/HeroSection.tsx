@@ -167,7 +167,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
     return (
       <div ref={ref} className="relative bg-white">
-        <section className="relative h-[90vh] md:h-screen w-full overflow-hidden">
+        <section className="relative h-[75vh] sm:h-[90vh] md:h-screen w-full overflow-hidden">
           {/* Background Slider */}
           {effectiveSlides.map((slide: any, index: number) => (
             <div
@@ -237,14 +237,14 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               <p className="text-white text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-4 font-medium drop-shadow-md">
                 {currentSlide.subtitle || site.hero.subtitle}
               </p>
-              <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
+              <h1 className="font-headline text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
                 {currentSlide.title || site.hero.title}
               </h1>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 {currentSlide.bannerCtaText ? (
                   <a 
                     href={currentSlide.bannerCtaHref || "/shop"} 
-                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-black rounded-full hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-black rounded-full hover:text-white transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
                   >
                     {currentSlide.bannerCtaText}
                   </a>
@@ -252,13 +252,13 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                   <>
                     <a 
                       href="/shop" 
-                      className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                      className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
                     >
                       Shop Now
                     </a>
                     <a 
                       href="/shop?newarrival=true" 
-                      className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-full sm:min-w-[160px] sm:w-auto"
+                      className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
                     >
                       New Arrivals
                     </a>
@@ -307,7 +307,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               <a 
                 key={c._id || c.slug} 
                 href={`/shop?category=${c.slug}`} 
-                className="block group flex-shrink-0 w-[70%] sm:w-[45%] md:w-[23%] snap-start"
+                className="block group flex-shrink-0 w-[80%] sm:w-[45%] md:w-[23%] snap-start"
               >
                 <div className="aspect-[3/4] overflow-hidden rounded-sm relative shadow-sm">
                   {c.imageUrl ? (

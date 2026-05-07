@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
+import { productService } from '../services/productService';
 import { authService, User, Address } from '../services/authService';
 import { formatAUD } from '../utils/storage';
 import { ShoppingBag, X, Check, MapPin, ChevronDown } from 'lucide-react';
@@ -33,6 +34,40 @@ export default function Checkout() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+  const [outOfStockItems, setOutOfStockItems] = useState<string[]>([]);
+  const [isCheckingStock, setIsCheckingStock] = useState(false);
+
+  useEffect(() => {
+    const checkStock = async () => {
+      if (items.length === 0) return;
+      setIsCheckingStock(true);
+      const oos: string[] = [];
+      await Promise.all(items.map(async (item) => {
+        try {
+          const p = await productService.getProduct(String(item.id));
+          const stockMap: Record<string, number> = p?.stock || {};
+          let availableStock = 0;
+          
+          if (item.size && stockMap[item.size] !== undefined) {
+            availableStock = Number(stockMap[item.size] || 0);
+          } else if (Object.keys(stockMap).length > 0) {
+            availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+          } else {
+            availableStock = Number((p as any).inStock || 0);
+          }
+
+          if (availableStock < item.qty) {
+            oos.push(item.id);
+          }
+        } catch (err) {
+          console.error('Stock check failed for', item.id, err);
+        }
+      }));
+      setOutOfStockItems(oos);
+      setIsCheckingStock(false);
+    };
+    checkStock();
+  }, [items]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,6 +132,35 @@ export default function Checkout() {
     }
 
     setIsPlacingOrder(true);
+
+    // Final stock check
+    const oos: string[] = [];
+    await Promise.all(items.map(async (item) => {
+      try {
+        const p = await productService.getProduct(String(item.id));
+        const stockMap: Record<string, number> = p?.stock || {};
+        let availableStock = 0;
+        
+        if (item.size && stockMap[item.size] !== undefined) {
+          availableStock = Number(stockMap[item.size] || 0);
+        } else if (Object.keys(stockMap).length > 0) {
+          availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+        } else {
+          availableStock = Number((p as any).inStock || 0);
+        }
+
+        if (availableStock < item.qty) oos.push(item.name);
+      } catch (err) {
+        console.error('Stock check failed', err);
+      }
+    }));
+
+    if (oos.length > 0) {
+      showToast(`Sorry, ${oos.join(', ')} is out of stock.`, 'error');
+      setIsPlacingOrder(false);
+      return;
+    }
+
     const payload = { 
       customer: {
         fullName: shipping.fullName,
@@ -448,16 +512,26 @@ export default function Checkout() {
               <p className="text-5xl font-bold tracking-tighter">{formatAUD(grandTotal)}</p>
             </div>
 
+            {outOfStockItems.length > 0 && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-medium border border-red-100 animate-shake">
+                Some items in your order are currently out of stock. Please remove them to continue.
+              </div>
+            )}
+
             <button 
               onClick={handlePlaceOrder}
-              disabled={isPlacingOrder || isLoading}
-              className={`w-full bg-[#B11B67] text-white py-6 rounded-full font-bold tracking-widest uppercase text-sm transition-all flex items-center justify-center gap-2 ${isPlacingOrder || isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
+              disabled={isPlacingOrder || isLoading || isCheckingStock || outOfStockItems.length > 0}
+              className={`w-full bg-[#B11B67] text-white py-6 rounded-full font-bold tracking-widest uppercase text-sm transition-all flex items-center justify-center gap-2 ${(isPlacingOrder || isLoading || isCheckingStock || outOfStockItems.length > 0) ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
             >
               {isPlacingOrder ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Placing Order...
                 </>
+              ) : isCheckingStock ? (
+                'Checking Stock...'
+              ) : outOfStockItems.length > 0 ? (
+                'Out of Stock'
               ) : (
                 'Place Order'
               )}

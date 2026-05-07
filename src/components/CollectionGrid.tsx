@@ -59,7 +59,7 @@ export default function CollectionGrid() {
   return (
     <section className="py-12 md:py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden">
       <div className="text-center mb-12 md:mb-20">
-        <h2 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
+        <h2 className="font-headline text-3xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
           Shop by Age
         </h2>
         <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">
@@ -81,7 +81,7 @@ export default function CollectionGrid() {
             <div
               key={id}
               onClick={() => navigate(`/shop?age=${group.ageGroup}`)}
-              className="group cursor-pointer snap-start shrink-0 w-[260px] md:w-[320px] lg:w-[380px]"
+              className="group cursor-pointer snap-start shrink-0 w-[220px] sm:w-[320px] lg:w-[380px]"
             >
               <div className="relative overflow-hidden aspect-[3/4] mb-6 rounded-2xl">
                 {failed[id] || !group.mediaUrl ? (

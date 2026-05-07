@@ -67,25 +67,25 @@ export default function Footer() {
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-20">
         <div className="border-b border-white/20 pb-16 mb-16">
           <div className="max-w-2xl mx-auto text-center">
-            <h3 className="font-headline text-3xl md:text-4xl mb-6">
+            <h3 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-6">
               {site.newsletter.heading}
             </h3>
-            <p className="text-sm tracking-wider text-black/80 mb-8">
+            <p className="text-sm tracking-wider text-black/80 mb-8 px-4">
               {site.newsletter.subtext}
             </p>
 
-            <form onSubmit={handleNewsletterSubmit} className="flex max-w-md mx-auto flex-col sm:flex-row gap-3 sm:gap-0">
+            <form onSubmit={handleNewsletterSubmit} className="flex max-w-md mx-auto flex-col sm:flex-row gap-4 sm:gap-2 px-6 sm:px-0">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="EMAIL ADDRESS"
                 required
-                className="flex-1 bg-transparent border rounded-full border-black py-3 px-4 text-sm focus:outline-none focus:border-white/60 transition-colors duration-300 placeholder-black"
+                className="flex-1 bg-transparent border rounded-full border-black py-3 px-6 text-sm focus:outline-none focus:border-hot-pink transition-colors duration-300 placeholder-black/50"
               />
               <button
                 type="submit"
-                className="border rounded-full border-white px-8 py-3  ml-2 text-sm tracking-widest uppercase hover:bg-black hover:text-white transition-all duration-500"
+                className="border rounded-full border-black bg-black text-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-500"
               >
                 Join
               </button>

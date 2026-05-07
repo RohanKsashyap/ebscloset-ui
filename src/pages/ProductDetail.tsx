@@ -33,6 +33,41 @@ export default function ProductDetail() {
     ? (product.reviews ?? []).reduce((s: number, r: { rating: number }) => s + r.rating, 0) / reviewsCount
     : 0;
 
+  const totalStock = (() => {
+    if (product?.variants && product.variants.length > 0) {
+      return product.variants.reduce((a: any, b: any) => a + (Number(b.inStock) || 0), 0);
+    }
+    if (product?.stock && Object.keys(product.stock).length > 0) {
+      return Object.values(product.stock).reduce((a: any, b: any) => a + (Number(b) || 0), 0);
+    }
+    return (Number(product?.inStock) || 0);
+  })();
+  
+  const isOutOfStock = product && totalStock === 0;
+  const selectedSizeStock = (() => {
+    if (!size || !product) return 0;
+    
+    // 1. Check variants
+    if (product.variants && product.variants.length > 0) {
+      const variant = product.variants.find((v: any) => v.size?.toLowerCase() === size.toLowerCase());
+      if (variant) return Number(variant.inStock) || 0;
+    }
+    
+    // 2. Check stock object (case-insensitive)
+    if (product.stock) {
+      const stockKey = Object.keys(product.stock).find(k => k.toLowerCase() === size.toLowerCase());
+      if (stockKey) return Number(product.stock[stockKey]) || 0;
+    }
+    
+    // 3. Fallback to inStock if size matches legacy size
+    if (product.size?.toLowerCase() === size.toLowerCase()) {
+      return Number(product.inStock) || 0;
+    }
+
+    return 0;
+  })();
+  const isSelectedSizeOutOfStock = size ? selectedSizeStock === 0 : false;
+
   useEffect(() => {
     setLoading(true);
     productService.getProduct(String(slug))
@@ -154,7 +189,14 @@ export default function ProductDetail() {
             }} />
           </div>
           <div id="details-top" className="premium-card p-5 sm:p-6 md:p-8">
-            <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-2">{product.categoryId.name}</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink">{product.categoryId.name}</p>
+              {isOutOfStock && (
+                <span className="bg-gray-800 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                  Out of Stock
+                </span>
+              )}
+            </div>
             <div className="flex items-start justify-between gap-3">
               <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-2 text-gray-800 leading-tight">{product.name}</h1>
               <button
@@ -216,15 +258,38 @@ export default function ProductDetail() {
                   ];
                   const uniqueSizes = Array.from(new Set(availableSizes)) as string[];
                   
-                  return uniqueSizes.map((s: string) => (
-                    <button
-                      key={s}
-                      onClick={() => setSize(s)}
-                      className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${size === s ? 'bg-black text-white border-black' : 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'}`}
-                    >
-                      {s}
-                    </button>
-                  ));
+                  return uniqueSizes.map((s: string) => {
+                    const isInStock = (() => {
+                      // 1. Check variants
+                      if (product.variants && product.variants.length > 0) {
+                        const variant = product.variants.find((v: any) => v.size?.toLowerCase() === s.toLowerCase());
+                        if (variant) return (Number(variant.inStock) || 0) > 0;
+                      }
+                      // 2. Check stock object
+                      if (product.stock && Object.keys(product.stock).length > 0) {
+                        const stockKey = Object.keys(product.stock).find(k => k.toLowerCase() === s.toLowerCase());
+                        if (stockKey) return (Number(product.stock[stockKey]) || 0) > 0;
+                      }
+                      // 3. Fallback
+                      return totalStock > 0;
+                    })();
+                    return (
+                      <button
+                        key={s}
+                        disabled={!isInStock}
+                        onClick={() => setSize(s)}
+                        className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${
+                          size === s 
+                            ? 'bg-black text-white border-black' 
+                            : isInStock 
+                              ? 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'
+                              : 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    );
+                  });
                 })()}
               </div>
               {size && (
@@ -249,12 +314,24 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <button onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} className="premium-button inverse w-full sm:w-auto">Add to Bag</button>
-              <button onClick={() => { 
-                if (!size) { showToast('Please select a size', 'error'); return; } 
-                const buyNowItem = { id: product.id || product._id, name: product.name, price: product.price, originalPrice: product.originalPrice, image: product.image, size: size ?? undefined, qty: 1 };
-                navigate('/checkout', { state: { buyNowItem } }); 
-              }} className="premium-button w-full sm:w-auto text-center">Buy Now</button>
+              <button 
+                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
+                onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
+                className={`premium-button inverse w-full sm:w-auto ${(isOutOfStock || (size ? isSelectedSizeOutOfStock : false)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+              >
+                {isOutOfStock ? 'Out of Stock' : 'Add to Bag'}
+              </button>
+              <button 
+                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
+                onClick={() => { 
+                  if (!size) { showToast('Please select a size', 'error'); return; } 
+                  const buyNowItem = { id: product.id || product._id, name: product.name, price: product.price, originalPrice: product.originalPrice, image: product.image, size: size ?? undefined, qty: 1 };
+                  navigate('/checkout', { state: { buyNowItem } }); 
+                }} 
+                className={`premium-button w-full sm:w-auto text-center ${(isOutOfStock || (size ? isSelectedSizeOutOfStock : false)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+              >
+                Buy Now
+              </button>
               <button onClick={() => {
                 if (navigator.share) {
                   navigator.share({ title: product.name, url: window.location.href });
@@ -324,7 +401,12 @@ export default function ProductDetail() {
         
         <RecentlyViewed />
         
-        <StickyBuyBar name={product.name} price={product.price} disabled={!size} onAdd={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} />
+        <StickyBuyBar 
+          name={product.name} 
+          price={product.price} 
+          disabled={!size || isSelectedSizeOutOfStock || isOutOfStock} 
+          onAdd={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
+        />
 
         {/* Size Guide Modal */}
         {showSizeGuide && (

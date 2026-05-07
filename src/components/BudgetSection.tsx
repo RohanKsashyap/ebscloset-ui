@@ -89,7 +89,7 @@ export default function BudgetSection() {
   }, [isPaused]);
 
   return (
-    <section className="py-16 md:py-24 bg-[#FAF9F6] overflow-hidden">
+    <section className="py-12 md:py-24 bg-[#FAF9F6] overflow-hidden">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         {/* Header */}
         <div className="mb-12">
@@ -116,7 +116,7 @@ export default function BudgetSection() {
               <Link 
                 key={`${item.slug}-${item.id || idx}`}
                 to={`/shop?budget=${item.slug}`}
-                className="flex-shrink-0 w-[280px] md:w-[350px] snap-start"
+                className="flex-shrink-0 w-[260px] sm:w-[280px] md:w-[350px] snap-start"
               >
                 <div className="relative aspect-[3/4] rounded-[40px] overflow-hidden bg-white shadow-sm border border-gray-100 group/card transition-transform duration-500 hover:-translate-y-2">
                   {item.img ? (
@@ -156,12 +156,12 @@ export default function BudgetSection() {
         </div>
 
         {/* Premium Section */}
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-black rounded-[40px] p-8 md:p-12 text-white overflow-hidden relative">
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-black rounded-[40px] p-6 md:p-12 text-white overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-hot-pink/20 blur-[100px] rounded-full -mr-32 -mt-32" />
           
           <div className="relative z-10 flex flex-col justify-center">
             <span className="text-hot-pink text-xs font-bold uppercase tracking-[0.3em] mb-4 block">Premium Selection</span>
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
               EB'S  CLOSET <br />
               SELECTS
             </h2>

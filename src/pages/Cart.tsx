@@ -19,9 +19,15 @@ export default function Cart() {
             try {
               const p = await productService.getProduct(String(it.id));
               const stockMap: Record<string, number> = p?.stock ? p.stock : {};
-              const totalStock = Object.values(stockMap || {}).reduce((s, n) => s + (Number(n) || 0), 0);
-              const sizeStock = it.size ? Number(stockMap?.[it.size] || 0) : undefined;
-              const available = it.size ? (sizeStock! > 0) : totalStock > 0;
+              let totalStock = 0;
+              if (Object.keys(stockMap).length > 0) {
+                totalStock = Object.values(stockMap).reduce((s, n) => s + (Number(n) || 0), 0);
+              } else {
+                totalStock = Number((p as any).inStock || 0);
+              }
+              
+              const sizeStock = (it.size && stockMap[it.size] !== undefined) ? Number(stockMap[it.size] || 0) : undefined;
+              const available = it.size !== undefined && sizeStock !== undefined ? sizeStock > 0 : totalStock > 0;
               return [`${it.id}:${it.size ?? ''}`, { totalStock, available, sizeStock }] as const;
             } catch {
               return [`${it.id}:${it.size ?? ''}`, { totalStock: 0, available: true, sizeStock: 0 }] as const;

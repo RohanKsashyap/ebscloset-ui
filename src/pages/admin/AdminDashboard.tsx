@@ -745,7 +745,15 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {tab === 'inventory' && <InventoryManagement products={catalog} />}
+            {tab === 'inventory' && (
+              <InventoryManagement 
+                products={catalog} 
+                onEdit={(p) => {
+                  setProductEditing(p);
+                  setIsProductModalOpen(true);
+                }} 
+              />
+            )}
 
             {tab === 'categories' && (
               <CategoryManagement 

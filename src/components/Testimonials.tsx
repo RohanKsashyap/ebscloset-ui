@@ -36,13 +36,13 @@ export default function Testimonials() {
   if (testimonials.length === 0) return null;
 
   return (
-    <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto bg-white">
-      <div className="text-center mb-16">
-        <h2 className="font-headline text-4xl md:text-5xl text-hot-pink mb-4">What Parents Say</h2>
+    <section className="py-12 md:py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto bg-white">
+      <div className="text-center mb-10 md:mb-16">
+        <h2 className="font-headline text-3xl sm:text-4xl md:text-5xl text-hot-pink mb-4">What Parents Say</h2>
         <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">Trusted by families everywhere</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
         {testimonials.map((t) => (
           <div key={t._id} className="bg-white border rounded-3xl p-8 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex gap-1 mb-6">

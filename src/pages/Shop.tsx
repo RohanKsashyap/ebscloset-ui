@@ -98,7 +98,7 @@ export default function Shop() {
       if (priceVal < minPrice || priceVal > maxPrice) return false;
       
       if (size !== 'All') {
-        const inSizes = (p.sizes ?? []).includes(size);
+        const inSizes = (p.sizes ?? []).some((s: string) => s.toLowerCase() === size.toLowerCase());
         if (!inSizes) return false;
       }
 
@@ -276,6 +276,26 @@ export default function Shop() {
                 </div>
               </div>
 
+              {/* Size Selector */}
+              <div>
+                <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Select Size</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {["xs", "s", "m", "l", "xl", "xxl"].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => updateParams('size', size.toLowerCase() === s ? 'All' : s)}
+                      className={`py-2 text-xs border rounded-lg transition-all uppercase ${
+                        size.toLowerCase() === s 
+                          ? 'bg-hot-pink border-hot-pink text-white shadow-lg shadow-hot-pink/20' 
+                          : 'border-gray-100 text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Colors */}
               <div>
                 <h3 className="text-xs uppercase tracking-[0.2em] font-bold mb-4 text-gray-900">Color</h3>
@@ -366,6 +386,10 @@ export default function Shop() {
               ) : (
                 filtered.map((p, idx) => {
                   const productId = p._id || p.id;
+                  const totalStock = (p.stock && Object.keys(p.stock).length > 0) 
+                    ? Object.values(p.stock).reduce((a: any, b: any) => a + (Number(b) || 0), 0)
+                    : (Number(p.inStock) || 0);
+                  const isOutOfStock = totalStock === 0;
                   return (
                     <div key={`${productId}-${idx}`} className="group relative">
                       {/* Image Card */}
@@ -374,7 +398,7 @@ export default function Shop() {
                           <img 
                             src={getOptimizedUrl(hoverId === productId && p.images?.[1] ? p.images[1] : p.image, 400)} 
                             alt={p.name} 
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${isOutOfStock ? 'grayscale opacity-60' : ''}`}
                             onMouseEnter={() => setHoverId(productId)}
                             onMouseLeave={() => setHoverId(null)}
                             loading="lazy"
@@ -384,15 +408,23 @@ export default function Shop() {
                         
                         {/* Badges */}
                         <div className="absolute top-4 left-4 flex flex-col gap-2">
-                          {idx < 3 && (
-                            <span className="bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full text-black shadow-sm">
-                              New Arrival
+                          {isOutOfStock ? (
+                            <span className="bg-gray-800 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                              Out of Stock
                             </span>
-                          )}
-                          {p.price < 1000 && (
-                            <span className="bg-hot-pink text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg shadow-hot-pink/20">
-                              Sale
-                            </span>
+                          ) : (
+                            <>
+                              {idx < 3 && (
+                                <span className="bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full text-black shadow-sm">
+                                  New Arrival
+                                </span>
+                              )}
+                              {p.price < 1000 && (
+                                <span className="bg-hot-pink text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg shadow-hot-pink/20">
+                                  Sale
+                                </span>
+                              )}
+                            </>
                           )}
                         </div>
 

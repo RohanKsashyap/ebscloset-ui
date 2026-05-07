@@ -22,11 +22,11 @@ export default function EditorialSection() {
         <p className="text-xs md:text-sm lg:text-base tracking-[0.5em] uppercase mb-8 animate-fadeIn ">
           {site.editorial.kicker}
         </p>
-        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-8xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
+        <h2 className="font-headline text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-8xl mb-12 leading-tight animate-fadeIn" dangerouslySetInnerHTML={{ __html: site.editorial.title.replace(/\n/g, '<br />') }} />
         <p className="text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-12 leading-relaxed animate-fadeIn">
           {site.editorial.body}
         </p>
-        <Link to={site.editorial.ctaHref ?? '/shop'} className="border-2 border-white px-16 py-5 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-700 animate-fadeIn">
+        <Link to={site.editorial.ctaHref ?? '/shop'} className="inline-block border-2 border-white px-8 sm:px-16 py-4 sm:py-5 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-700 animate-fadeIn">
           {site.editorial.ctaText}
         </Link>
       </div>
