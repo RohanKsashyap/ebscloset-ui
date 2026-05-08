@@ -10,6 +10,8 @@ import {
   Loader2,
   Trash2,
 } from 'lucide-react';
+import { adminService } from '../../services/adminService';
+import { useToast } from '../../context/ToastContext';
 
 type HeroBanner = {
   title: string;
@@ -26,14 +28,20 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
   const [site, setSite] = useState<any>(initial);
   const [activeBanner, setActiveBanner] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => { setSite(initial); }, [initial]);
 
   const onHeroBannerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
     const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
+    
+    setIsUploading(true);
+    try {
+      const uploadRes = await adminService.uploadAsset(file, 'ebs-closet/hero');
+      const imageUrl = uploadRes.url;
+
       setSite((s: any) => {
         const newSite = { ...s };
         if (!newSite.hero) newSite.hero = {};
@@ -41,18 +49,23 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
         
         // Update root bannerImage ONLY if it's the first banner
         if (activeBanner === 0) {
-          newSite.hero.bannerImage = String(reader.result);
+          newSite.hero.bannerImage = imageUrl;
         }
         
         if (!newSite.hero.slides[activeBanner]) {
           newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
         }
-        newSite.hero.slides[activeBanner].url = String(reader.result);
+        newSite.hero.slides[activeBanner].url = imageUrl;
         
         return newSite;
       });
-    };
-    reader.readAsDataURL(file);
+      showToast('Image uploaded successfully');
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      showToast('Failed to upload image', 'error');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const updateHeroField = (field: string, value: any) => {
@@ -257,7 +270,12 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     flex flex-col items-center justify-center gap-4 overflow-hidden transition-all
                     group-hover:border-pink-100 group-hover:bg-pink-50/30
                   `}>
-                    {displayImage ? (
+                    {isUploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 size={40} className="animate-spin text-[#eb4899]" />
+                        <p className="text-sm font-bold text-gray-900">Uploading to ImageKit...</p>
+                      </div>
+                    ) : displayImage ? (
                       <img src={displayImage} alt="Banner Preview" className="w-full h-full object-cover" />
                     ) : (
                       <>
@@ -273,8 +291,9 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     <input 
                       type="file" 
                       accept="image/*" 
-                      className="absolute inset-0 opacity-0 cursor-pointer" 
+                      className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" 
                       onChange={onHeroBannerFile}
+                      disabled={isUploading}
                     />
                   </div>
                 </div>

@@ -112,7 +112,7 @@ export function loadSite(fallback: SiteSettings): SiteSettings {
       hero: { 
         ...fallback.hero, 
         ...(loaded.hero || {}),
-        slides: (loaded.hero?.slides?.length ? loaded.hero.slides : fallback.hero.slides) || []
+        slides: loaded.hero?.slides ?? fallback.hero.slides ?? []
       },
       editorial: { ...fallback.editorial, ...(loaded.editorial || {}) },
       newsletter: { ...fallback.newsletter, ...(loaded.newsletter || {}) },

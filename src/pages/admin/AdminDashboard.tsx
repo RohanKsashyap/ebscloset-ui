@@ -232,14 +232,21 @@ export default function AdminDashboard() {
 
   const saveSiteAll = async (s: SiteSettings) => {
     try { 
-      await adminService.updateSiteSettings(s); 
-      queryClient.setQueryData(['admin', 'siteSettings'], s);
-      saveSite(s as any);
+      if (!s) throw new Error('No site settings to save');
+      
+      const response = await adminService.updateSiteSettings(s); 
+      // Update local state and cache with response from server which has _id etc
+      const savedData = response;
+      
+      queryClient.setQueryData(['admin', 'siteSettings'], savedData);
+      saveSite(savedData as any);
       window.dispatchEvent(new Event('backend-hydrated'));
-      showToast('Banner saved successfully'); 
-    } catch { 
-      showToast('Error saving Banner', 'error');
-      throw new Error('Failed to save site settings');
+      showToast('Settings saved successfully'); 
+    } catch (err: any) { 
+      console.error('Error saving site settings:', err);
+      const msg = err.response?.data?.error || err.response?.data?.message || 'Failed to save site settings';
+      showToast(msg, 'error');
+      throw err;
     }
   };
 

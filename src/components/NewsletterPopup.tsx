@@ -40,12 +40,8 @@ export default function NewsletterPopup({ onClose }: NewsletterPopupProps) {
         </button>
 
         <div className="grid md:grid-cols-2">
-          <div className="hidden md:block">
-            <img
-              src="https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Beautiful Girl in Pink Dress"
-              className="w-full h-full object-cover"
-            />
+          <div className="hidden md:block bg-pink-50 flex items-center justify-center">
+            <div className="text-hot-pink opacity-20 italic font-headline text-4xl">EB'S</div>
           </div>
 
           <div className="p-12 md:p-16 flex flex-col justify-center">

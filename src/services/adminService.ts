@@ -196,6 +196,17 @@ export const adminService = {
     return response.data.data;
   },
 
+  uploadAsset: async (file: File, folder?: string): Promise<{url: string, fileId: string, thumbnailUrl: string}> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (folder) formData.append('folder', folder);
+    
+    const response = await apiClient.post('/admin/upload-asset', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
   // Reviews
   getReviews: async (): Promise<Review[]> => {
     const response = await apiClient.get('/reviews/admin/all');

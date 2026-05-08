@@ -11,19 +11,15 @@ const defaultSite: SiteSettings = {
   hero: {
     title: "EB'S CLOSET",
     subtitle: 'Beautiful Dresses for Girls 7-13',
-    slides: [
-      { id: '1', type: 'image', url: 'https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=1920' },
-      { id: '2', type: 'image', url: 'https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg?auto=compress&cs=tinysrgb&w=1920' },
-      { id: '3', type: 'image', url: 'https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=1920' },
-    ],
-    bannerImage: 'https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    slides: [],
+    bannerImage: '',
     bannerTitle: 'Where Dreams\nCome True',
     bannerSubtitle: 'Perfect Dresses for Growing Girls',
     bannerCtaText: 'Discover Magic',
     bannerCtaHref: '/shop',
   },
   editorial: {
-    image: 'https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg?auto=compress&cs=tinysrgb&w=1920',
+    image: '',
     kicker: 'Growing Up in Style',
     title: 'Every Girl\nDeserves Magic',
     body: 'From first school dances to birthday parties, we create magical moments with dresses designed specifically for girls aged 7-13. Every dress tells a story of growing up beautifully.',
@@ -31,9 +27,9 @@ const defaultSite: SiteSettings = {
     ctaHref: '/shop',
   },
   collections: [
-    { id: 1, title: 'Princess Collection', image: 'https://images.pexels.com/photos/1620760/pexels-photo-1620760.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Ages 7-10' },
-    { id: 2, title: 'Birthday Party', image: 'https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Ages 8-12' },
-    { id: 3, title: 'School Dance', image: 'https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg?auto=compress&cs=tinysrgb&w=800', category: 'Ages 10-13' },
+    { id: 1, title: 'Princess Collection', image: '', category: 'Ages 7-10' },
+    { id: 2, title: 'Birthday Party', image: '', category: 'Ages 8-12' },
+    { id: 3, title: 'School Dance', image: '', category: 'Ages 10-13' },
   ],
   footerGroups: [
     { title: 'Shop by Age', links: [
@@ -125,24 +121,21 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
       };
     }, [products, site.hero.slides]);
 
-    const baseSlides = (site.hero.slides && site.hero.slides.length > 0 
+    const baseSlides = (site.hero.slides 
       ? site.hero.slides 
       : (site.hero.backgroundImages || []).map((url: string, i: number) => ({ id: `slide-${i}`, type: 'image' as const, url }))
     ).filter((s: any) => s.isActive !== false);
 
     const slides = baseSlides.filter((s: any) => !(s.type === 'video' && /w3schools\.com\/html\/mov_bbb\.mp4/i.test(s.url)));
     
-    if (slides.length === 0 && site.hero.bannerImage) {
-      slides.push({ id: 'fallback', type: 'image', url: site.hero.bannerImage });
-    }
-    
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [brokenIds, setBrokenIds] = useState<Set<string>>(new Set());
 
-    const displaySlides = slides.filter((s: any) => !brokenIds.has(s.id));
-    const effectiveSlides = displaySlides.length > 0
-      ? displaySlides
-      : (site.hero.bannerImage ? [{ id: 'fallback', type: 'image', url: site.hero.bannerImage }] : slides);
+    const effectiveSlides = slides.filter((s: any) => !brokenIds.has(s.id));
+
+    if (effectiveSlides.length === 0 && site.hero.bannerImage) {
+      effectiveSlides.push({ id: 'fallback', type: 'image', url: site.hero.bannerImage });
+    }
 
     useEffect(() => {
       if (effectiveSlides.length <= 1) return;
@@ -197,7 +190,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                 <img
                   src={getOptimizedUrl(slide.url, 1920)}
                   alt={slide.title || `Hero slide ${index + 1}`}
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover object-center"
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"
                   onError={() => {

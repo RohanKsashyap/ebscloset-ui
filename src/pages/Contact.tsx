@@ -3,8 +3,13 @@ import { Mail, Phone, MapPin, Share2, Twitter, Instagram, Send } from 'lucide-re
 import { contactService } from '../services/contactService';
 import { useToast } from '../context/ToastContext';
 import SEO from '../components/SEO';
+import { loadSite } from '../utils/storage';
 
 export default function Contact() {
+  const site = loadSite({
+    hero: { title: "EB'S CLOSET", subtitle: '', slides: [], bannerImage: '', bannerTitle: '', bannerSubtitle: '', bannerCtaText: '', bannerCtaHref: '' },
+    social: []
+  } as any);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
@@ -42,11 +47,15 @@ export default function Contact() {
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.pexels.com/photos/1005058/pexels-photo-1005058.jpeg?auto=compress&cs=tinysrgb&w=1920" 
-            alt="Contact Hero" 
-            className="w-full h-full object-cover"
-          />
+          {site.hero.bannerImage ? (
+            <img 
+              src={site.hero.bannerImage} 
+              alt="Contact Hero" 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-hot-pink/10" />
+          )}
           <div className="absolute inset-0 bg-black/30" />
         </div>
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
@@ -178,12 +187,7 @@ export default function Contact() {
             </div>
 
             {/* Map Placeholder */}
-            <div className="relative h-80 rounded-[2rem] overflow-hidden group shadow-xl">
-              <img 
-                src="https://images.pexels.com/photos/2033343/pexels-photo-2033343.jpeg?auto=compress&cs=tinysrgb&w=800" 
-                alt="Map Placeholder" 
-                className="w-full h-full object-cover grayscale brightness-90 group-hover:scale-105 transition-transform duration-700"
-              />
+            <div className="relative h-80 rounded-[2rem] overflow-hidden group shadow-xl bg-pink-50">
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <div className="relative">
                   {/* Pin Marker */}
