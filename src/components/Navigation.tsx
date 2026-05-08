@@ -112,10 +112,10 @@ export default function Navigation() {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-screen-2xl mx-auto px-4 lg:px-12 transition-all duration-500">
+        <div className="max-w-screen-2xl mx-auto px-5 lg:px-12 transition-all duration-500">
           {/* Main Row */}
           <div className={`flex items-center justify-between transition-all duration-500 ${
-            shouldShowSolid ? 'h-14 lg:h-16' : 'h-20'
+            shouldShowSolid ? 'h-16 lg:h-20' : 'h-24'
           }`}>
             {/* Left Section: Menu (mobile)  */}
             <div className="flex-1 flex items-center space-x-4 lg:space-x-6">
@@ -123,7 +123,7 @@ export default function Navigation() {
                 className="lg:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
-                <Menu className={`w-6 h-6 ${shouldShowSolid ? 'text-black' : 'text-white'}`} />
+                <Menu className={`w-6 h-6 ${shouldShowSolid ? 'text-black' : 'text-black lg:text-white'}`} />
               </button>
 
               <Link 
@@ -135,10 +135,10 @@ export default function Navigation() {
             </div>
 
             {/* Center Section: Logo */}
-            <div className="flex-none flex justify-center items-center h-full px-2">
+            <div className="flex-none flex justify-center items-center h-full px-4">
               <Link 
                 to="/" 
-                className={`font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
+                className={`font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap pt-1 ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
               >
                 EB'S CLOSET
               </Link>
@@ -192,7 +192,9 @@ export default function Navigation() {
                     onChange={(e) => setQ(e.target.value)} 
                     placeholder="Search..." 
                     className={`w-full px-4 py-1.5 rounded-full border focus:outline-none text-sm ${
-                      shouldShowSolid ? 'bg-gray-100 border-transparent' : 'bg-white/20 border-white/30 text-white placeholder-white/70'
+                      shouldShowSolid 
+                        ? 'bg-gray-100 border-transparent text-black' 
+                        : 'bg-gray-100 border-gray-200 lg:bg-white/20 lg:border-white/30 text-black lg:text-white placeholder-gray-500 lg:placeholder-white/70'
                     }`} 
                   />
                   <button className="absolute right-3 top-1/2 -translate-y-1/2 text-hot-pink" onClick={() => {
@@ -240,7 +242,7 @@ export default function Navigation() {
 
 {!expanded && (
                 <button 
-                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
+                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-black lg:text-white lg:hover:text-white/70'}`}
                   onClick={() => setExpanded(true)}
                 >
                   <Search className="w-5 h-5 lg:w-6 lg:h-6" />
@@ -255,7 +257,7 @@ export default function Navigation() {
               </button> */}
 
               <button 
-                className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`} 
+                className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-black lg:text-white lg:hover:text-white/70'}`} 
                 onClick={() => navigate('/cart')}
               >
                 <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6" />

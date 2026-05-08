@@ -130,6 +130,33 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [brokenIds, setBrokenIds] = useState<Set<string>>(new Set());
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+    // Minimum swipe distance in pixels
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+      setTouchEnd(null);
+      setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+      setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+      if (!touchStart || !touchEnd) return;
+      const distance = touchStart - touchEnd;
+      const isLeftSwipe = distance > minSwipeDistance;
+      const isRightSwipe = distance < -minSwipeDistance;
+      
+      if (isLeftSwipe) {
+        nextSlide();
+      } else if (isRightSwipe) {
+        prevSlide();
+      }
+    };
 
     const effectiveSlides = slides.filter((s: any) => !brokenIds.has(s.id));
 
@@ -159,8 +186,13 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     const currentSlide = effectiveSlides[currentImageIndex] || {};
 
     return (
-      <div ref={ref} className="relative bg-white">
-        <section className="relative h-auto aspect-video sm:h-[90vh] md:h-screen w-full overflow-hidden">
+      <div ref={ref} className="relative bg-white pt-[72px] sm:pt-0">
+        <section 
+          className="relative h-auto aspect-video sm:h-[90vh] md:h-screen w-full overflow-hidden touch-pan-y"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           {/* Background Slider */}
           {effectiveSlides.map((slide: any, index: number) => (
             <div
@@ -206,27 +238,27 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
             </div>
           ))}
 
-          {/* Navigation Arrows */}
+          {/* Navigation Arrows - Hidden on mobile, visible on medium+ screens */}
           {effectiveSlides.length > 1 && (
-            <>
+            <div className="hidden md:block">
               <button 
                 onClick={prevSlide}
-                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
+                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
               >
-                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                <ChevronLeft className="w-6 h-6" />
               </button>
               <button 
                 onClick={nextSlide}
-                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
               >
-                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                <ChevronRight className="w-6 h-6" />
               </button>
-            </>
+            </div>
           )}
 
           {/* Content Overlay */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
-            <div className="animate-fadeIn w-full max-w-4xl">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none">
+            <div className="animate-fadeIn w-full max-w-4xl pointer-events-auto">
               <p className="text-white text-[10px] sm:text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-2 sm:mb-4 font-medium drop-shadow-md">
                 {currentSlide.subtitle || site.hero.subtitle}
               </p>
