@@ -160,7 +160,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
     return (
       <div ref={ref} className="relative bg-white">
-        <section className="relative h-[75vh] sm:h-[90vh] md:h-screen w-full overflow-hidden">
+        <section className="relative h-auto aspect-video sm:h-[90vh] md:h-screen w-full overflow-hidden">
           {/* Background Slider */}
           {effectiveSlides.map((slide: any, index: number) => (
             <div
@@ -190,7 +190,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                 <img
                   src={getOptimizedUrl(slide.url, 1920)}
                   alt={slide.title || `Hero slide ${index + 1}`}
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-cover sm:object-center"
                   loading={index === 0 ? "eager" : "lazy"}
                   decoding="async"
                   onError={() => {
@@ -202,7 +202,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                   }}
                 />
               )}
-              <div className="absolute inset-0 bg-black/20" /> {/* Subtle overlay */}
+              <div className="absolute inset-0 bg-black/10" /> {/* Subtle overlay */}
             </div>
           ))}
 
@@ -211,15 +211,15 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
             <>
               <button 
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
               <button 
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full bg-white/30 backdrop-blur-sm text-white hover:bg-white/50 transition-colors z-20"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </>
           )}
@@ -227,17 +227,17 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
           {/* Content Overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10">
             <div className="animate-fadeIn w-full max-w-4xl">
-              <p className="text-white text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-4 font-medium drop-shadow-md">
+              <p className="text-white text-[10px] sm:text-xs md:text-sm lg:text-base tracking-[0.3em] uppercase mb-2 sm:mb-4 font-medium drop-shadow-md">
                 {currentSlide.subtitle || site.hero.subtitle}
               </p>
-              <h1 className="font-headline text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
+              <h1 className="font-headline text-2xl sm:text-5xl md:text-7xl lg:text-8xl text-white mb-4 sm:mb-8 tracking-wide drop-shadow-lg leading-tight whitespace-pre-line">
                 {currentSlide.title || site.hero.title}
               </h1>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center items-center">
                 {currentSlide.bannerCtaText ? (
                   <a 
                     href={currentSlide.bannerCtaHref || "/shop"} 
-                    className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-black rounded-full hover:text-white transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
+                    className="bg-white text-black px-6 sm:px-8 py-2 sm:py-3 md:py-4 text-[10px] sm:text-xs md:text-sm tracking-widest uppercase hover:bg-black rounded-full hover:text-white transition-all duration-300 w-[70%] sm:min-w-[160px] sm:w-auto"
                   >
                     {currentSlide.bannerCtaText}
                   </a>
@@ -245,13 +245,13 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                   <>
                     <a 
                       href="/shop" 
-                      className="bg-white text-black px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
+                      className="bg-white text-black px-6 sm:px-8 py-2 sm:py-3 md:py-4 text-[10px] sm:text-xs md:text-sm tracking-widest uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 w-[70%] sm:min-w-[160px] sm:w-auto"
                     >
                       Shop Now
                     </a>
                     <a 
                       href="/shop?newarrival=true" 
-                      className="border-2 border-white text-white px-8 py-3 md:py-4 text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-[85%] sm:min-w-[160px] sm:w-auto"
+                      className="border-2 border-white text-white px-6 sm:px-8 py-2 sm:py-3 md:py-4 text-[10px] sm:text-xs md:text-sm tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300 w-[70%] sm:min-w-[160px] sm:w-auto"
                     >
                       New Arrivals
                     </a>
@@ -263,13 +263,13 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
           {/* Dots Indicators */}
           {effectiveSlides.length > 1 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+            <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-20">
               {effectiveSlides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    idx === currentImageIndex ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${
+                    idx === currentImageIndex ? 'bg-white w-6 sm:w-8' : 'bg-white/50 hover:bg-white/80'
                   }`}
                 />
               ))}
