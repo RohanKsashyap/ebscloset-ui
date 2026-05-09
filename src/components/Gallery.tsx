@@ -8,21 +8,62 @@ interface GalleryProps {
   intervalMs?: number;
   onImageClick?: () => void;
   productName?: string;
+  layout?: 'slider' | 'grid';
 }
 
-export default function Gallery({ images, autoplay = true, intervalMs = 3500, onImageClick, productName = "Dress" }: GalleryProps) {
+export default function Gallery({ images, autoplay = true, intervalMs = 3500, onImageClick, productName = "Dress", layout = 'slider' }: GalleryProps) {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
-  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
-  const next = () => setCurrent((c) => (c + 1) % images.length);
 
   useEffect(() => {
-    if (!autoplay) return;
+    if (!autoplay || layout === 'grid') return;
     const id = setInterval(() => {
       if (!paused) setCurrent((c) => (c + 1) % images.length);
     }, intervalMs);
     return () => clearInterval(id);
-  }, [paused, autoplay, intervalMs, images.length]);
+  }, [paused, autoplay, intervalMs, images.length, layout]);
+
+  if (layout === 'grid') {
+    return (
+      <div className="space-y-4">
+        <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
+          {images[0] ? (
+            <img 
+              src={getOptimizedUrl(images[0], 1200)} 
+              alt={`${productName} - main`} 
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+              <div className="w-24 h-32 rounded-2xl bg-white/70 border" />
+            </div>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2].map((idx) => (
+            <div key={idx} className="aspect-square bg-gray-100 overflow-hidden">
+              {images[idx] ? (
+                <img 
+                  src={getOptimizedUrl(images[idx], 800)} 
+                  alt={`${productName} - view ${idx + 1}`} 
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                   <div className="w-12 h-16 rounded-xl bg-white/70 border" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
+  const next = () => setCurrent((c) => (c + 1) % images.length);
 
   return (
     <div>

@@ -1,53 +1,11 @@
-import { Instagram, Facebook, Youtube } from 'lucide-react';
 import { useState } from 'react';
 import { newsletterService } from '../services/newsletterService';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
-import { loadSite } from '../utils/storage';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const { showToast } = useToast();
-  const site = loadSite({
-    hero: { title: "EB'S CLOSET", subtitle: 'Beautiful Dresses for Girls 7-13', slides: [], backgroundImages: [], bannerImage: '', bannerTitle: '', bannerSubtitle: '', bannerCtaText: 'Discover Magic', bannerCtaHref: '/shop' },
-    editorial: { image: '', kicker: 'Growing Up in Style', title: 'Every Girl\nDeserves Magic', body: 'From first school dances to birthday parties, we create magical moments with dresses designed specifically for girls aged 7-13. Every dress tells a story of growing up beautifully.', ctaText: 'Find Her Perfect Dress', ctaHref: '/shop' },
-    collections: [],
-    footerGroups: [
-      { title: 'Shop by Age', links: [
-        { label: 'Ages 7-8', href: '/shop' },
-        { label: 'Ages 9-10', href: '/shop' },
-        { label: 'Ages 11-12', href: '/shop' },
-        { label: 'Ages 12-13', href: '/shop' },
-      ]},
-      { title: 'Quick Links', links: [
-        { label: 'New Arrival Dresses', href: '/shop?newarrival=true' },
-        { label: 'Best Seller Collection', href: '/shop' },
-        { label: 'Party Dress Styles', href: '/shop?type=party' },
-        { label: 'Casual Wear', href: '/shop?type=casual' },
-      ]},
-      { title: 'For Parents', links: [
-        { label: 'Size Guide', href: '/size-guide' },
-        { label: 'Care Instructions', href: '/care' },
-        { label: 'Gift Cards', href: '/gift-cards' },
-        { label: 'Our Story', href: '/our-story' },
-      ]},
-      { title: 'Customer Care', links: [
-        { label: 'Contact Us', href: '/contact' },
-        { label: 'Shipping', href: '/shipping' },
-        { label: 'Returns', href: '/returns' },
-        { label: 'FAQ', href: '/faq' },
-      ]},
-      { title: 'Follow Us', links: [] },
-    ],
-    social: [
-      { kind: 'instagram', href: '#' },
-      { kind: 'facebook', href: '#' },
-      { kind: 'youtube', href: '#' },
-    ],
-    newsletter: { heading: 'Join Our Magic Circle', subtext: 'Get exclusive access to new magical dress collections and special offers for growing girls' },
-    legalLabels: { privacy: 'Privacy Policy', terms: 'Terms of Service', cookies: 'Cookie Policy' },
-    infoPages: {}
-  });
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,93 +21,80 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#f6f3f2] text-black">
-      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-20">
-        <div className="border-b border-white/20 pb-16 mb-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-6">
-              {site.newsletter.heading}
-            </h3>
-            <p className="text-sm tracking-wider text-black/80 mb-8 px-4">
-              {site.newsletter.subtext}
+    <footer className="bg-[#050505] text-white">
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-24">
+          {/* Brand Column */}
+          <div className="max-w-md">
+            <h2 className="font-headline text-4xl mb-8 uppercase tracking-tight">VELVET ATELIER</h2>
+            <p className="text-gray-400 text-sm font-light leading-relaxed uppercase tracking-widest mb-12">
+              Architectural precision. Textile luxury. Since 2024, crafting the future of children's haute couture.
             </p>
-
-            <form onSubmit={handleNewsletterSubmit} className="flex max-w-md mx-auto flex-col sm:flex-row gap-4 sm:gap-2 px-6 sm:px-0">
+            
+            <form onSubmit={handleNewsletterSubmit} className="relative max-w-sm">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="EMAIL ADDRESS"
+                placeholder="JOIN THE ATELIER LIST"
                 required
-                className="flex-1 bg-transparent border rounded-full border-black py-3 px-6 text-sm focus:outline-none focus:border-hot-pink transition-colors duration-300 placeholder-black/50"
+                className="w-full bg-transparent border-b border-gray-800 py-4 text-[10px] tracking-[0.3em] uppercase focus:border-hot-pink transition-colors outline-none placeholder-gray-500"
               />
               <button
                 type="submit"
-                className="border rounded-full border-black bg-black text-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-500"
+                className="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold tracking-[0.2em] uppercase text-hot-pink"
               >
-                Join
+                JOIN
               </button>
             </form>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
-          {site.footerGroups.map((group, gi) => (
-            <div key={gi}>
-              <h4 className="text-sm tracking-widest uppercase mb-6 font-medium">
-                {group.title}
-              </h4>
-              <ul className="space-y-3">
-                {group.links.map((l, li) => (
-                  <li key={li}>
-                    {l.href.startsWith('/') ? (
-                      <Link to={l.href} className="text-sm text-black/80 hover:text-black transition-colors duration-300">
-                        {l.label}
-                      </Link>
-                    ) : (
-                      <a href={l.href} className="text-sm text-black/80 hover:text-black transition-colors duration-300">
-                        {l.label}
-                      </a>
-                    )}
+          {/* Links Columns */}
+          <div className="grid grid-cols-2 gap-12">
+            <div>
+              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-500">COLLECTIONS</h4>
+              <ul className="space-y-4">
+                {['NEW ARRIVALS', 'THE ATELIER SERIES', 'HERITAGE KNITS', 'OUTERWEAR'].map((item) => (
+                  <li key={item}>
+                    <Link to="/shop" className="text-[10px] tracking-[0.2em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+                      {item}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
-
-        {site.social.length > 0 && (
-          <div className="mb-16">
-            <h4 className="text-sm tracking-widest uppercase mb-6 font-medium">Follow Us</h4>
-            <div className="flex space-x-6">
-              {site.social.map((s, si) => (
-                <a key={si} href={s.href} className="text-black/80 hover:text-black transition-colors duration-300">
-                  {s.kind === 'instagram' && <Instagram className="w-5 h-5" />}
-                  {s.kind === 'facebook' && <Facebook className="w-5 h-5" />}
-                  {s.kind === 'youtube' && <Youtube className="w-5 h-5" />}
-                  {s.kind === 'custom' && <span className="text-xs">Link</span>}
-                </a>
-              ))}
+            <div>
+              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-500">SERVICE</h4>
+              <ul className="space-y-4">
+                {[
+                  { label: 'SIZE GUIDE', href: '/size-guide' },
+                  { label: 'SHIPPING', href: '/shipping' },
+                  { label: 'RETURNS', href: '/returns' },
+                  { label: 'CONTACT', href: '/contact' }
+                ].map((item) => (
+                  <li key={item.label}>
+                    <Link to={item.href} className="text-[10px] tracking-[0.2em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        )}
+        </div>
 
-        <div className="pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="flex space-x-8">
-            <Link to="/privacy" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
-              {site.legalLabels.privacy}
-            </Link>
-            <Link to="/terms" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
-              {site.legalLabels.terms}
-            </Link>
-            <Link to="/cookies" className="text-xs text-black/80 hover:text-black transition-colors duration-300">
-              {site.legalLabels.cookies}
-            </Link>
-          </div>
-
-          <p className="text-xs text-black/80">
-            © 2025 EB'S CLOSET. All rights reserved.
+        <div className="pt-12 border-t border-gray-900 flex flex-col items-center space-y-8">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold">
+            © 2024 VELVET ATELIER KIDS. DIGITAL HIGH-END COLLECTIVE.
           </p>
+          
+          <div className="flex space-x-12">
+            {['INSTAGRAM', 'PINTEREST', 'TWITTER X'].map((s) => (
+              <a key={s} href="#" className="text-[10px] tracking-[0.3em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+                {s}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

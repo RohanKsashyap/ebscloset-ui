@@ -8,7 +8,7 @@ import RecentlyViewed from '../components/RecentlyViewed';
 import TrustBadges from '../components/TrustBadges';
 import Accordion from '../components/Accordion';
 import StickyBuyBar from '../components/StickyBuyBar';
-import { Star, Sparkles, Scissors, Ruler, X, Heart } from 'lucide-react';
+import { Star, Sparkles, Scissors, Ruler, X, Heart, Truck, RefreshCw } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { productService } from '../services/productService';
 import { useProductContext } from '../context/ProductContext';
@@ -173,83 +173,75 @@ export default function ProductDetail() {
           })}
         </script>
       </Helmet>
-      <section className="pt-24 pb-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
-        <div className="mb-6 text-[10px] md:text-xs text-gray-600 overflow-x-auto whitespace-nowrap">
-          <Link to="/" className="hover:underline">Home</Link>
-          <span className="mx-2">/</span>
-          <Link to="/shop" className="hover:underline">Shop</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-800">{product.categoryId.name}</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <div>
-            <Gallery images={product.images ?? []} productName={product.name} onImageClick={() => {
-              const el = document.getElementById('details-top');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }} />
+
+      {/* Main Product Section */}
+      <section className="pt-24 pb-20 md:pt-32 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+          {/* Left: Gallery */}
+          <div className="lg:sticky lg:top-32 h-fit">
+            <Gallery 
+              images={product.images ?? []} 
+              productName={product.name} 
+              layout="grid"
+            />
           </div>
-          <div id="details-top" className="premium-card p-5 sm:p-6 md:p-8">
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink">{product.categoryId.name}</p>
-              {isOutOfStock && (
-                <span className="bg-gray-800 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                  Out of Stock
+
+          {/* Right: Product Info */}
+          <div className="flex flex-col">
+            <div className="flex flex-col gap-2 mb-6">
+              <span className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-semibold border-l-2 border-hot-pink pl-3 h-3 flex items-center">
+                Atelier Series No. {String(product.sku || '').slice(-3) || '062'}
+              </span>
+              <h1 className="font-headline text-5xl md:text-6xl lg:text-7xl text-gray-900 leading-[1.05] tracking-tight uppercase">
+                {(() => {
+                  const name = String(product.name || '');
+                  const parts = name.split(' ');
+                  if (parts.length > 1) {
+                    return (
+                      <>
+                        {parts[0]} <span className="italic text-hot-pink font-light">{parts[1]}</span> {parts.slice(2).join(' ')}
+                      </>
+                    );
+                  }
+                  return name;
+                })()}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-3xl font-light text-gray-900">{formatAUD(product.price)}</span>
+              {isOutOfStock ? (
+                <span className="bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
+                  Sold Out
+                </span>
+              ) : (
+                <span className="bg-black text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
+                  In Stock
                 </span>
               )}
             </div>
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl mb-2 text-gray-800 leading-tight">{product.name}</h1>
-              <button
-                aria-label="Toggle wishlist"
-                onClick={() => toggleWishlist(product.id)}
-                className="mt-1 bg-white/80 hover:bg-white rounded-full p-2 shadow flex-shrink-0"
-              >
-                <Heart
-                  className={isWishlisted(product.id) ? 'text-hot-pink' : 'text-gray-700'}
-                  fill={isWishlisted(product.id) ? 'currentColor' : 'none'}
-                  size={18}
-                />
-              </button>
-            </div>
-            <div className="flex items-baseline gap-3 mb-3">
-              <p className="text-xl md:text-2xl font-semibold text-hot-pink">{formatAUD(product.price)}</p>
-              {product.originalPrice && (
-                <p className="text-base md:text-lg text-gray-400 line-through decoration-red-500">{formatAUD(product.originalPrice)}</p>
-              )}
-              {product.sku && (
-                <span className="text-[10px] md:text-xs tracking-widest uppercase text-gray-500 ml-auto">Inclusive of taxes</span>
-              )}
-            </div>
-            <div className="text-xs md:text-sm text-hot-pink mb-4">Extra 10% off with code MAGIC10</div>
-            <div className="flex flex-wrap gap-2 mb-6">
-              <span className="text-[10px] md:text-[11px] px-3 py-1 border rounded-full">Free shipping over $100</span>
-              <span className="text-[10px] md:text-[11px] px-3 py-1 border rounded-full">30-day easy returns</span>
-              <span className="text-[10px] md:text-[11px] px-3 py-1 border rounded-full">Ships in 2–3 days</span>
-            </div>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-5 h-5 ${i < Math.round(avgRating) ? 'text-hot-pink' : 'text-gray-300'}`} fill={i < Math.round(avgRating) ? 'currentColor' : 'none'} />
-                ))}
-              </div>
-              <span className="text-sm text-gray-600">{reviewsCount} reviews</span>
-            </div>
 
-            <p className="text-gray-700 leading-relaxed mb-8">{product.description}</p>
-            <div className="mb-6">
-              <p className="text-xs tracking-widest uppercase text-gray-600 mb-3">Color: <span className="text-gray-900 font-medium">{product.color || 'Multi'}</span></p>
-              <div className="flex gap-2">
-                {(product.images ?? []).slice(0,3).map((img: string, idx: number) => (
-                  <div key={idx} className={`border-2 rounded-sm p-0.5 cursor-pointer ${idx === 0 ? 'border-gray-900' : 'border-transparent hover:border-gray-300'}`}>
-                    <img src={img} alt="color variant" className="w-10 h-10 object-cover" loading="lazy" decoding="async" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p className="text-gray-600 leading-relaxed mb-10 text-lg max-w-xl font-light">
+              {product.description}
+            </p>
 
+            {/* Colors */}
             <div className="mb-8">
-              <p className="text-xs tracking-widest uppercase text-gray-600 mb-3">Select Size</p>
-              <div className="flex flex-wrap gap-2 max-w-xs">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold mb-4">Color / {product.color || 'Charcoal Black'}</p>
+              <div className="flex gap-4">
+                <button className="w-8 h-8 rounded-full bg-black ring-2 ring-offset-2 ring-black" />
+                <button className="w-8 h-8 rounded-full bg-gray-300 ring-1 ring-gray-200" />
+                <button className="w-8 h-8 rounded-full bg-[#1a2b3c] ring-1 ring-[#1a2b3c]" />
+              </div>
+            </div>
+
+            {/* Sizes */}
+            <div className="mb-10">
+              <div className="flex justify-between items-end mb-4">
+                <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold">Size Selection</p>
+                <button onClick={() => setShowSizeGuide(true)} className="text-[10px] tracking-widest uppercase text-gray-900 underline font-bold">Size Chart</button>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {(() => {
                   const availableSizes = [
                     ...(product.sizes && product.sizes.length > 0 ? product.sizes : []),
@@ -258,201 +250,219 @@ export default function ProductDetail() {
                   ];
                   const uniqueSizes = Array.from(new Set(availableSizes)) as string[];
                   
-                  return uniqueSizes.map((s: string) => {
-                    const isInStock = (() => {
-                      // 1. Check variants
-                      if (product.variants && product.variants.length > 0) {
-                        const variant = product.variants.find((v: any) => v.size?.toLowerCase() === s.toLowerCase());
-                        if (variant) return (Number(variant.inStock) || 0) > 0;
-                      }
-                      // 2. Check stock object
-                      if (product.stock && Object.keys(product.stock).length > 0) {
-                        const stockKey = Object.keys(product.stock).find(k => k.toLowerCase() === s.toLowerCase());
-                        if (stockKey) return (Number(product.stock[stockKey]) || 0) > 0;
-                      }
-                      // 3. Fallback
-                      return totalStock > 0;
-                    })();
-                    return (
-                      <button
-                        key={s}
-                        disabled={!isInStock}
-                        onClick={() => setSize(s)}
-                        className={`min-w-[3rem] h-10 px-3 text-sm transition-all duration-300 border ${
-                          size === s 
-                            ? 'bg-black text-white border-black' 
-                            : isInStock 
-                              ? 'border-gray-900 text-gray-900 hover:bg-black hover:text-white'
-                              : 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50'
-                        }`}
-                      >
-                        {s}
-                      </button>
-                    );
-                  });
+                  return uniqueSizes.map((s: string) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={`h-14 border text-sm transition-all duration-300 ${
+                        size === s 
+                          ? 'bg-black text-white border-black font-bold' 
+                          : 'border-gray-100 text-gray-400 hover:border-gray-300'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ));
                 })()}
               </div>
-              {size && (
-                <p className="mt-3 text-sm text-gray-600">Selected size: {size}</p>
-              )}
-              <div className="mt-3">
-                <button onClick={() => setShowSizeGuide(true)} className="text-sm text-gray-700 underline flex items-center gap-2 hover:text-hot-pink transition-colors">
-                  <Ruler className="w-4 h-4" /> Size Guide
-                </button>
-              </div>
             </div>
 
-            <div className="mb-6">
-              <p className="text-xs tracking-widest uppercase text-gray-600 mb-2">Check Delivery</p>
-              <div className="flex gap-2 max-w-sm">
-                <input value={pin} onChange={(e) => setPin(e.target.value)} className="border px-4 py-2 flex-1 min-w-0" placeholder="PIN code" />
-                <button className="premium-button px-4 py-2 w-auto sm:w-[140px] flex-shrink-0" onClick={() => {
-                  if (/^\d{6}$/.test(pin)) setPinMsg('Delivers in 3–5 days to your area'); else setPinMsg('Enter a valid 6-digit PIN');
-                }}>Check</button>
-              </div>
-              {!!pinMsg && <p className="text-sm text-gray-700 mt-2">{pinMsg}</p>}
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Actions */}
+            <div className="space-y-4 mb-12">
               <button 
                 disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
                 onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
-                className={`premium-button inverse w-full sm:w-auto ${(isOutOfStock || (size ? isSelectedSizeOutOfStock : false)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                className="w-full h-16 bg-hot-pink text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-black transition-all duration-500 disabled:opacity-50"
               >
-                {isOutOfStock ? 'Out of Stock' : 'Add to Bag'}
+                Add to Bag — {formatAUD(product.price)}
               </button>
               <button 
-                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
-                onClick={() => { 
-                  if (!size) { showToast('Please select a size', 'error'); return; } 
-                  const buyNowItem = { id: product.id || product._id, name: product.name, price: product.price, originalPrice: product.originalPrice, image: product.image, size: size ?? undefined, qty: 1 };
-                  navigate('/checkout', { state: { buyNowItem } }); 
-                }} 
-                className={`premium-button w-full sm:w-auto text-center ${(isOutOfStock || (size ? isSelectedSizeOutOfStock : false)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                onClick={() => toggleWishlist(product.id)}
+                className="w-full h-16 border border-gray-900 text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2"
               >
-                Buy Now
+                {isWishlisted(product.id) ? (
+                  <>In Wishlist <Heart size={14} fill="currentColor" className="text-hot-pink" /></>
+                ) : (
+                  <>Add to Wishlist <Heart size={14} /></>
+                )}
               </button>
-              <button onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: product.name, url: window.location.href });
-                } else {
-                  navigator.clipboard.writeText(window.location.href);
-                  alert('Link copied');
-                }
-              }} className="text-gray-700 underline text-sm text-center py-2">Share</button>
             </div>
 
-            <div className="mt-4 text-xs text-gray-700">
-              <p>Free shipping over $100 • Easy 30-day returns</p>
-            </div>
-
-          </div>
-        </div>
-
-        <TrustBadges />
-
-        <div className="mt-12 bg-rose-50 p-6 md:p-8 rounded-2xl border border-rose-100">
-          <h3 className="font-headline text-xl md:text-2xl text-gray-800 mb-4 flex items-center gap-2">
-            <Heart className="w-5 h-5 text-hot-pink fill-current" /> Why We Love It
-          </h3>
-          <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-6">
-            This piece is designed with both style and comfort in mind. The {product.materials?.toLowerCase() || 'premium fabric'} ensures a soft touch against delicate skin, while the attention to detail in the {product.care?.toLowerCase().includes('hand') ? 'hand-finished' : 'high-quality'} construction guarantees it stands up to every adventure.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 bg-white p-4 rounded shadow-sm">
-              <Sparkles className="w-5 h-5 text-hot-pink" />
-              <span className="text-sm font-medium text-gray-800">Premium Quality</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white p-4 rounded shadow-sm">
-              <Scissors className="w-5 h-5 text-hot-pink" />
-              <span className="text-sm font-medium text-gray-800">Expertly Crafted</span>
-            </div>
-            <div className="flex items-center gap-3 bg-white p-4 rounded shadow-sm">
-              <Star className="w-5 h-5 text-hot-pink" />
-              <span className="text-sm font-medium text-gray-800">Top Rated</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-12">
-          <Accordion items={[
-            { title: 'Details', content: product.description },
-            { title: 'Fabric & Care', content: (
-              <div>
-                <p className="mb-2">{product.materials}</p>
-                <p>{product.care}</p>
+            {/* Service Icons */}
+            <div className="grid grid-cols-2 gap-8 border-t border-gray-100 pt-8">
+              <div className="flex items-start gap-3">
+                <Truck className="w-5 h-5 text-hot-pink" />
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase mb-1">Global Courier</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-tighter">Complimentary</p>
+                </div>
               </div>
-            ) },
-            { title: 'Shipping & Returns', content: (
-              <div>
-                <p>Ships in 2-3 business days. Free shipping over $100.</p>
-                <p>30-day returns for unworn items with tags.</p>
-              </div>
-            ) },
-          ]} />
-        </div>
-
-        <div className="mt-16">
-          <h2 className="font-headline text-2xl mb-6 text-gray-800">Reviews</h2>
-          <Reviews initialReviews={product.reviews} onSubmit={handleReviewSubmit} />
-        </div>
-
-        <SimilarProducts currentId={product.id} category={product.category} />
-        
-        <RecentlyViewed />
-        
-        <StickyBuyBar 
-          name={product.name} 
-          price={product.price} 
-          disabled={!size || isSelectedSizeOutOfStock || isOutOfStock} 
-          onAdd={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
-        />
-
-        {/* Size Guide Modal */}
-        {showSizeGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-            <div className="bg-white p-8 max-w-lg w-full rounded-lg shadow-xl relative animate-slideUp">
-              <button 
-                onClick={() => setShowSizeGuide(false)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-900"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              
-              <h3 className="font-headline text-2xl mb-2 text-center">Size Guide</h3>
-              <p className="text-center text-gray-500 text-sm mb-6">Find the perfect fit for your little one</p>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 text-xs uppercase text-gray-700">
-                    <tr>
-                      <th className="px-4 py-3">Size</th>
-                      <th className="px-4 py-3">Height (cm)</th>
-                      <th className="px-4 py-3">Chest (cm)</th>
-                      <th className="px-4 py-3">Waist (cm)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    <tr><td className="px-4 py-3 font-medium">7-8 Years</td><td className="px-4 py-3">122-128</td><td className="px-4 py-3">63-66</td><td className="px-4 py-3">57-59</td></tr>
-                    <tr><td className="px-4 py-3 font-medium">9-10 Years</td><td className="px-4 py-3">134-140</td><td className="px-4 py-3">69-72</td><td className="px-4 py-3">61-63</td></tr>
-                    <tr><td className="px-4 py-3 font-medium">11-12 Years</td><td className="px-4 py-3">146-152</td><td className="px-4 py-3">75-78</td><td className="px-4 py-3">65-67</td></tr>
-                    <tr><td className="px-4 py-3 font-medium">12-13 Years</td><td className="px-4 py-3">152-158</td><td className="px-4 py-3">78-81</td><td className="px-4 py-3">67-69</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              
-              <div className="mt-6 text-xs text-gray-500">
-                <p className="font-medium mb-1">How to Measure:</p>
-                <ul className="list-disc pl-4 space-y-1">
-                  <li><strong>Height:</strong> Measure from the top of the head to the floor.</li>
-                  <li><strong>Chest:</strong> Measure around the fullest part of the chest.</li>
-                  <li><strong>Waist:</strong> Measure around the natural waistline.</li>
-                </ul>
+              <div className="flex items-start gap-3">
+                <RefreshCw className="w-5 h-5 text-hot-pink" />
+                <div>
+                  <p className="text-[10px] font-bold tracking-widest uppercase mb-1">Exchanges</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-tighter">30-Day Window</p>
+                </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </section>
+
+      {/* Curation of Comfort Section */}
+      <section className="bg-[#050505] text-white py-24 px-4 sm:px-6 lg:px-12">
+        <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div>
+            <h2 className="font-headline text-5xl md:text-6xl lg:text-7xl leading-none mb-8">
+              THE <span className="text-hot-pink">CURATION</span> OF COMFORT
+            </h2>
+            <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-md">
+              A dialogue between artisanal heritage and modern wearability. Every stitch is a testament to our commitment to luxury.
+            </p>
+          </div>
+          <div className="space-y-12">
+            {[
+              { label: 'FABRICATION', text: 'Masterful blend of 70% Virgin Wool and 30% Grade-A Mongolian Cashmere. Sourced from sustainable heritage mills.' },
+              { label: 'ARCHITECTURE', text: "Silk-viscose lining featuring our signature 'Cloud Stitch' for frictionless layering and superior breathability." },
+              { label: 'FINISHING', text: 'Double-breasted tailored closure. Hand-polished horn buttons. Reinforced welt pockets.' }
+            ].map((item, idx) => (
+              <div key={idx} className="border-l border-hot-pink/30 pl-8">
+                <p className="text-[10px] tracking-[0.3em] text-hot-pink font-bold mb-4 uppercase">{item.label}</p>
+                <p className="text-gray-300 font-light leading-relaxed uppercase text-sm tracking-widest">
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Community Voices Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+          <div>
+            <h2 className="font-headline text-5xl md:text-6xl mb-4 uppercase">
+              COMMUNITY <span className="text-hot-pink italic font-light">VOICES</span>
+            </h2>
+            <div className="flex items-center gap-4">
+              <div className="flex text-hot-pink">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={16} fill={i < 4.9 ? 'currentColor' : 'none'} />
+                ))}
+              </div>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-bold">
+                {avgRating.toFixed(1)} BASED ON {reviewsCount} ATELIER REVIEWS
+              </span>
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+              const el = document.getElementById('reviews-section');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-hot-pink transition-all duration-500"
+          >
+            Write Review
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          {(product.reviews ?? []).slice(0, 3).map((r: any, idx: number) => (
+            <div key={idx} className="border-l-4 border-hot-pink/20 pl-8 py-4">
+               <div className="flex text-gray-900 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={12} fill={i < r.rating ? 'currentColor' : 'none'} />
+                ))}
+              </div>
+              <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-bold mb-4">VERIFIED ATELIER BUYER</p>
+              <h3 className="font-headline text-2xl mb-4 italic uppercase">"{r.comment.split(' ').slice(0,2).join(' ')}"</h3>
+              <p className="text-gray-500 font-light leading-relaxed mb-8 uppercase text-xs tracking-widest">
+                {r.comment}
+              </p>
+              <p className="text-[10px] tracking-[0.3em] uppercase text-gray-900 font-bold">
+                {r.name} — {r.location || 'LONDON, UK'}
+              </p>
+            </div>
+          ))}
+        </div>
+        
+        <div id="reviews-section">
+          <Reviews initialReviews={product.reviews || []} onSubmit={handleReviewSubmit} />
+        </div>
+      </section>
+
+      {/* Complete the Look Section */}
+      <section className="py-24 bg-gray-50 px-4 sm:px-6 lg:px-12 overflow-hidden">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="flex justify-between items-end mb-16">
+             <h2 className="font-headline text-5xl md:text-6xl uppercase leading-none">
+              COMPLETE THE <br /><span className="text-hot-pink italic font-light">LOOK</span>
+            </h2>
+          </div>
+          
+          <SimilarProducts 
+            currentId={product.id || product._id} 
+            categoryId={product.categoryId?._id || (typeof product.categoryId === 'string' ? product.categoryId : undefined)} 
+            categoryName={product.categoryId?.name || (typeof product.categoryId === 'string' ? undefined : product.category)} 
+          />
+        </div>
+      </section>
+
+      <div className="py-12">
+        <RecentlyViewed />
+      </div>
+
+      <StickyBuyBar 
+        name={product.name} 
+        price={product.price} 
+        disabled={!size || isSelectedSizeOutOfStock || isOutOfStock} 
+        onAdd={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
+      />
+
+      {/* Size Guide Modal */}
+      {showSizeGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white p-8 max-w-lg w-full rounded-lg shadow-xl relative animate-slideUp">
+            <button 
+              onClick={() => setShowSizeGuide(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-900"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <h3 className="font-headline text-2xl mb-2 text-center">Size Guide</h3>
+            <p className="text-center text-gray-500 text-sm mb-6">Find the perfect fit for your little one</p>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+                  <tr>
+                    <th className="px-4 py-3">Size</th>
+                    <th className="px-4 py-3">Height (cm)</th>
+                    <th className="px-4 py-3">Chest (cm)</th>
+                    <th className="px-4 py-3">Waist (cm)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr><td className="px-4 py-3 font-medium">7-8 Years</td><td className="px-4 py-3">122-128</td><td className="px-4 py-3">63-66</td><td className="px-4 py-3">57-59</td></tr>
+                  <tr><td className="px-4 py-3 font-medium">9-10 Years</td><td className="px-4 py-3">134-140</td><td className="px-4 py-3">69-72</td><td className="px-4 py-3">61-63</td></tr>
+                  <tr><td className="px-4 py-3 font-medium">11-12 Years</td><td className="px-4 py-3">146-152</td><td className="px-4 py-3">75-78</td><td className="px-4 py-3">65-67</td></tr>
+                  <tr><td className="px-4 py-3 font-medium">12-13 Years</td><td className="px-4 py-3">152-158</td><td className="px-4 py-3">78-81</td><td className="px-4 py-3">67-69</td></tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="mt-6 text-xs text-gray-500">
+              <p className="font-medium mb-1">How to Measure:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li><strong>Height:</strong> Measure from the top of the head to the floor.</li>
+                <li><strong>Chest:</strong> Measure around the fullest part of the chest.</li>
+                <li><strong>Waist:</strong> Measure around the natural waistline.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
