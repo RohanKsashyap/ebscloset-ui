@@ -21,13 +21,13 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#050505] text-white">
+    <footer className="bg-[#FAF9F6] text-gray-900 border-t border-gray-100">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-24">
           {/* Brand Column */}
           <div className="max-w-md">
-            <h2 className="font-headline text-4xl mb-8 uppercase tracking-tight">VELVET ATELIER</h2>
-            <p className="text-gray-400 text-sm font-light leading-relaxed uppercase tracking-widest mb-12">
+            <h2 className="font-headline text-4xl mb-8 uppercase tracking-tight text-gray-900">EB'S CLOSET</h2>
+            <p className="text-gray-500 text-sm font-light leading-relaxed uppercase tracking-widest mb-12">
               Architectural precision. Textile luxury. Since 2024, crafting the future of children's haute couture.
             </p>
             
@@ -38,7 +38,7 @@ export default function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="JOIN THE ATELIER LIST"
                 required
-                className="w-full bg-transparent border-b border-gray-800 py-4 text-[10px] tracking-[0.3em] uppercase focus:border-hot-pink transition-colors outline-none placeholder-gray-500"
+                className="w-full bg-transparent border-b border-gray-200 py-4 text-[10px] tracking-[0.3em] uppercase focus:border-hot-pink transition-colors outline-none placeholder-gray-400"
               />
               <button
                 type="submit"
@@ -52,11 +52,11 @@ export default function Footer() {
           {/* Links Columns */}
           <div className="grid grid-cols-2 gap-12">
             <div>
-              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-500">COLLECTIONS</h4>
+              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-400">COLLECTIONS</h4>
               <ul className="space-y-4">
                 {['NEW ARRIVALS', 'THE ATELIER SERIES', 'HERITAGE KNITS', 'OUTERWEAR'].map((item) => (
                   <li key={item}>
-                    <Link to="/shop" className="text-[10px] tracking-[0.2em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+                    <Link to="/shop" className="text-[10px] tracking-[0.2em] uppercase font-bold text-gray-900 hover:text-hot-pink transition-colors">
                       {item}
                     </Link>
                   </li>
@@ -64,7 +64,7 @@ export default function Footer() {
               </ul>
             </div>
             <div>
-              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-500">SERVICE</h4>
+              <h4 className="text-[10px] tracking-[0.3em] uppercase mb-8 font-bold text-gray-400">SERVICE</h4>
               <ul className="space-y-4">
                 {[
                   { label: 'SIZE GUIDE', href: '/size-guide' },
@@ -73,7 +73,7 @@ export default function Footer() {
                   { label: 'CONTACT', href: '/contact' }
                 ].map((item) => (
                   <li key={item.label}>
-                    <Link to={item.href} className="text-[10px] tracking-[0.2em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+                    <Link to={item.href} className="text-[10px] tracking-[0.2em] uppercase font-bold text-gray-900 hover:text-hot-pink transition-colors">
                       {item.label}
                     </Link>
                   </li>
@@ -83,14 +83,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-12 border-t border-gray-900 flex flex-col items-center space-y-8">
-          <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold">
-            © 2024 VELVET ATELIER KIDS. DIGITAL HIGH-END COLLECTIVE.
+        <div className="pt-12 border-t border-gray-100 flex flex-col items-center space-y-8">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-bold">
+            © 2024 EB'S CLOSET KIDS. DIGITAL HIGH-END COLLECTIVE.
           </p>
           
           <div className="flex space-x-12">
             {['INSTAGRAM', 'PINTEREST', 'TWITTER X'].map((s) => (
-              <a key={s} href="#" className="text-[10px] tracking-[0.3em] uppercase font-bold text-white hover:text-hot-pink transition-colors">
+              <a key={s} href="#" className="text-[10px] tracking-[0.3em] uppercase font-bold text-gray-900 hover:text-hot-pink transition-colors">
                 {s}
               </a>
             ))}

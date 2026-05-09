@@ -156,23 +156,23 @@ export default function BudgetSection() {
         </div>
 
         {/* Premium Section */}
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-black rounded-[40px] p-6 md:p-12 text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-hot-pink/20 blur-[100px] rounded-full -mr-32 -mt-32" />
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white border border-gray-100 shadow-sm rounded-[40px] p-6 md:p-12 text-gray-900 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-hot-pink/10 blur-[100px] rounded-full -mr-32 -mt-32" />
           
           <div className="relative z-10 flex flex-col justify-center">
             <span className="text-hot-pink text-xs font-bold uppercase tracking-[0.3em] mb-4 block">Premium Selection</span>
             <h2 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter mb-6">
-              EB'S  CLOSET <br />
+              EB'S CLOSET <br />
               SELECTS
             </h2>
-            <p className="text-gray-400 mb-8 max-w-md text-sm md:text-base leading-relaxed">
+            <p className="text-gray-600 mb-8 max-w-md text-sm md:text-base leading-relaxed">
               Our signature high-end casual wear and formal wear for the most distinguished young wardrobes. Precision-crafted, limited edition pieces.
             </p>
             <div className="flex items-center gap-6">
-              <span className="text-3xl font-black text-white">$100+</span>
+              <span className="text-3xl font-black text-hot-pink">$100+</span>
               <Link 
                 to="/shop?budget=100plus" 
-                className="px-8 py-4 bg-transparent border border-white/20 hover:border-hot-pink hover:bg-hot-pink text-white font-bold uppercase tracking-widest text-xs rounded-full transition-all duration-300"
+                className="px-8 py-4 bg-hot-pink text-white font-bold uppercase tracking-widest text-xs rounded-full transition-all duration-300 hover:bg-black"
               >
                 Explore Premium
               </Link>
@@ -180,16 +180,16 @@ export default function BudgetSection() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 relative z-10">
-            <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 hover:bg-white/10 transition-colors">
-              <Diamond className="w-10 h-10 text-white" />
+            <div className="aspect-square bg-gray-50 rounded-3xl flex items-center justify-center border border-gray-100 hover:border-hot-pink/30 transition-colors">
+              <Diamond className="w-10 h-10 text-hot-pink" />
             </div>
-            <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 hover:bg-white/10 transition-colors">
-              <Star className="w-10 h-10 text-white" />
+            <div className="aspect-square bg-gray-50 rounded-3xl flex items-center justify-center border border-gray-100 hover:border-hot-pink/30 transition-colors">
+              <Star className="w-10 h-10 text-hot-pink" />
             </div>
-            <div className="aspect-square bg-white/5 rounded-3xl flex items-center justify-center border border-white/10 hover:bg-white/10 transition-colors">
-              <Zap className="w-10 h-10 text-white" />
+            <div className="aspect-square bg-gray-50 rounded-3xl flex items-center justify-center border border-gray-100 hover:border-hot-pink/30 transition-colors">
+              <Zap className="w-10 h-10 text-hot-pink" />
             </div>
-            <div className="aspect-square bg-hot-pink rounded-3xl flex flex-col items-center justify-center text-center p-4">
+            <div className="aspect-square bg-hot-pink rounded-3xl flex flex-col items-center justify-center text-center p-4 text-white">
               <span className="text-2xl font-black">E.B'S</span>
               <span className="text-[10px] uppercase font-bold tracking-widest">Limited</span>
             </div>

@@ -215,7 +215,7 @@ export default function ProductDetail() {
                   Sold Out
                 </span>
               ) : (
-                <span className="bg-black text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
+                <span className="bg-hot-pink text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
                   In Stock
                 </span>
               )}
@@ -229,7 +229,7 @@ export default function ProductDetail() {
             <div className="mb-8">
               <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold mb-4">Color / {product.color || 'Charcoal Black'}</p>
               <div className="flex gap-4">
-                <button className="w-8 h-8 rounded-full bg-black ring-2 ring-offset-2 ring-black" />
+                <button className="w-8 h-8 rounded-full bg-gray-900 ring-2 ring-offset-2 ring-gray-900" />
                 <button className="w-8 h-8 rounded-full bg-gray-300 ring-1 ring-gray-200" />
                 <button className="w-8 h-8 rounded-full bg-[#1a2b3c] ring-1 ring-[#1a2b3c]" />
               </div>
@@ -256,7 +256,7 @@ export default function ProductDetail() {
                       onClick={() => setSize(s)}
                       className={`h-14 border text-sm transition-all duration-300 ${
                         size === s 
-                          ? 'bg-black text-white border-black font-bold' 
+                          ? 'bg-hot-pink text-white border-hot-pink font-bold' 
                           : 'border-gray-100 text-gray-400 hover:border-gray-300'
                       }`}
                     >
@@ -272,16 +272,16 @@ export default function ProductDetail() {
               <button 
                 disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
                 onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
-                className="w-full h-16 bg-hot-pink text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-black transition-all duration-500 disabled:opacity-50"
+                className="w-full h-16 bg-hot-pink text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:opacity-90 transition-all duration-500 disabled:opacity-50"
               >
                 Add to Bag — {formatAUD(product.price)}
               </button>
               <button 
                 onClick={() => toggleWishlist(product.id)}
-                className="w-full h-16 border border-gray-900 text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2"
+                className="w-full h-16 border border-hot-pink text-hot-pink text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
               >
                 {isWishlisted(product.id) ? (
-                  <>In Wishlist <Heart size={14} fill="currentColor" className="text-hot-pink" /></>
+                  <>In Wishlist <Heart size={14} fill="currentColor" /></>
                 ) : (
                   <>Add to Wishlist <Heart size={14} /></>
                 )}
@@ -310,13 +310,13 @@ export default function ProductDetail() {
       </section>
 
       {/* Curation of Comfort Section */}
-      <section className="bg-[#050505] text-white py-24 px-4 sm:px-6 lg:px-12">
+      <section className="bg-[#FAF9F6] text-gray-900 py-24 px-4 sm:px-6 lg:px-12 border-y border-gray-100">
         <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="font-headline text-5xl md:text-6xl lg:text-7xl leading-none mb-8">
               THE <span className="text-hot-pink">CURATION</span> OF COMFORT
             </h2>
-            <p className="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-md">
+            <p className="text-gray-600 text-lg md:text-xl font-light leading-relaxed max-w-md">
               A dialogue between artisanal heritage and modern wearability. Every stitch is a testament to our commitment to luxury.
             </p>
           </div>
@@ -328,7 +328,7 @@ export default function ProductDetail() {
             ].map((item, idx) => (
               <div key={idx} className="border-l border-hot-pink/30 pl-8">
                 <p className="text-[10px] tracking-[0.3em] text-hot-pink font-bold mb-4 uppercase">{item.label}</p>
-                <p className="text-gray-300 font-light leading-relaxed uppercase text-sm tracking-widest">
+                <p className="text-gray-600 font-light leading-relaxed uppercase text-sm tracking-widest">
                   {item.text}
                 </p>
               </div>
@@ -360,7 +360,7 @@ export default function ProductDetail() {
               const el = document.getElementById('reviews-section');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="px-12 py-5 bg-black text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-hot-pink transition-all duration-500"
+            className="px-12 py-5 bg-hot-pink text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-gray-900 transition-all duration-500"
           >
             Write Review
           </button>
