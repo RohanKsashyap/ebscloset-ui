@@ -123,7 +123,7 @@ export default function Navigation() {
                 className="lg:hidden"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
-                <Menu className={`w-6 h-6 ${shouldShowSolid ? 'text-black' : 'text-black lg:text-white'}`} />
+                <Menu className={`w-6 h-6 ${shouldShowSolid ? 'text-black' : 'text-white'}`} />
               </button>
 
               <Link 
@@ -242,22 +242,22 @@ export default function Navigation() {
 
 {!expanded && (
                 <button 
-                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-black lg:text-white lg:hover:text-white/70'}`}
+                  className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
                   onClick={() => setExpanded(true)}
                 >
                   <Search className="w-5 h-5 lg:w-6 lg:h-6" />
                 </button>
               )}
 
-              {/* <button 
+              <button 
                 className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
                 onClick={() => navigate(isAuthenticated() ? '/dashboard' : '/login')}
               >
                 <User className="w-5 h-5 lg:w-6 lg:h-6" />
-              </button> */}
+              </button>
 
               <button 
-                className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-black lg:text-white lg:hover:text-white/70'}`} 
+                className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`} 
                 onClick={() => navigate('/cart')}
               >
                 <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6" />

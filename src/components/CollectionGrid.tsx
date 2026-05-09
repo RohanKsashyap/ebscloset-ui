@@ -71,7 +71,7 @@ export default function CollectionGrid() {
         ref={scrollRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        className="flex gap-6 md:gap-8 overflow-x-auto snap-x snap-mandatory pb-8 custom-scrollbar scroll-smooth"
+        className="flex gap-6 md:gap-8 overflow-x-auto snap-x snap-mandatory pb-8 custom-scrollbar scroll-smooth touch-pan-y"
       >
         {collections.map((group) => {
           const id = group._id || group.id;

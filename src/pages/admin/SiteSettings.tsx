@@ -29,6 +29,7 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
   const [activeBanner, setActiveBanner] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const { showToast } = useToast();
 
   useEffect(() => { setSite(initial); }, [initial]);
@@ -63,6 +64,43 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
     } catch (err) {
       console.error('Error uploading image:', err);
       showToast('Failed to upload image', 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const onHeroBannerUrl = async () => {
+    if (!imageUrlInput) {
+      showToast('Please paste an image URL first', 'error');
+      return;
+    }
+    
+    setIsUploading(true);
+    try {
+      const uploadRes = await adminService.uploadAsset(imageUrlInput, 'ebs-closet/hero');
+      const imageUrl = uploadRes.url;
+
+      setSite((s: any) => {
+        const newSite = { ...s };
+        if (!newSite.hero) newSite.hero = {};
+        if (!newSite.hero.slides) newSite.hero.slides = [];
+        
+        if (activeBanner === 0) {
+          newSite.hero.bannerImage = imageUrl;
+        }
+        
+        if (!newSite.hero.slides[activeBanner]) {
+          newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
+        }
+        newSite.hero.slides[activeBanner].url = imageUrl;
+        
+        return newSite;
+      });
+      setImageUrlInput('');
+      showToast('Image uploaded from URL successfully');
+    } catch (err) {
+      console.error('Error uploading image from URL:', err);
+      showToast('Failed to upload image from URL', 'error');
     } finally {
       setIsUploading(false);
     }
@@ -297,6 +335,34 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                     />
                   </div>
                 </div>
+
+                {/* URL Upload Option */}
+                <div className="flex gap-4">
+                  <div className="flex-1 relative">
+                    <input 
+                      type="text" 
+                      placeholder="Or paste image URL here..." 
+                      className="w-full bg-white border border-gray-100 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300 shadow-sm"
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          onHeroBannerUrl();
+                        }
+                      }}
+                    />
+                  </div>
+                  <button 
+                    onClick={onHeroBannerUrl}
+                    disabled={isUploading || !imageUrlInput}
+                    className="bg-[#111827] text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isUploading ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
+                    Upload URL
+                  </button>
+                </div>
+
                 <p className="text-[10px] text-gray-400 font-bold italic text-center">Recommended size: 1920x800px. Max size: 2MB.</p>
               </div>
 

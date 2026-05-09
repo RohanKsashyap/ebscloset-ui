@@ -69,7 +69,7 @@ export default function HomePage() {
             <h2 className="font-headline text-3xl md:text-6xl lg:text-7xl mb-6 text-hot-pink">Homepage Animations</h2>
             <p className="text-xs md:text-sm tracking-[0.3em] uppercase text-rose-gold">Auto‑playing showcase from Admin</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12 touch-pan-y">
             {animations.filter(a => !!a.video).map((anim, i) => {
               const title = anim.title ?? '';
               const cover = anim.cover ?? '';

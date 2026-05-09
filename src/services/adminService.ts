@@ -196,9 +196,13 @@ export const adminService = {
     return response.data.data;
   },
 
-  uploadAsset: async (file: File, folder?: string): Promise<{url: string, fileId: string, thumbnailUrl: string}> => {
+  uploadAsset: async (fileOrUrl: File | string, folder?: string): Promise<{url: string, fileId: string, thumbnailUrl: string}> => {
     const formData = new FormData();
-    formData.append('file', file);
+    if (typeof fileOrUrl === 'string') {
+      formData.append('url', fileOrUrl);
+    } else {
+      formData.append('file', fileOrUrl);
+    }
     if (folder) formData.append('folder', folder);
     
     const response = await apiClient.post('/admin/upload-asset', formData, {
