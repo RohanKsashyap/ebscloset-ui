@@ -442,9 +442,8 @@ export default function AgeCategoryManager() {
                     />
                   </div>
                 </div>
-
-                {/* Recent Uploads Section */}
-                <div className="bg-white p-6 rounded-[2.5rem] border border-gray-50 shadow-sm flex items-center justify-between">
+{/* recent */}
+                {/* <div className="bg-white p-6 rounded-[2.5rem] border border-gray-50 shadow-sm flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
                       {mediaFile ? <ImageIcon size={20} /> : <ImageIcon size={20} className="opacity-20" />}
@@ -463,11 +462,11 @@ export default function AgeCategoryManager() {
                       Uploaded
                     </span>
                   )}
-                </div>
+                </div> */}
               </div>
 
               {/* Content Controls */}
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
                   <MousePointer2 size={14} />
                   Content Controls
@@ -503,10 +502,10 @@ export default function AgeCategoryManager() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Advanced Settings */}
-              <div className="space-y-6">
+              {/* <div className="space-y-6">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
                   <Sparkles size={14} />
                   Advanced Settings
@@ -559,7 +558,7 @@ export default function AgeCategoryManager() {
                     </select>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

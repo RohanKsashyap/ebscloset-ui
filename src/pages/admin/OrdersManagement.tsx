@@ -1,4 +1,5 @@
   import { useState } from 'react';
+import { useDashboard } from '../../hooks/useAdminData';
 import { 
   Search, 
   Plus, 
@@ -20,6 +21,7 @@ interface OrdersManagementProps {
 }
 
 export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder, onBulkDeleteOrders, onViewDetails }: OrdersManagementProps) {
+  const { data: dashboardData } = useDashboard();
   const [activeTab, setActiveTab] = useState('All Orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
@@ -111,10 +113,10 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
               className="w-full bg-white border border-gray-200 rounded-2xl pl-11 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all outline-none"
             />
           </div>
-          <button className="bg-[#eb4899] hover:bg-[#d9448a] text-white px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-pink-500/20">
+          {/* <button className="bg-[#eb4899] hover:bg-[#d9448a] text-white px-5 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-pink-500/20">
             <Plus size={18} />
             Create Order
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -278,31 +280,41 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6" onClick={e => e.stopPropagation()}>
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 space-y-4">
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Total Sales</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-3xl font-bold text-gray-900">${orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0).toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                ${dashboardData?.counts?.sales 
+                  ? Number(dashboardData.counts.sales).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0).toFixed(2)}
+              </p>
               <span className="text-green-500 text-xs font-bold">+12% ↑</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 space-y-4">
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Active Shipments</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-3xl font-bold text-gray-900">{orders.filter(o => o.status?.toLowerCase() === 'shipped').length}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                {dashboardData?.counts?.activeShipments ?? orders.filter(o => o.status?.toLowerCase() === 'shipped').length}
+              </p>
               <span className="text-pink-500 text-xs font-bold">Real-time</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 space-y-4">
+        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 space-y-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Avg. Order Value</p>
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-3xl font-bold text-gray-900">${(orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0) / (orders.length || 1)).toFixed(2)}</p>
+              <p className="text-3xl font-bold text-gray-900">
+                ${dashboardData?.counts?.sales && dashboardData?.counts?.orders
+                  ? (Number(dashboardData.counts.sales) / dashboardData.counts.orders).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : (orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0) / (orders.length || 1)).toFixed(2)}
+              </p>
               <span className="text-gray-400 text-xs font-bold">-2% ↓</span>
             </div>
           </div>
