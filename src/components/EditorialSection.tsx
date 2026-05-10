@@ -19,7 +19,7 @@ export default function EditorialSection() {
           decoding="async"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-r from-hot-pink/40 to-millennial-pink/30" />
+      <div className="absolute inset-0 bg-gradient-to-r from-hot-pink/80 to-millennial-pink/30" />
 
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto py-20 md:py-0">
         <p className="text-xs md:text-sm lg:text-base tracking-[0.5em] uppercase mb-8 animate-fadeIn ">
