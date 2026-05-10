@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Product } from '../../services/productService';
 import { adminService, type Review, type GalleryCategory, type Category } from '../../services/adminService';
 import type { Testimonial, GalleryImage } from '../../services/siteService';
@@ -134,6 +134,19 @@ export default function AdminDashboard() {
   const [testimonialEditing, setTestimonialEditing] = useState<Testimonial | undefined>(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminName, setAdminName] = useState('Administrator');
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const [newReview, setNewReview] = useState({
     productId: '',
@@ -405,9 +418,145 @@ export default function AdminDashboard() {
     );
   }
 
+  const handleSearchSubmit = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const q = searchQuery.toLowerCase().trim();
+      
+      const commandMap: Record<string, typeof tab> = {
+        'dashboard': 'dashboard',
+        'home': 'dashboard',
+        'products': 'products',
+        'catalog': 'products',
+        'categories': 'categories',
+        'age categories': 'age-categories',
+        'age': 'age-categories',
+        'budgets': 'budgets',
+        'discounts': 'discounts',
+        'codes': 'discounts',
+        'site': 'site',
+        'settings': 'site',
+        'orders': 'orders',
+        'sales': 'orders',
+        'newsletter': 'newsletter',
+        'subscribers': 'newsletter',
+        'inbox': 'inbox',
+        'messages': 'inbox',
+        'reviews': 'reviews',
+        'testimonials': 'testimonials',
+        'gallery': 'gallery',
+        'lookbook': 'gallery',
+        'customers': 'customers',
+        'users': 'customers',
+        'analytics': 'analytics',
+        'stats': 'analytics',
+        'inventory': 'inventory',
+        'stock': 'inventory'
+      };
+
+      if (commandMap[q]) {
+        setTab(commandMap[q]);
+        setSearchQuery(''); // Clear after navigation
+        showToast(`Navigated to ${q}`);
+      }
+    }
+  };
+
   const filteredProducts = catalog.filter(p => {
-    if (productFilter === 'All Products') return true;
-    return p.category === productFilter;
+    const matchesFilter = productFilter === 'All Products' || p.category === productFilter;
+    const matchesSearch = !searchQuery || 
+      p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      p.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(p._id).toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
+
+  const filteredOrders = orders.filter(o => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      String(o.orderId || o._id).toLowerCase().includes(q) ||
+      o.customer?.fullName?.toLowerCase().includes(q) ||
+      o.customer?.email?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredUsers = users.filter(u => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      u.fullName?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      String(u._id).toLowerCase().includes(q)
+    );
+  });
+
+  const filteredSubscribers = subscribers.filter(s => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return s.email?.toLowerCase().includes(q);
+  });
+
+  const filteredReviews = reviews.filter(r => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      r.customerName?.toLowerCase().includes(q) ||
+      r.comment?.toLowerCase().includes(q) ||
+      r.productId?.name?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredTestimonials = testimonials.filter(t => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      t.customerName?.toLowerCase().includes(q) ||
+      t.content?.toLowerCase().includes(q) ||
+      t.tag?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredGalleryImages = galleryImages.filter(img => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      img.title?.toLowerCase().includes(q) ||
+      img.category?.name?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredCategories = productCategories.filter(cat => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      cat.name?.toLowerCase().includes(q) ||
+      cat.slug?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredCodes = codes.filter(c => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return c.code?.toLowerCase().includes(q);
+  });
+
+  const filteredMessages = messages.filter(m => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      m.name?.toLowerCase().includes(q) ||
+      m.email?.toLowerCase().includes(q) ||
+      m.message?.toLowerCase().includes(q)
+    );
+  });
+
+  const filteredRecentOrders = (dashboardData?.recentOrders || []).filter((order: any) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      order.customer?.fullName?.toLowerCase().includes(q) ||
+      (order.orderId || `#${String(order._id || '').substring(0, 8)}`).toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -507,9 +656,13 @@ export default function AdminDashboard() {
             <div className="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
               <Search className="text-gray-400" size={16} />
               <input 
+                ref={searchInputRef}
                 type="text" 
                 placeholder="Search command..." 
                 className="bg-transparent border-none text-xs font-bold focus:ring-0 w-48 placeholder:text-gray-400"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchSubmit}
               />
               <span className="text-[9px] font-black text-gray-300 bg-white px-1.5 py-0.5 rounded border border-gray-100">⌘K</span>
             </div>
@@ -564,7 +717,7 @@ export default function AdminDashboard() {
                     </div>
                     
                     <div className="space-y-6">
-                      {dashboardData?.recentOrders?.map((order: any, i: number) => {
+                      {filteredRecentOrders.map((order: any, i: number) => {
                         const customerName = order.customer?.fullName || 'Guest';
                         const orderNumber = order.orderId || `#${String(order._id || '').substring(0, 8)}`;
                         
@@ -754,7 +907,7 @@ export default function AdminDashboard() {
 
             {tab === 'inventory' && (
               <InventoryManagement 
-                products={catalog} 
+                products={filteredProducts} 
                 onEdit={(p) => {
                   setProductEditing(p);
                   setIsProductModalOpen(true);
@@ -764,7 +917,7 @@ export default function AdminDashboard() {
 
             {tab === 'categories' && (
               <CategoryManagement 
-                categories={productCategories}
+                categories={filteredCategories}
                 onRefresh={() => queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })}
                 onEdit={(cat) => {
                   setCategoryEditing(cat);
@@ -787,12 +940,12 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {tab === 'discounts' && <DiscountsManagement codes={codes} onRefresh={() => adminService.getDiscounts().then(setCodes as any)} />}
+            {tab === 'discounts' && <DiscountsManagement codes={filteredCodes} onRefresh={() => adminService.getDiscounts().then(setCodes as any)} />}
 
             {tab === 'orders' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                <OrdersManagement 
-  orders={orders} 
+  orders={filteredOrders} 
   onUpdateStatus={updateOrderStatus} 
   onDeleteOrder={deleteOrder}
   onBulkDeleteOrders={bulkDeleteOrders}
@@ -827,7 +980,7 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-50">
-                        {subscribers.map((s) => (
+                        {filteredSubscribers.map((s) => (
                           <tr key={s._id} className="group hover:bg-gray-50/50 transition-all">
                             <td className="px-8 py-5 font-bold text-sm text-gray-900">{s.email}</td>
                             <td className="px-8 py-5 text-xs text-gray-400">{new Date(s.createdAt).toLocaleDateString()}</td>
@@ -847,7 +1000,7 @@ export default function AdminDashboard() {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Messages<span className="text-[#eb4899]">.</span></h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {messages.map((m) => (
+                  {filteredMessages.map((m) => (
                     <div key={m._id} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
                       <div className="flex justify-between items-start mb-6">
                         <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-[#eb4899] group-hover:scale-110 transition-transform">
@@ -886,7 +1039,7 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-[1fr,400px] gap-8">
                   <div className="space-y-4">
-                    {reviews.map((r) => (
+                    {filteredReviews.map((r) => (
                       <div key={r._id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group">
                         <div className="flex justify-between items-start mb-6">
                           <div className="flex items-center gap-4">
@@ -964,7 +1117,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {testimonials.map((t) => (
+                    {filteredTestimonials.map((t) => (
                       <div key={t._id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group relative overflow-hidden">
                         <div className="flex justify-between items-start mb-6">
                           <div className="flex items-center gap-4">
@@ -1017,7 +1170,7 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-[1fr,350px] gap-8">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {galleryImages.map((img) => (
+                    {filteredGalleryImages.map((img) => (
                       <div key={img._id} className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm group">
                         <div className="aspect-square relative overflow-hidden">
                           <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
@@ -1051,7 +1204,7 @@ export default function AdminDashboard() {
 
             {tab === 'customers' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <CustomersManagement users={users} />
+                <CustomersManagement users={filteredUsers} />
               </div>
             )}
 
