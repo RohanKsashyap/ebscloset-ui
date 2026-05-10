@@ -1087,6 +1087,10 @@ export default function AdminDashboard() {
               />
             )}
 
+
+
+            {/* categories tab starts from here */}
+
             {tab === 'categories' && (
               <CategoryManagement 
                 categories={filteredCategories}

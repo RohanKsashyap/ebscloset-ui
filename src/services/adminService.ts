@@ -56,6 +56,7 @@ export interface Category {
   imageUrl?: string;
   thumbnailUrl?: string;
   imageId?: string;
+  productCount?: number;
   createdAt: string;
 }
 
