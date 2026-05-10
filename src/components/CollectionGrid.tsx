@@ -101,7 +101,7 @@ export default function CollectionGrid() {
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={() => setIsPaused(true)}
           onTouchEnd={() => setIsPaused(false)}
-          className="flex gap-6 md:gap-8 overflow-x-auto pb-8 custom-scrollbar snap-x snap-mandatory touch-pan-x relative z-0"
+          className="flex gap-6 md:gap-8 overflow-x-auto pb-8 custom-scrollbar snap-x snap-mandatory touch-pan-y relative z-0"
         >
         {collections.map((group) => {
           const id = group._id || group.id;

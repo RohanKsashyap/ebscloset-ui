@@ -341,7 +341,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               onMouseLeave={() => setIsCategoryPaused(false)}
               onTouchStart={() => setIsCategoryPaused(true)}
               onTouchEnd={() => setIsCategoryPaused(false)}
-              className="flex gap-4 md:gap-8 overflow-x-auto pb-6 custom-scrollbar snap-x snap-mandatory touch-pan-x relative z-0"
+              className="flex gap-4 md:gap-8 overflow-x-auto pb-6 custom-scrollbar snap-x snap-mandatory touch-pan-y relative z-0"
             >
             {(realCategories.length > 0 ? realCategories : [
               { _id: '1', title: 'Party Dresses', slug: 'party', imageUrl: categoryImages.party, name: 'Party Dresses' },
