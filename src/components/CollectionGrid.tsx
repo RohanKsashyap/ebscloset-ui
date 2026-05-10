@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { adminService, type AgeCollection } from '../services/adminService';
 
 const DEFAULT_AGE_GROUPS = [
@@ -41,23 +42,35 @@ export default function CollectionGrid() {
     if (isPaused || collections.length === 0) return;
 
     const interval = setInterval(() => {
-      if (scrollRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-        const maxScroll = scrollWidth - clientWidth;
-        
-        if (scrollLeft >= maxScroll - 10) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
-        }
-      }
+      handleScroll('right');
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, collections.length]);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth * 0.8;
+      
+      if (direction === 'left') {
+        if (scrollLeft <= 0) {
+          scrollRef.current.scrollTo({ left: scrollWidth, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        }
+      } else {
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      }
+    }
+  };
 
   return (
-    <section className="py-12 md:py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden">
+    <section className="py-12 md:py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden relative group/section">
       <div className="text-center mb-12 md:mb-20">
         <h2 className="font-headline text-3xl sm:text-5xl md:text-6xl lg:text-7xl mb-4 md:mb-6 text-hot-pink">
           Shop by Age
@@ -67,12 +80,29 @@ export default function CollectionGrid() {
         </p>
       </div>
 
-      <div 
-        ref={scrollRef}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        className="flex gap-6 md:gap-8 overflow-x-auto snap-x snap-mandatory pb-8 custom-scrollbar scroll-smooth touch-pan-y"
-      >
+      <div className="relative">
+        {/* Navigation Buttons */}
+        <button 
+          onClick={() => handleScroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-pink-100 text-hot-pink opacity-0 group-hover/section:opacity-100 transition-opacity hidden md:block"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button 
+          onClick={() => handleScroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-pink-100 text-hot-pink opacity-0 group-hover/section:opacity-100 transition-opacity hidden md:block"
+        >
+          <ChevronRight size={24} />
+        </button>
+
+        <div 
+          ref={scrollRef}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+          className="flex gap-6 md:gap-8 overflow-x-auto pb-8 custom-scrollbar snap-x snap-mandatory touch-pan-x relative z-0"
+        >
         {collections.map((group) => {
           const id = group._id || group.id;
           const isVideo = group.mediaType === 'video' || group.video;
@@ -140,6 +170,7 @@ export default function CollectionGrid() {
           );
         })}
       </div>
+    </div>
     </section>
   );
 }

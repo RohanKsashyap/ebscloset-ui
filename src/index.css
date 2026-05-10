@@ -142,6 +142,7 @@
 
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -149,8 +150,9 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #f1f1f1;
+    background: #FF69B4;
     border-radius: 10px;
+    border: 1px solid transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {

@@ -68,6 +68,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     const [site, setSite] = useState<SiteSettings>(() => loadSite(defaultSite));
     const [realCategories, setRealCategories] = useState<Category[]>([]);
     const carouselRef = useRef<HTMLDivElement>(null);
+    const [isCategoryPaused, setIsCategoryPaused] = useState(false);
 
     useEffect(() => {
       const refresh = () => setSite(loadSite(defaultSite));
@@ -88,22 +89,34 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
     // Auto-slider for categories carousel
     useEffect(() => {
-      if (realCategories.length <= 4) return;
+      if (realCategories.length <= 4 || isCategoryPaused) return;
       
       const interval = setInterval(() => {
-        if (carouselRef.current) {
-          const container = carouselRef.current;
-          const scrollAmount = container.clientWidth / 2; // Scroll half a container
+        handleCategoryScroll('right');
+      }, 4000);
+
+      return () => clearInterval(interval);
+    }, [realCategories, isCategoryPaused]);
+
+    const handleCategoryScroll = (direction: 'left' | 'right') => {
+      if (carouselRef.current) {
+        const container = carouselRef.current;
+        const scrollAmount = container.clientWidth * 0.8;
+        if (direction === 'left') {
+          if (container.scrollLeft <= 0) {
+            container.scrollTo({ left: container.scrollWidth, behavior: 'smooth' });
+          } else {
+            container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          }
+        } else {
           if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
             container.scrollTo({ left: 0, behavior: 'smooth' });
           } else {
             container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
           }
         }
-      }, 4000);
-
-      return () => clearInterval(interval);
-    }, [realCategories]);
+      }
+    };
     
     const categoryImages = useMemo(() => {
       const getFirstImage = (cat: string) => {
@@ -304,14 +317,32 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
 {/* Find the Perfect Dress for Every Moment section */}
 
-        <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden">
+        <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto overflow-hidden relative group/cat-section">
           <h2 className="font-headline text-2xl md:text-3xl lg:text-4xl text-center text-gray-900 mb-10">Find the Perfect Dress for Every Moment</h2>
           
-          <div 
-            ref={carouselRef}
-            className="flex gap-4 md:gap-8 overflow-x-auto pb-6 scrollbar-hide snap-x snap-mandatory no-scrollbar touch-pan-y"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
+          <div className="relative">
+            {/* Navigation Buttons */}
+            <button 
+              onClick={() => handleCategoryScroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-pink-100 text-hot-pink opacity-0 group-hover/cat-section:opacity-100 transition-opacity hidden md:block"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button 
+              onClick={() => handleCategoryScroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-pink-100 text-hot-pink opacity-0 group-hover/cat-section:opacity-100 transition-opacity hidden md:block"
+            >
+              <ChevronRight size={24} />
+            </button>
+
+            <div 
+              ref={carouselRef}
+              onMouseEnter={() => setIsCategoryPaused(true)}
+              onMouseLeave={() => setIsCategoryPaused(false)}
+              onTouchStart={() => setIsCategoryPaused(true)}
+              onTouchEnd={() => setIsCategoryPaused(false)}
+              className="flex gap-4 md:gap-8 overflow-x-auto pb-6 custom-scrollbar snap-x snap-mandatory touch-pan-x relative z-0"
+            >
             {(realCategories.length > 0 ? realCategories : [
               { _id: '1', title: 'Party Dresses', slug: 'party', imageUrl: categoryImages.party, name: 'Party Dresses' },
               { _id: '2', title: 'Casual Dresses', slug: 'casual', imageUrl: categoryImages.casual, name: 'Casual Dresses' },
@@ -341,6 +372,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                 </div>
               </a>
             ))}
+            </div>
           </div>
         </section>
       </div>
