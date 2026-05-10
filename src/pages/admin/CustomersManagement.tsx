@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Users, 
   Search, 
@@ -8,8 +8,17 @@ import {
   UserPlus, 
   Zap,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Edit,
+  Trash2,
+  Eye,
+  ExternalLink
 } from 'lucide-react';
+import { useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useAdminData';
+import { adminService } from '../../services/adminService';
+import CustomerManagementModal from '../../components/admin/CustomerManagementModal';
+import CustomerDetailsModal from '../../components/admin/CustomerDetailsModal';
+import OrderDetailsModal from '../../components/admin/OrderDetailsModal';
 
 interface User {
   _id: string;
@@ -17,7 +26,9 @@ interface User {
   email: string;
   role: string;
   createdAt: string;
+  phone?: string;
   orders?: any[];
+  addresses?: any[];
 }
 
 interface CustomersManagementProps {
@@ -28,6 +39,28 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => 
@@ -78,6 +111,34 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
     return getTimeAgo(user.createdAt);
   };
 
+  const handleSaveCustomer = async (data: any) => {
+    if (selectedCustomer) {
+      await updateUserMutation.mutateAsync({ id: selectedCustomer._id, data });
+    } else {
+      await createUserMutation.mutateAsync(data);
+    }
+    setIsModalOpen(false);
+    setSelectedCustomer(null);
+  };
+
+  const handleDeleteCustomer = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+      await deleteUserMutation.mutateAsync(id);
+      setActiveMenuId(null);
+    }
+  };
+
+  const handleViewDetails = async (id: string) => {
+    try {
+      const fullUser = await adminService.getUserById(id);
+      setSelectedCustomer(fullUser);
+      setIsDetailsModalOpen(true);
+      setActiveMenuId(null);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Header */}
@@ -94,15 +155,21 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
-              placeholder="Search customers by name, email or ID..."
+              placeholder="Search customers..."
               className="pl-12 pr-6 py-3 bg-white border border-gray-100 rounded-2xl w-full md:w-80 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition-all shadow-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-pink-200">
+          <button 
+            onClick={() => {
+              setSelectedCustomer(null);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-pink-200"
+          >
             <Plus size={18} />
-            Add New Customer
+            Add Customer
           </button>
         </div>
       </div>
@@ -166,8 +233,8 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
               <tr className="border-b border-gray-50">
                 <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer Name</th>
                 <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</th>
-                <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Total Orders</th>
-                <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Total Spent</th>
+                <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Orders</th>
+                <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Spent</th>
                 <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Last Active</th>
                 <th className="px-8 py-6 text-[10px] font-bold uppercase tracking-widest text-gray-400 text-center">Status</th>
                 <th className="px-8 py-6"></th>
@@ -192,17 +259,56 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
                   </td>
                   <td className="px-8 py-6 text-center">
                     <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      (user.orders?.length || 0) > 5 
+                      user.role === 'admin' 
+                        ? 'bg-purple-50 text-purple-600 border border-purple-100' 
+                        : (user.orders?.length || 0) > 5 
                         ? 'bg-pink-100 text-pink-600 border border-pink-200' 
                         : 'bg-blue-50 text-blue-600 border border-blue-100'
                     }`}>
-                      {(user.orders?.length || 0) > 5 ? 'Premium Member' : 'Member'}
+                      {user.role === 'admin' ? 'Admin' : (user.orders?.length || 0) > 5 ? 'Premium' : 'Member'}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-right">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all opacity-0 group-hover:opacity-100">
+                  <td className="px-8 py-6 text-right relative">
+                    <button 
+                      onClick={() => setActiveMenuId(activeMenuId === user._id ? null : user._id)}
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+                    >
                       <MoreVertical size={18} />
                     </button>
+                    
+                    {activeMenuId === user._id && (
+                      <div 
+                        ref={menuRef}
+                        className="absolute right-12 top-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 w-48 z-50 animate-scaleIn"
+                      >
+                        <button 
+                          onClick={() => handleViewDetails(user._id)}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-gray-600 hover:bg-pink-50 hover:text-pink-600 flex items-center gap-3 transition-colors"
+                        >
+                          <Eye size={16} />
+                          View Details
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedCustomer(user);
+                            setIsModalOpen(true);
+                            setActiveMenuId(null);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition-colors"
+                        >
+                          <Edit size={16} />
+                          Edit Member
+                        </button>
+                        <div className="h-px bg-gray-50 my-1 mx-2" />
+                        <button 
+                          onClick={() => handleDeleteCustomer(user._id)}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                          Delete Account
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -261,6 +367,38 @@ export default function CustomersManagement({ users }: CustomersManagementProps)
           </div>
         </div>
       </div>
+
+      <CustomerManagementModal 
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedCustomer(null);
+        }}
+        onSave={handleSaveCustomer}
+        customer={selectedCustomer}
+      />
+
+      <CustomerDetailsModal 
+        isOpen={isDetailsModalOpen}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedCustomer(null);
+        }}
+        customer={selectedCustomer}
+        onViewOrder={(order) => {
+          setSelectedOrder(order);
+          setIsOrderModalOpen(true);
+        }}
+      />
+
+      <OrderDetailsModal
+        isOpen={isOrderModalOpen}
+        onClose={() => {
+          setIsOrderModalOpen(false);
+          setSelectedOrder(null);
+        }}
+        order={selectedOrder}
+      />
     </div>
   );
 }

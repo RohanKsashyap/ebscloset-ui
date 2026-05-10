@@ -164,3 +164,54 @@ export function useCreateProduct() {
     }
   });
 }
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  
+  return useMutation({
+    mutationFn: (data: any) => adminService.createUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      showToast('User created successfully');
+    },
+    onError: (err: any) => {
+      console.error('Create user error:', err);
+      showToast(err.response?.data?.message || 'Error creating user', 'error');
+    }
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => adminService.updateUser(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      showToast('User updated successfully');
+    },
+    onError: (err: any) => {
+      console.error('Update user error:', err);
+      showToast(err.response?.data?.message || 'Error updating user', 'error');
+    }
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  
+  return useMutation({
+    mutationFn: (id: string) => adminService.deleteUser(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      showToast('User deleted successfully');
+    },
+    onError: (err: any) => {
+      console.error('Delete user error:', err);
+      showToast(err.response?.data?.message || 'Error deleting user', 'error');
+    }
+  });
+}

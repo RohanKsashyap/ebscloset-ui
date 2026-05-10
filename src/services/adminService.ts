@@ -168,6 +168,29 @@ export const adminService = {
     return response.data.users || [];
   },
 
+  createUser: async (userData: any): Promise<any> => {
+    const response = await apiClient.post('/admin/users', userData);
+    return response.data;
+  },
+
+  updateUser: async (id: string, userData: any): Promise<any> => {
+    const response = await apiClient.put(`/admin/users/${id}`, userData);
+    return response.data;
+  },
+
+  deleteUser: async (id: string): Promise<void> => {
+    await apiClient.delete(`/admin/users/${id}`);
+  },
+
+  bulkDeleteUsers: async (ids: string[]): Promise<void> => {
+    await apiClient.delete('/admin/users', { data: { ids } });
+  },
+
+  getUserById: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/admin/users/${id}`);
+    return response.data;
+  },
+
   createDiscount: async (discountData: Partial<DiscountCode>): Promise<DiscountCode> => {
     const response = await apiClient.post('/admin/discounts', discountData);
     return response.data;
