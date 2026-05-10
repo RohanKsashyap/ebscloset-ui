@@ -20,6 +20,7 @@ export default function CollectionGrid() {
   const [failed, setFailed] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const touchX = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchCollections = async () => {
@@ -99,9 +100,21 @@ export default function CollectionGrid() {
           ref={scrollRef}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-          className="flex gap-6 md:gap-8 overflow-x-auto pb-8 custom-scrollbar snap-x snap-mandatory touch-pan-y relative z-0"
+          onTouchStart={(e) => {
+            setIsPaused(true);
+            touchX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            setIsPaused(false);
+            if (touchX.current !== null) {
+              const dx = e.changedTouches[0].clientX - touchX.current;
+              if (Math.abs(dx) > 40) {
+                handleScroll(dx < 0 ? 'right' : 'left');
+              }
+              touchX.current = null;
+            }
+          }}
+          className="flex gap-6 md:gap-8 overflow-x-auto pb-8 custom-scrollbar snap-x snap-mandatory relative z-0"
         >
         {collections.map((group) => {
           const id = group._id || group.id;

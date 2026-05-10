@@ -69,6 +69,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
     const [realCategories, setRealCategories] = useState<Category[]>([]);
     const carouselRef = useRef<HTMLDivElement>(null);
     const [isCategoryPaused, setIsCategoryPaused] = useState(false);
+    const categoryTouchX = useRef<number | null>(null);
 
     useEffect(() => {
       const refresh = () => setSite(loadSite(defaultSite));
@@ -339,9 +340,21 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               ref={carouselRef}
               onMouseEnter={() => setIsCategoryPaused(true)}
               onMouseLeave={() => setIsCategoryPaused(false)}
-              onTouchStart={() => setIsCategoryPaused(true)}
-              onTouchEnd={() => setIsCategoryPaused(false)}
-              className="flex gap-4 md:gap-8 overflow-x-auto pb-6 custom-scrollbar snap-x snap-mandatory touch-pan-y relative z-0"
+              onTouchStart={(e) => {
+                setIsCategoryPaused(true);
+                categoryTouchX.current = e.touches[0].clientX;
+              }}
+              onTouchEnd={(e) => {
+                setIsCategoryPaused(false);
+                if (categoryTouchX.current !== null) {
+                  const dx = e.changedTouches[0].clientX - categoryTouchX.current;
+                  if (Math.abs(dx) > 40) {
+                    handleCategoryScroll(dx < 0 ? 'right' : 'left');
+                  }
+                  categoryTouchX.current = null;
+                }
+              }}
+              className="flex gap-4 md:gap-8 overflow-x-auto pb-6 custom-scrollbar snap-x snap-mandatory relative z-0"
             >
             {(realCategories.length > 0 ? realCategories : [
               { _id: '1', title: 'Party Dresses', slug: 'party', imageUrl: categoryImages.party, name: 'Party Dresses' },
