@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { Product } from '../../services/productService';
-import { adminService, type Review, type GalleryCategory, type Category } from '../../services/adminService';
-import type { Testimonial, GalleryImage } from '../../services/siteService';
+import { adminService, type Review, type Category } from '../../services/adminService';
+import type { Testimonial } from '../../services/siteService';
 import { useNavigate } from 'react-router-dom';
 import OrdersManagement from './OrdersManagement';
 import DiscountsManagement from './DiscountsManagement';
@@ -17,8 +17,6 @@ import CategoryManagementModal from '../../components/admin/CategoryManagementMo
 import OrderDetailsModal from '../../components/admin/OrderDetailsModal';
 import TestimonialForm from '../../components/admin/TestimonialForm';
 import BudgetManager from '../../components/admin/BudgetManager';
-import GalleryImageForm from '../../components/admin/GalleryImageForm';
-import GalleryCategoryForm from '../../components/admin/GalleryCategoryForm';
 import InventoryManagement from '../../components/admin/InventoryManagement';
 import SidebarItem from '../../components/admin/SidebarItem';
 import type { DiscountCode, SiteSettings, Budget } from '../../types/admin';
@@ -29,13 +27,11 @@ import {
   useSiteSettings, 
   useDashboard, 
   useDiscounts, 
-  useCategories,
-  useGalleryCategories, 
+  useCategories, 
   useSubscribers, 
   useMessages, 
   useReviews, 
   useTestimonials, 
-  useGalleryImages, 
   useAgeCollections,
   useUsers,
   useCreateProduct,
@@ -86,7 +82,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
+  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
   const [productCategoryId, setProductCategoryId] = useState<string>('all');
   const [productSearch, setProductSearch] = useState<string>('');
   const debouncedSearch = useDebounce(productSearch, 300);
@@ -109,12 +105,10 @@ export default function AdminDashboard() {
   const { data: dashboardData = null, isLoading: dashboardLoading } = useDashboard(tab === 'dashboard' || tab === 'analytics');
   const { data: codes = [], isLoading: codesLoading } = useDiscounts(tab === 'discounts' || tab === 'dashboard');
   const { data: productCategories = [], isLoading: productCategoriesLoading } = useCategories(tab === 'categories' || tab === 'products');
-  const { data: galleryCategories = [], isLoading: galleryCategoriesLoading } = useGalleryCategories(tab === 'gallery');
   const { data: subscribers = [], isLoading: subscribersLoading } = useSubscribers(tab === 'newsletter');
   const { data: messages = [], isLoading: messagesLoading } = useMessages(tab === 'inbox');
   const { data: reviews = [], isLoading: reviewsLoading } = useReviews(tab === 'reviews');
   const { data: testimonials = [], isLoading: testimonialsLoading } = useTestimonials(tab === 'testimonials');
-  const { data: galleryImages = [], isLoading: galleryImagesLoading } = useGalleryImages(tab === 'gallery');
   const { data: ageCollections = [], isLoading: ageCollectionsLoading } = useAgeCollections(tab === 'age-categories' || tab === 'dashboard');
   const { data: users = [], isLoading: usersLoading } = useUsers(tab === 'customers');
 
@@ -131,7 +125,6 @@ export default function AdminDashboard() {
     (tab === 'inbox' && messagesLoading) ||
     (tab === 'reviews' && reviewsLoading) ||
     (tab === 'testimonials' && testimonialsLoading) ||
-    (tab === 'gallery' && (galleryImagesLoading || galleryCategoriesLoading)) ||
     (tab === 'customers' && usersLoading) ||
     (tab === 'analytics' && dashboardLoading) ||
     (tab === 'inventory' && (productsLoading && catalog.length === 0));
@@ -403,14 +396,6 @@ export default function AdminDashboard() {
     } catch { showToast('Error updating status', 'error'); }
   };
 
-  const saveGalleryImage = async (fd: FormData) => {
-    try {
-      await adminService.createGalleryImage(fd);
-      queryClient.invalidateQueries({ queryKey: ['admin', 'galleryImages'] });
-      alert('Image uploaded');
-    } catch { alert('Error'); }
-  };
-
   const logout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('admin');
@@ -452,8 +437,6 @@ export default function AdminDashboard() {
     'messages': 'inbox',
     'reviews': 'reviews',
     'testimonials': 'testimonials',
-    'gallery': 'gallery',
-    'lookbook': 'gallery',
     'customers': 'customers',
     'users': 'customers',
     'analytics': 'analytics',
@@ -530,15 +513,6 @@ export default function AdminDashboard() {
       t.customerName?.toLowerCase().includes(q) ||
       t.content?.toLowerCase().includes(q) ||
       t.tag?.toLowerCase().includes(q)
-    );
-  });
-
-  const filteredGalleryImages = galleryImages.filter(img => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      img.title?.toLowerCase().includes(q) ||
-      img.category?.name?.toLowerCase().includes(q)
     );
   });
 
@@ -621,7 +595,6 @@ export default function AdminDashboard() {
             <div className="mb-8">
               <p className="px-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Site Content</p>
               <div className="space-y-1">
-                <SidebarItem icon={ImageIcon} label="Gallery" active={tab === 'gallery'} onClick={() => setTab('gallery')} />
                 <SidebarItem icon={Star} label="Reviews" active={tab === 'reviews'} onClick={() => setTab('reviews')} />
                 <SidebarItem icon={MessageSquare} label="Testimonials" active={tab === 'testimonials'} onClick={() => setTab('testimonials')} />
                 <SidebarItem icon={DollarSign} label="Budgets" active={tab === 'budgets'} onClick={() => setTab('budgets')} />
@@ -1337,43 +1310,6 @@ export default function AdminDashboard() {
                 />
               </div>
             )}
-
-            {tab === 'gallery' && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center justify-between">
-                  <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Lookbook Gallery<span className="text-[#eb4899]">.</span></h1>
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-[1fr,350px] gap-8">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                    {filteredGalleryImages.map((img) => (
-                      <div key={img._id} className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm group">
-                        <div className="aspect-square relative overflow-hidden">
-                          <img src={img.url} alt={img.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                            <button onClick={() => deleteGalleryImage(img._id)} className="p-3 bg-red-500 text-white rounded-xl hover:scale-110 transition-transform"><Trash2 size={18} /></button>
-                          </div>
-                        </div>
-                        <div className="p-4 flex items-center justify-between bg-white">
-                          <div>
-                             <p className="text-xs font-black text-gray-900 uppercase tracking-widest">{img.title}</p>
-                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-0.5">Category: {img.category?.name || 'Uncategorized'}</p>
-                          </div>
-                          {img.featured && <Sparkles size={14} className="text-[#eb4899]" />}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-6">
-                    <GalleryImageForm categories={galleryCategories} onSave={saveGalleryImage} />
-                    <GalleryCategoryForm onSave={saveCategory} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-
 
 {/* customer tab starts here */}
 
