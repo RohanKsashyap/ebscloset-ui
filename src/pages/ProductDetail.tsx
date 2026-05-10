@@ -64,6 +64,11 @@ export default function ProductDetail() {
       return Number(product.inStock) || 0;
     }
 
+    // 4. Fallback to inStock if size is in sizes array
+    if (product.sizes && product.sizes.some((s: string) => s.toLowerCase() === size.toLowerCase())) {
+      return Number(product.inStock) || 0;
+    }
+
     return 0;
   })();
   const isSelectedSizeOutOfStock = size ? selectedSizeStock === 0 : false;
@@ -277,6 +282,17 @@ export default function ProductDetail() {
                 Add to Bag — {formatAUD(product.price)}
               </button>
               <button 
+                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
+                onClick={() => { 
+                  if (!size) { showToast('Please select a size', 'error'); return; } 
+                  handleAdd();
+                  navigate('/checkout');
+                }} 
+                className="w-full h-16 bg-gray-900 text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:opacity-90 transition-all duration-500 disabled:opacity-50"
+              >
+                Buy Now
+              </button>
+              <button 
                 onClick={() => toggleWishlist(product.id)}
                 className="w-full h-16 border border-hot-pink text-hot-pink text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
               >
@@ -417,6 +433,11 @@ export default function ProductDetail() {
         price={product.price} 
         disabled={!size || isSelectedSizeOutOfStock || isOutOfStock} 
         onAdd={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
+        onBuyNow={() => { 
+          if (!size) { showToast('Please select a size', 'error'); return; } 
+          handleAdd(); 
+          navigate('/checkout');
+        }}
       />
 
       {/* Size Guide Modal */}

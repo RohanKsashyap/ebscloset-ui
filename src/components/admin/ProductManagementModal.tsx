@@ -25,6 +25,8 @@ interface ProductManagementModalProps {
   initialProduct?: Product;
 }
 
+const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL'];
+
 export default function ProductManagementModal({ 
   isOpen, 
   onClose, 
@@ -40,7 +42,7 @@ export default function ProductManagementModal({
     inStock: 0,
     minStock: 5,
     size: '',
-    sizes: '',
+    sizes: [],
     color: '',
     newarrival:false,
     trending: false,
@@ -75,7 +77,7 @@ export default function ProductManagementModal({
       setForm({
         ...initialProduct,
         categoryId: (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '',
-        sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes.join(', ') : (initialProduct as any).sizes || '',
+        sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes : [],
         ageGroups: (initialProduct as any).ageGroups || [],
         color: (initialProduct as any).color || '',
       });
@@ -95,7 +97,7 @@ export default function ProductManagementModal({
         inStock: 0,
         minStock: 5,
         size: '',
-        sizes: '',
+        sizes: [],
         ageGroups: [],
         color: '',
         newarrival:false,
@@ -182,9 +184,8 @@ export default function ProductManagementModal({
 
         if (key === 'variants') {
           formData.append(key, JSON.stringify(form[key]));
-        } else if (key === 'sizes' && typeof form[key] === 'string') {
-          const sizesArr = form[key].split(',').map((s: string) => s.trim()).filter((s: string) => s !== '');
-          sizesArr.forEach((s: string) => formData.append('sizes', s));
+        } else if (key === 'sizes' && Array.isArray(form[key])) {
+          form[key].forEach((s: string) => formData.append('sizes', s));
         } else if (key === 'ageGroups' && Array.isArray(form[key])) {
           form[key].forEach((a: string) => formData.append('ageGroups', a));
         } else {
@@ -351,7 +352,7 @@ export default function ProductManagementModal({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 col-span-2">
                   <label className="text-sm font-bold text-gray-900">Color</label>
                   <div className="relative">
                     <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -363,16 +364,42 @@ export default function ProductManagementModal({
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Sizes (comma separated)</label>
-                  <div className="relative">
-                    <Maximize className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      placeholder="e.g. S, M, L, XL or 32, 34, 36" 
-                      value={form.sizes} 
-                      onChange={(e) => setForm({ ...form, sizes: e.target.value })} 
-                    />
+
+                <div className="space-y-3 col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-bold text-gray-900">Available Sizes</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = (form.sizes || []).length === AVAILABLE_SIZES.length;
+                        setForm({ ...form, sizes: allSelected ? [] : [...AVAILABLE_SIZES] });
+                      }}
+                      className="text-[10px] font-bold uppercase tracking-wider text-pink-500 hover:text-pink-600 transition-colors"
+                    >
+                      {(form.sizes || []).length === AVAILABLE_SIZES.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {AVAILABLE_SIZES.map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          const current = form.sizes || [];
+                          const updated = current.includes(size)
+                            ? current.filter((s: string) => s !== size)
+                            : [...current, size];
+                          setForm({ ...form, sizes: updated });
+                        }}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                          (form.sizes || []).includes(size)
+                            ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
+                            : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
