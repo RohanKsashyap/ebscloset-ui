@@ -28,7 +28,7 @@ export default function Footer() {
           <div className="max-w-md">
             <h2 className="font-headline text-4xl mb-8 uppercase tracking-tight text-gray-900">EB'S CLOSET</h2>
             <p className="text-gray-500 text-sm font-light leading-relaxed uppercase tracking-widest mb-12">
-              Architectural precision. Textile luxury. Since 2024, crafting the future of children's haute couture.
+              Architectural precision. Textile luxury. Since 2026, crafting the future of children's haute couture.
             </p>
             
             <form onSubmit={handleNewsletterSubmit} className="relative max-w-sm">
@@ -85,7 +85,7 @@ export default function Footer() {
 
         <div className="pt-12 border-t border-gray-100 flex flex-col items-center space-y-8">
           <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-bold">
-            © 2024 EB'S CLOSET KIDS. DIGITAL HIGH-END COLLECTIVE.
+            © 2026 EB'S CLOSET KIDS. DIGITAL HIGH-END COLLECTIVE.
           </p>
           
           <div className="flex space-x-12">
