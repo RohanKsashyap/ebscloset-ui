@@ -100,8 +100,13 @@ export const adminService = {
     await apiClient.delete('/admin/orders/bulk', { data: { ids: orderIds } });
   },
 
-  getProducts: async (): Promise<Product[]> => {
-    const response = await apiClient.get('/admin/products');
+  getProducts: async (params?: { categoryId?: string; search?: string }): Promise<Product[]> => {
+    const response = await apiClient.get('/admin/products', { params });
+    return response.data || [];
+  },
+
+  getProductSuggestions: async (search: string): Promise<Product[]> => {
+    const response = await apiClient.get('/admin/products/suggestions', { params: { search } });
     return response.data || [];
   },
 

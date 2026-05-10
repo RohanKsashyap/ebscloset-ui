@@ -3,11 +3,20 @@ import { adminService } from '../services/adminService';
 import { useToast } from '../context/ToastContext';
 import type { DiscountCode, SiteSettings } from '../types/admin';
 
-export function useProducts(enabled: boolean = true) {
+export function useProducts(filters?: { categoryId?: string; search?: string }, enabled: boolean = true) {
   return useQuery({
-    queryKey: ['admin', 'products'],
-    queryFn: () => adminService.getProducts(),
+    queryKey: ['admin', 'products', filters],
+    queryFn: () => adminService.getProducts(filters),
     enabled,
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useProductSuggestions(search: string, enabled: boolean = false) {
+  return useQuery({
+    queryKey: ['admin', 'products', 'suggestions', search],
+    queryFn: () => adminService.getProductSuggestions(search),
+    enabled: enabled && search.length > 0,
   });
 }
 

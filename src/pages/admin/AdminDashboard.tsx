@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDebounce } from '../../hooks/useDebounce';
 import type { Product } from '../../services/productService';
 import { adminService, type Review, type GalleryCategory, type Category } from '../../services/adminService';
 import type { Testimonial, GalleryImage } from '../../services/siteService';
@@ -23,6 +24,7 @@ import SidebarItem from '../../components/admin/SidebarItem';
 import type { DiscountCode, SiteSettings, Budget } from '../../types/admin';
 import { 
   useProducts, 
+  useProductSuggestions,
   useOrders, 
   useSiteSettings, 
   useDashboard, 
@@ -85,9 +87,23 @@ export default function AdminDashboard() {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'gallery'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
-  
+  const [productCategoryId, setProductCategoryId] = useState<string>('all');
+  const [productSearch, setProductSearch] = useState<string>('');
+  const debouncedSearch = useDebounce(productSearch, 300);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // React Query Hooks
-  const { data: catalog = [], isLoading: productsLoading } = useProducts(tab === 'products' || tab === 'inventory' || tab === 'dashboard' || tab === 'testimonials' || tab === 'reviews');
+  const { data: catalog = [], isLoading: productsLoading } = useProducts(
+    (tab === 'products' || tab === 'inventory') ? { categoryId: productCategoryId, search: debouncedSearch } : undefined,
+    tab === 'products' || tab === 'inventory' || tab === 'dashboard' || tab === 'testimonials' || tab === 'reviews'
+  );
+  
+  const { data: suggestions = [], isLoading: suggestionsLoading } = useProductSuggestions(
+    searchQuery,
+    showSuggestions && tab === 'products'
+  );
   const { data: orders = [], isLoading: ordersLoading } = useOrders(tab === 'orders' || tab === 'dashboard');
   const { data: site = null, isLoading: siteLoading } = useSiteSettings(tab === 'site' || tab === 'dashboard' || tab === 'budgets');
   const { data: dashboardData = null, isLoading: dashboardLoading } = useDashboard(tab === 'dashboard' || tab === 'analytics');
@@ -103,8 +119,8 @@ export default function AdminDashboard() {
   const { data: users = [], isLoading: usersLoading } = useUsers(tab === 'customers');
 
   const isPageLoading = 
-    (tab === 'dashboard' && (dashboardLoading || productsLoading || ordersLoading || siteLoading || codesLoading || ageCollectionsLoading)) ||
-    (tab === 'products' && (productsLoading || productCategoriesLoading)) ||
+    (tab === 'dashboard' && (dashboardLoading || (productsLoading && catalog.length === 0) || ordersLoading || siteLoading || codesLoading || ageCollectionsLoading)) ||
+    (tab === 'products' && ((productsLoading && catalog.length === 0) || productCategoriesLoading)) ||
     (tab === 'categories' && productCategoriesLoading) ||
     (tab === 'age-categories' && ageCollectionsLoading) ||
     (tab === 'budgets' && siteLoading) ||
@@ -118,12 +134,11 @@ export default function AdminDashboard() {
     (tab === 'gallery' && (galleryImagesLoading || galleryCategoriesLoading)) ||
     (tab === 'customers' && usersLoading) ||
     (tab === 'analytics' && dashboardLoading) ||
-    (tab === 'inventory' && productsLoading);
+    (tab === 'inventory' && (productsLoading && catalog.length === 0));
 
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct();
 
-  const [productFilter, setProductFilter] = useState('All Products');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [productEditing, setProductEditing] = useState<Product | undefined>(undefined);
   const [categoryEditing, setCategoryEditing] = useState<Category | undefined>(undefined);
@@ -134,8 +149,6 @@ export default function AdminDashboard() {
   const [testimonialEditing, setTestimonialEditing] = useState<Testimonial | undefined>(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminName, setAdminName] = useState('Administrator');
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -418,56 +431,60 @@ export default function AdminDashboard() {
     );
   }
 
+  const commandMap: Record<string, string> = {
+    'dashboard': 'dashboard',
+    'home': 'dashboard',
+    'products': 'products',
+    'catalog': 'products',
+    'categories': 'categories',
+    'age categories': 'age-categories',
+    'age': 'age-categories',
+    'budgets': 'budgets',
+    'discounts': 'discounts',
+    'codes': 'discounts',
+    'site': 'site',
+    'settings': 'site',
+    'orders': 'orders',
+    'sales': 'orders',
+    'newsletter': 'newsletter',
+    'subscribers': 'newsletter',
+    'inbox': 'inbox',
+    'messages': 'inbox',
+    'reviews': 'reviews',
+    'testimonials': 'testimonials',
+    'gallery': 'gallery',
+    'lookbook': 'gallery',
+    'customers': 'customers',
+    'users': 'customers',
+    'analytics': 'analytics',
+    'stats': 'analytics',
+    'inventory': 'inventory',
+    'stock': 'inventory'
+  };
+
   const handleSearchSubmit = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       const q = searchQuery.toLowerCase().trim();
       
-      const commandMap: Record<string, typeof tab> = {
-        'dashboard': 'dashboard',
-        'home': 'dashboard',
-        'products': 'products',
-        'catalog': 'products',
-        'categories': 'categories',
-        'age categories': 'age-categories',
-        'age': 'age-categories',
-        'budgets': 'budgets',
-        'discounts': 'discounts',
-        'codes': 'discounts',
-        'site': 'site',
-        'settings': 'site',
-        'orders': 'orders',
-        'sales': 'orders',
-        'newsletter': 'newsletter',
-        'subscribers': 'newsletter',
-        'inbox': 'inbox',
-        'messages': 'inbox',
-        'reviews': 'reviews',
-        'testimonials': 'testimonials',
-        'gallery': 'gallery',
-        'lookbook': 'gallery',
-        'customers': 'customers',
-        'users': 'customers',
-        'analytics': 'analytics',
-        'stats': 'analytics',
-        'inventory': 'inventory',
-        'stock': 'inventory'
-      };
-
       if (commandMap[q]) {
-        setTab(commandMap[q]);
-        setSearchQuery(''); // Clear after navigation
+        setTab(commandMap[q] as any);
+        setSearchQuery(''); 
         showToast(`Navigated to ${q}`);
+      } else if (q.length > 0) {
+        // Fallback: search products
+        setTab('products');
+        setProductSearch(searchQuery);
+        setShowSuggestions(false);
       }
     }
   };
 
-  const filteredProducts = catalog.filter(p => {
-    const matchesFilter = productFilter === 'All Products' || p.category === productFilter;
+  const filteredProducts = (tab === 'products' || tab === 'inventory') ? catalog : catalog.filter(p => {
     const matchesSearch = !searchQuery || 
       p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
       p.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       String(p._id).toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
 
   const filteredOrders = orders.filter(o => {
@@ -653,18 +670,91 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-xl border border-gray-100">
+            <div className="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-xl border border-gray-100 relative group">
               <Search className="text-gray-400" size={16} />
               <input 
                 ref={searchInputRef}
                 type="text" 
-                placeholder="Search command..." 
+                placeholder="Search products or commands..." 
                 className="bg-transparent border-none text-xs font-bold focus:ring-0 w-48 placeholder:text-gray-400"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setProductSearch(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 onKeyDown={handleSearchSubmit}
               />
               <span className="text-[9px] font-black text-gray-300 bg-white px-1.5 py-0.5 rounded border border-gray-100">⌘K</span>
+
+              {/* Global Suggestions Dropdown */}
+              {showSuggestions && searchQuery.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200 min-w-[250px]">
+                  {/* Command Suggestions */}
+                  {Object.keys(commandMap).filter(cmd => cmd.includes(searchQuery.toLowerCase())).length > 0 && (
+                    <div className="py-2 border-b border-gray-50">
+                      <p className="px-4 py-1 text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Navigation</p>
+                      {Object.keys(commandMap)
+                        .filter(cmd => cmd.includes(searchQuery.toLowerCase()))
+                        .slice(0, 3)
+                        .map(cmd => (
+                          <button
+                            key={cmd}
+                            onMouseDown={(e) => {
+                              e.preventDefault(); // Prevent blur before action
+                              setTab(commandMap[cmd] as any);
+                              setSearchQuery('');
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
+                          >
+                            <LayoutGrid size={14} className="text-[#eb4899]" />
+                            <span className="text-xs font-bold text-gray-700 capitalize">Go to {cmd}</span>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* Product Suggestions */}
+                  {suggestionsLoading ? (
+                    <div className="p-4 text-center">
+                      <div className="w-4 h-4 border-2 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    </div>
+                  ) : suggestions.length > 0 ? (
+                    <div className="py-2">
+                      <p className="px-4 py-1 text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Products</p>
+                      {suggestions.map((p) => (
+                        <button
+                          key={p._id}
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // Prevent blur before action
+                            setTab('products');
+                            setSearchQuery(p.name);
+                            setProductSearch(p.name);
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <div className="w-8 h-8 rounded-lg overflow-hidden bg-gray-50 border border-gray-100">
+                            <img src={p.image} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold text-gray-900 line-clamp-1">{p.name}</p>
+                            <p className="text-[9px] font-bold text-[#eb4899]">${p.price}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    // Only show "No results" if NO commands matched either
+                    Object.keys(commandMap).filter(cmd => cmd.includes(searchQuery.toLowerCase())).length === 0 && searchQuery.length > 2 && (
+                      <div className="p-4 text-center text-[10px] text-gray-400 font-bold">No results found</div>
+                    )
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
@@ -788,23 +878,105 @@ export default function AdminDashboard() {
                     <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Product Catalog<span className="text-[#eb4899]">.</span></h1>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Manage {catalog.length} store items</p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
-                      {['All Products', 'Dresses', 'Accessories'].map((filter) => (
+                  <div className="flex flex-wrap items-center gap-4">
+                    {/* Category Filter */}
+                    <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-[500px] no-scrollbar">
+                      <button
+                        onClick={() => setProductCategoryId('all')}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                          productCategoryId === 'all' ? 'bg-[#111827] text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-gray-900'
+                        }`}
+                      >
+                        All Products
+                      </button>
+                      {productCategories.map((cat) => (
                         <button
-                          key={filter}
-                          onClick={() => setProductFilter(filter)}
-                          className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                            productFilter === filter ? 'bg-[#111827] text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-gray-900'
+                          key={cat._id}
+                          onClick={() => setProductCategoryId(cat._id)}
+                          className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                            productCategoryId === cat._id ? 'bg-[#111827] text-white shadow-lg shadow-black/20' : 'text-gray-400 hover:text-gray-900'
                           }`}
                         >
-                          {filter}
+                          {cat.name}
                         </button>
                       ))}
                     </div>
+
+                    {/* Product Search Bar */}
+                    <div className="relative group min-w-[300px]">
+                      <div className="flex items-center bg-white px-5 py-3.5 rounded-2xl border border-gray-100 shadow-sm focus-within:border-pink-200 transition-all">
+                        <Search className="text-gray-400 mr-3" size={18} />
+                        <input 
+                          type="text" 
+                          placeholder="Search product..." 
+                          className="bg-transparent border-none text-xs font-bold focus:ring-0 flex-1 placeholder:text-gray-400"
+                          value={searchQuery}
+                          onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setProductSearch(e.target.value);
+                            setShowSuggestions(true);
+                          }}
+                          onFocus={() => setShowSuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        />
+                        {searchQuery && (
+                          <button 
+                            onClick={() => { setSearchQuery(''); setProductSearch(''); }}
+                            className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Suggestions Dropdown */}
+                      {showSuggestions && searchQuery.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-3xl border border-gray-100 shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                          {suggestionsLoading ? (
+                            <div className="p-8 text-center">
+                              <div className="w-6 h-6 border-2 border-[#eb4899] border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            </div>
+                          ) : suggestions.length > 0 ? (
+                            <div className="py-3">
+                              <p className="px-5 py-2 text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-50 mb-2">Suggestions</p>
+                              {suggestions.map((p) => (
+                                <button
+                                  key={p._id}
+                                  onClick={() => {
+                                    setSearchQuery(p.name);
+                                    setProductSearch(p.name);
+                                    setShowSuggestions(false);
+                                  }}
+                                  className="w-full flex items-center gap-4 px-5 py-3 hover:bg-pink-50/30 transition-all text-left group/item"
+                                >
+                                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 group-hover/item:scale-105 transition-transform">
+                                    <img src={p.image} alt="" className="w-full h-full object-cover" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-black text-gray-900 line-clamp-1 group-hover/item:text-[#eb4899] transition-colors">{p.name}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className="text-[11px] font-black text-[#eb4899]">${p.price}</span>
+                                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">in {p.categoryId?.name || 'Uncategorized'}</span>
+                                    </div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-8 text-center">
+                              <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                <Search className="text-gray-300" size={20} />
+                              </div>
+                              <p className="text-xs text-gray-400 font-bold">No products found</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <button 
                       onClick={() => { setProductEditing(undefined); setIsProductModalOpen(true); }}
-                      className="px-8 py-4 bg-[#eb4899] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 hover:scale-105 transition-all flex items-center gap-2"
+                      className="px-8 py-4 bg-[#eb4899] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
                     >
                       <Plus size={16} /> Add Product
                     </button>
