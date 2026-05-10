@@ -49,12 +49,12 @@ export default function Shop() {
       const match = (site.budgets ?? []).find((x) => x.slug === b);
       if (match) { setMinPrice(match.min); setMaxPrice(match.max); }
       else {
-        if (b === 'under20') { setMinPrice(0); setMaxPrice(2000); }
-        else if (b === 'under40') { setMinPrice(0); setMaxPrice(4000); }
-        else if (b === 'under60') { setMinPrice(0); setMaxPrice(6000); }
-        else if (b === '60-80') { setMinPrice(6000); setMaxPrice(8000); }
-        else if (b === '80-100') { setMinPrice(8000); setMaxPrice(10000); }
-        else if (b === '100plus') { setMinPrice(10000); setMaxPrice(1000000); }
+        if (b === 'under20') { setMinPrice(0); setMaxPrice(20); }
+        else if (b === 'under40') { setMinPrice(0); setMaxPrice(40); }
+        else if (b === 'under60') { setMinPrice(0); setMaxPrice(60); }
+        else if (b === '60-80') { setMinPrice(60); setMaxPrice(80); }
+        else if (b === '80-100') { setMinPrice(80); setMaxPrice(100); }
+        else if (b === '100plus') { setMinPrice(100); setMaxPrice(1000000); }
       }
     }
     const qParam = sp.get('q');

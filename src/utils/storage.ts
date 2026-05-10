@@ -189,7 +189,10 @@ export function toUSD(val: number): number {
   return val;
 }
 export function formatUSD(val: number): string {
-  return `$${val.toFixed(2)}`;
+  return `$${Number(val).toLocaleString(undefined, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  })}`;
 }
 
 // Keeping these for backward compatibility but redirecting to USD

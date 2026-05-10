@@ -69,6 +69,31 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
     }
   };
 
+  const onEditorialFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const file = e.target.files[0];
+    
+    setIsUploading(true);
+    try {
+      const uploadRes = await adminService.uploadAsset(file, 'ebs-closet/editorial');
+      const imageUrl = uploadRes.url;
+
+      setSite((s: any) => ({
+        ...s,
+        editorial: {
+          ...(s.editorial || {}),
+          image: imageUrl
+        }
+      }));
+      showToast('Editorial image uploaded successfully');
+    } catch (err) {
+      console.error('Error uploading editorial image:', err);
+      showToast('Failed to upload editorial image', 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const onHeroBannerUrl = async () => {
     if (!imageUrlInput) {
       showToast('Please paste an image URL first', 'error');
@@ -419,6 +444,105 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                   {!currentSlide.bannerCtaHref && site?.hero?.bannerCtaHref && (
                     <p className="text-[10px] text-gray-400 italic">Falling back to global URL: {site.hero.bannerCtaHref}</p>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 bg-pink-50 rounded-xl text-[#eb4899]">
+                <Settings size={24} />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">Editorial Section Customization</h3>
+            </div>
+
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-sm font-bold text-gray-900">Editorial Background Image</label>
+                <div className="relative group">
+                  <div className={`
+                    w-full h-[300px] rounded-[2rem] border-4 border-dashed border-gray-100 bg-gray-50 
+                    flex flex-col items-center justify-center gap-4 overflow-hidden transition-all
+                    group-hover:border-pink-100 group-hover:bg-pink-50/30
+                  `}>
+                    {isUploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 size={40} className="animate-spin text-[#eb4899]" />
+                        <p className="text-sm font-bold text-gray-900">Uploading...</p>
+                      </div>
+                    ) : site?.editorial?.image ? (
+                      <img src={site.editorial.image} alt="Editorial Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm text-gray-300">
+                          <ImageIcon size={32} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-gray-900">Click to upload editorial image</p>
+                        </div>
+                      </>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed" 
+                      onChange={onEditorialFile}
+                      disabled={isUploading}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Kicker (Small Heading)</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10"
+                    placeholder="e.g. Growing Up in Style"
+                    value={site?.editorial?.kicker || ''}
+                    onChange={(e) => setSite({...site, editorial: {...site.editorial, kicker: e.target.value}})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Main Title</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10"
+                    placeholder="e.g. Every Girl Deserves Magic"
+                    value={site?.editorial?.title || ''}
+                    onChange={(e) => setSite({...site, editorial: {...site.editorial, title: e.target.value}})}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Body Text</label>
+                  <textarea 
+                    className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 h-32 resize-none"
+                    placeholder="Describe your brand story..."
+                    value={site?.editorial?.body || ''}
+                    onChange={(e) => setSite({...site, editorial: {...site.editorial, body: e.target.value}})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">CTA Button Text</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10"
+                    placeholder="e.g. Find Her Perfect Dress"
+                    value={site?.editorial?.ctaText || ''}
+                    onChange={(e) => setSite({...site, editorial: {...site.editorial, ctaText: e.target.value}})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">CTA Button Link</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-gray-50 border-none rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10"
+                    placeholder="e.g. /shop"
+                    value={site?.editorial?.ctaHref || ''}
+                    onChange={(e) => setSite({...site, editorial: {...site.editorial, ctaHref: e.target.value}})}
+                  />
                 </div>
               </div>
             </div>

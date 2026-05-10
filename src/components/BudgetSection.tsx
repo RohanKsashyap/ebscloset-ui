@@ -21,11 +21,11 @@ export default function BudgetSection() {
       legalLabels: { privacy: '', terms: '', cookies: '' }, 
       infoPages: {}, 
       budgets: [
-        { label: 'The Essentials', slug: 'under20', min: 0, max: 2000 },
-        { label: 'Playground Chic', slug: 'under40', min: 0, max: 4000 },
-        { label: 'Weekend Luxury', slug: 'under60', min: 0, max: 6000 },
-        { label: 'Party Ready', slug: '60-80', min: 6000, max: 8000 },
-        { label: 'Premium Picks', slug: '80-100', min: 8000, max: 10000 },
+        { label: 'The Essentials', slug: 'under20', min: 0, max: 20 },
+        { label: 'Playground Chic', slug: 'under40', min: 0, max: 40 },
+        { label: 'Weekend Luxury', slug: 'under60', min: 0, max: 60 },
+        { label: 'Party Ready', slug: '60-80', min: 60, max: 80 },
+        { label: 'Premium Picks', slug: '80-100', min: 80, max: 100 },
       ] 
     };
     const site = loadSite(fallback);
@@ -37,20 +37,20 @@ export default function BudgetSection() {
       
       if (matchingProducts.length === 0) {
         const priceLabel = b.slug.startsWith('under')
-          ? `Under ${formatAUD(b.max / 100)}`
+          ? `Under ${formatAUD(b.max)}`
           : b.slug === '100plus'
-            ? `${formatAUD(b.min / 100)}+`
-            : `${formatAUD(b.min / 100)} – ${formatAUD(b.max / 100)}`;
+            ? `${formatAUD(b.min)}+`
+            : `${formatAUD(b.min)} – ${formatAUD(b.max)}`;
             
         items.push({ ...b, priceLabel, img: null, badge: 'Essentials' });
       } else {
         // Show up to 3 different products for each budget tier to provide variety
         matchingProducts.slice(0, 3).forEach((p, idx) => {
           const priceLabel = b.slug.startsWith('under')
-            ? `Under ${formatAUD(b.max / 100)}`
+            ? `Under ${formatAUD(b.max)}`
             : b.slug === '100plus'
-              ? `${formatAUD(b.min / 100)}+`
-              : `${formatAUD(b.min / 100)} – ${formatAUD(b.max / 100)}`;
+              ? `${formatAUD(b.min)}+`
+              : `${formatAUD(b.min)} – ${formatAUD(b.max)}`;
           
           items.push({
             ...b,

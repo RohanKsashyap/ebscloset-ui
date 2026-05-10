@@ -1,5 +1,6 @@
 import { loadSite } from '../utils/storage';
 import { Link } from 'react-router-dom';
+import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function EditorialSection() {
   const site = loadSite({
@@ -9,13 +10,15 @@ export default function EditorialSection() {
   });
   return (
     <section className="relative min-h-[600px] md:h-screen flex items-center justify-center overflow-hidden">
-      <img
-        src={site.editorial.image}
-        alt={`${site.editorial.title} - ${site.editorial.kicker}`}
-        className="absolute inset-0 w-full h-full object-cover"
-        loading="lazy"
-        decoding="async"
-      />
+      {site.editorial.image && (
+        <img
+          src={getOptimizedUrl(site.editorial.image, 1920)}
+          alt={`${site.editorial.title} - ${site.editorial.kicker}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-r from-hot-pink/40 to-millennial-pink/30" />
 
       <div className="relative z-10 text-center text-white px-6 max-w-4xl mx-auto py-20 md:py-0">
