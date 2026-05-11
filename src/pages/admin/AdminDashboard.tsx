@@ -84,6 +84,7 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
   const [productCategoryId, setProductCategoryId] = useState<string>('all');
+  const [reviewFilter, setReviewFilter] = useState<'All' | 'Approved' | 'Pending'>('All');
   const [productSearch, setProductSearch] = useState<string>('');
   const debouncedSearch = useDebounce(productSearch, 300);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -497,6 +498,10 @@ export default function AdminDashboard() {
   });
 
   const filteredReviews = reviews.filter(r => {
+    // Apply status filter
+    if (reviewFilter === 'Approved' && r.status !== 'approved') return false;
+    if (reviewFilter === 'Pending' && r.status === 'approved') return false;
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -1180,8 +1185,18 @@ export default function AdminDashboard() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Manage verified feedback</p>
                   </div>
                   <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
-                    {['All', 'Approved', 'Pending'].map((filter) => (
-                      <button key={filter} className="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-all">{filter}</button>
+                    {(['All', 'Approved', 'Pending'] as const).map((filter) => (
+                      <button 
+                        key={filter} 
+                        onClick={() => setReviewFilter(filter)}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                          reviewFilter === filter 
+                            ? 'bg-gray-900 text-white shadow-lg shadow-black/10' 
+                            : 'text-gray-400 hover:text-gray-900'
+                        }`}
+                      >
+                        {filter}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -1189,7 +1204,16 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 xl:grid-cols-[1fr,400px] gap-8">
                   <div className="space-y-4">
                     {filteredReviews.map((r) => (
-                      <div key={r._id} className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group">
+                      <div 
+                        key={r._id} 
+                        onClick={() => {
+                          if (r.status === 'approved' && r.productId) {
+                            setProductEditing(r.productId as any);
+                            setIsProductModalOpen(true);
+                          }
+                        }}
+                        className={`bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm group ${r.status === 'approved' ? 'cursor-pointer hover:border-pink-200 transition-all' : ''}`}
+                      >
                         <div className="flex justify-between items-start mb-6">
                           <div className="flex items-center gap-4">
                             <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center font-black text-[#eb4899] border border-gray-100 group-hover:scale-110 transition-transform">
@@ -1210,21 +1234,78 @@ export default function AdminDashboard() {
                             }`}>
                               {r.status || 'Pending'}
                             </span>
-                            <button onClick={() => deleteReview(r._id)} className="p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteReview(r._id);
+                              }} 
+                              className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
                         </div>
-                        <h4 className="text-base font-black text-gray-900 tracking-tight mb-2">"{r.headline || 'Product Review'}"</h4>
+                        <h4 className="text-base font-black text-gray-900 tracking-tight mb-1">"{r.headline || 'Product Review'}"</h4>
+                        {r.productId && (
+                          <p className="text-[10px] font-bold text-[#eb4899] uppercase tracking-widest mb-2">For: {r.productId.name}</p>
+                        )}
                         <p className="text-sm text-gray-600 leading-relaxed mb-6">"{r.reviewText}"</p>
+                        
+                        {/* Review Media Display */}
+                        {(r.images?.length || r.video) && (
+                          <div className="flex flex-wrap gap-4 mb-6">
+                            {r.images?.map((img: string, i: number) => (
+                              <div key={i} className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group/img relative">
+                                <img src={img} alt="" className="w-full h-full object-cover transition-transform group-hover/img:scale-110" />
+                                <a 
+                                  href={img} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center"
+                                >
+                                  <ExternalLink size={16} className="text-white" />
+                                </a>
+                              </div>
+                            ))}
+                            {r.video && (
+                              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group/vid relative">
+                                <video src={r.video} className="w-full h-full object-cover" />
+                                <a 
+                                  href={r.video} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="absolute inset-0 bg-black/40 opacity-0 group-hover/vid:opacity-100 transition-opacity flex items-center justify-center"
+                                >
+                                  <ExternalLink size={16} className="text-white" />
+                                </a>
+                                <div className="absolute top-1 right-1 bg-[#eb4899] p-1 rounded-md">
+                                  <Camera size={8} className="text-white" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex items-center gap-3 pt-6 border-t border-gray-50">
                           {r.status !== 'approved' && (
                             <button 
-                              onClick={() => updateReviewStatus(r._id, 'approved')}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateReviewStatus(r._id, 'approved');
+                              }}
                               className="px-6 py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
                             >
                               Approve
                             </button>
                           )}
-                          <button className="px-6 py-3 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all">Reply</button>
+                          <button 
+                            onClick={(e) => e.stopPropagation()}
+                            className="px-6 py-3 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all"
+                          >
+                            Reply
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -1250,6 +1331,26 @@ export default function AdminDashboard() {
                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Feedback</label>
                         <textarea className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 text-sm font-medium placeholder:text-gray-300 focus:ring-2 focus:ring-pink-100 h-32 resize-none" placeholder="What did they say?" value={newReview.comment} onChange={e => setNewReview({...newReview, comment: e.target.value})} />
                       </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Images</label>
+                          <label className="flex flex-col items-center justify-center w-full h-24 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all">
+                            <Camera size={20} className="text-gray-300 mb-1" />
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">{reviewImages.length} Images Selected</span>
+                            <input type="file" multiple accept="image/*" className="hidden" onChange={e => setReviewImages(Array.from(e.target.files || []))} />
+                          </label>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Video</label>
+                          <label className="flex flex-col items-center justify-center w-full h-24 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all">
+                            <Upload size={20} className="text-gray-300 mb-1" />
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">{reviewVideo ? '1 Video Selected' : 'No Video'}</span>
+                            <input type="file" accept="video/*" className="hidden" onChange={e => setReviewVideo(e.target.files?.[0] || null)} />
+                          </label>
+                        </div>
+                      </div>
+
                       <button onClick={handleCreateReview} className="w-full py-4 bg-[#eb4899] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 hover:scale-[1.02] transition-all">Publish Review</button>
                     </div>
                   </div>

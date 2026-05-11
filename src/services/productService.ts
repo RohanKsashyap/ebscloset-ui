@@ -93,19 +93,11 @@ getBestSellerProducts: async (): Promise<Product[]> => {
 
   addReview: async (
     productId: string,
-    name: string,
-    rating: number,
-    comment: string,
-    orderId: string,
-    contact: string
+    formData: FormData
   ): Promise<Product> => {
     if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
-    const response = await apiClient.post(`/products/${productId}/reviews`, {
-      name,
-      rating,
-      comment,
-      orderId,
-      contact
+    const response = await apiClient.post(`/products/${productId}/reviews`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data.product;
   },

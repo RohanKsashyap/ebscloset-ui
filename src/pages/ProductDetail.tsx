@@ -130,9 +130,9 @@ export default function ProductDetail() {
     showToast('Added to bag');
   };
 
-  const handleReviewSubmit = async (name: string, rating: number, comment: string, orderId: string, contact: string) => {
+  const handleReviewSubmit = async (formData: FormData) => {
     try {
-      await productService.addReview(product._id || product.id, name, rating, comment, orderId, contact);
+      await productService.addReview(product._id || product.id, formData);
       showToast('Review submitted for approval!');
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Failed to submit review', 'error');
@@ -403,7 +403,7 @@ export default function ProductDetail() {
         </div>
         
         <div id="reviews-section">
-          <Reviews initialReviews={product.reviews || []} onSubmit={handleReviewSubmit} />
+          <Reviews productId={product._id || product.id} initialReviews={product.reviews || []} onSubmit={handleReviewSubmit} />
         </div>
       </section>
 

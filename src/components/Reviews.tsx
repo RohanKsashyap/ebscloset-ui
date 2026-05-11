@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Star, X, Plus } from 'lucide-react';
+import { Star, X, Plus, Camera, Upload } from 'lucide-react';
 
 export interface Review {
+  _id?: string;
   name: string;
   rating: number; // 1-5
   comment: string;
+  reviewText?: string;
+  headline?: string;
   date?: string;
+  images?: string[];
+  video?: string;
+  status?: string;
 }
 
 interface ReviewsProps {
+  productId: string;
   initialReviews: Review[];
-  onSubmit?: (name: string, rating: number, comment: string, orderId: string, contact: string) => Promise<void>;
+  onSubmit?: (formData: FormData) => Promise<void>;
 }
 
-export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
+export default function Reviews({ productId, initialReviews, onSubmit }: ReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>(initialReviews || []);
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);
@@ -23,12 +30,16 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
   const [contact, setContact] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Media upload state
+  const [reviewImages, setReviewImages] = useState<File[]>([]);
+  const [reviewVideo, setReviewVideo] = useState<File | null>(null);
 
   useEffect(() => {
     setReviews(initialReviews || []);
   }, [initialReviews]);
 
-  const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length) : 0;
+  const avg = reviews.length ? (reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length) : 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,16 +51,25 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
     const trimmedName = name.trim();
     const trimmedComment = comment.trim();
 
-    if (!trimmedName) return;
-    if (!trimmedOrderId) return;
-    if (!trimmedContact) return;
-    if (!trimmedComment) return;
+    if (!trimmedName || !trimmedOrderId || !trimmedContact || !trimmedComment) return;
 
     setIsSubmitting(true);
     try {
       if (onSubmit) {
-        await onSubmit(trimmedName, rating, trimmedComment, trimmedOrderId, trimmedContact);
+        const fd = new FormData();
+        fd.append('productId', productId);
+        fd.append('name', trimmedName);
+        fd.append('rating', String(rating));
+        fd.append('comment', trimmedComment);
+        fd.append('orderId', trimmedOrderId);
+        fd.append('contact', trimmedContact);
+        
+        reviewImages.forEach(img => fd.append('images', img));
+        if (reviewVideo) fd.append('video', reviewVideo);
+
+        await onSubmit(fd);
       } else {
+        // Fallback for demo without backend
         setReviews([{ name: trimmedName, rating, comment: trimmedComment, date: new Date().toISOString().slice(0, 10) }, ...reviews]);
       }
       setName('');
@@ -57,6 +77,8 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
       setComment('');
       setOrderId('');
       setContact('');
+      setReviewImages([]);
+      setReviewVideo(null);
       setIsOpen(false);
     } catch (err) {
       console.error('Review submission failed:', err);
@@ -82,13 +104,33 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
             <div className="flex items-center gap-4 mb-6">
               <div className="flex text-hot-pink">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={14} fill={i < r.rating ? 'currentColor' : 'none'} />
+                  <Star key={i} size={14} fill={i < (r.rating || 0) ? 'currentColor' : 'none'} />
                 ))}
               </div>
               <span className="text-[10px] tracking-[0.3em] uppercase text-gray-900 font-bold">{r.name}</span>
               {r.date && <span className="ml-auto text-[10px] text-gray-400 uppercase tracking-[0.2em]">{r.date}</span>}
             </div>
-            <p className="text-gray-500 font-light leading-relaxed uppercase text-sm tracking-widest max-w-4xl">{r.comment}</p>
+            {r.headline && <h4 className="text-sm font-bold uppercase tracking-widest mb-2 text-gray-900">{r.headline}</h4>}
+            <p className="text-gray-500 font-light leading-relaxed uppercase text-sm tracking-widest max-w-4xl">{r.comment || r.reviewText}</p>
+            
+            {/* Review Media */}
+            {(r.images?.length || r.video) && (
+              <div className="flex flex-wrap gap-4 mt-6">
+                {r.images?.map((img, i) => (
+                  <div key={i} className="w-24 h-24 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+                {r.video && (
+                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 relative">
+                    <video src={r.video} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <Plus className="text-white rotate-45" size={16} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -159,6 +201,25 @@ export default function Reviews({ initialReviews, onSubmit }: ReviewsProps) {
             <div className="space-y-2">
               <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 ml-1">Review Narrative</label>
               <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full border-b border-gray-200 bg-transparent px-4 py-4 text-xs uppercase tracking-widest h-32 resize-none focus:border-hot-pink transition-colors outline-none" placeholder="Describe your experience with this product..." required />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 ml-1">Images</label>
+                <label className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 cursor-pointer hover:border-hot-pink transition-all">
+                  <Camera className="text-hot-pink" size={20} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{reviewImages.length} Selected</span>
+                  <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => setReviewImages(Array.from(e.target.files || []))} />
+                </label>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 ml-1">Video</label>
+                <label className="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-100 cursor-pointer hover:border-hot-pink transition-all">
+                  <Upload className="text-hot-pink" size={20} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{reviewVideo ? '1 Selected' : 'No Video'}</span>
+                  <input type="file" accept="video/*" className="hidden" onChange={(e) => setReviewVideo(e.target.files?.[0] || null)} />
+                </label>
+              </div>
             </div>
 
             <button 

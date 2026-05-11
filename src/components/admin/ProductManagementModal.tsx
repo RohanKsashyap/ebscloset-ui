@@ -80,6 +80,7 @@ export default function ProductManagementModal({
         sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes : [],
         ageGroups: (initialProduct as any).ageGroups || [],
         color: (initialProduct as any).color || '',
+        variants: Array.isArray((initialProduct as any).variants) ? (initialProduct as any).variants : [],
       });
       setPreviews({
         image: initialProduct.image || '',
@@ -531,7 +532,7 @@ export default function ProductManagementModal({
               </div>
 
               <div className="space-y-3">
-                {form.variants.map((v: any, i: number) => (
+                {form.variants?.map((v: any, i: number) => (
                   <div key={i} className="flex gap-3 items-center bg-gray-50/50 p-3 rounded-2xl border border-transparent hover:border-pink-100 transition-all">
                     <input className="flex-1 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-pink-100" placeholder="Variant Name (e.g. Red)" value={v.name} onChange={e => updateVariant(i, 'name', e.target.value)} />
                     <input className="w-20 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none text-center focus:ring-2 focus:ring-pink-100" placeholder="Size" value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} />
@@ -541,7 +542,7 @@ export default function ProductManagementModal({
                     </button>
                   </div>
                 ))}
-                {form.variants.length === 0 && (
+                {(!form.variants || form.variants.length === 0) && (
                   <div className="text-center py-8 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100">
                     <p className="text-[10px] font-bold uppercase text-gray-400">No variants added yet</p>
                   </div>
