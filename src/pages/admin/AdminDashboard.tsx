@@ -76,6 +76,7 @@ import {
   Camera,
   Upload,
   Download,
+  CheckCircle,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -85,6 +86,7 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
   const [productCategoryId, setProductCategoryId] = useState<string>('all');
   const [reviewFilter, setReviewFilter] = useState<'All' | 'Approved' | 'Pending'>('All');
+  const [messageFilter, setMessageFilter] = useState<'All' | 'Pending' | 'Resolved'>('All');
   const [productSearch, setProductSearch] = useState<string>('');
   const debouncedSearch = useDebounce(productSearch, 300);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -309,6 +311,23 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       showToast(`Review ${status} successfully`);
     } catch { showToast('Error updating review', 'error'); }
+  };
+
+  const updateMessageStatus = async (id: string, status: string) => {
+    try {
+      await adminService.updateMessageStatus(id, status);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'messages'] });
+      showToast(`Message marked as ${status}`);
+    } catch { showToast('Error updating message status', 'error'); }
+  };
+
+  const deleteMessage = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return;
+    try {
+      await adminService.deleteMessage(id);
+      showToast('Message deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['admin', 'messages'] });
+    } catch { showToast('Error deleting message', 'error'); }
   };
 
   const deleteReview = async (id: string) => {
@@ -537,6 +556,10 @@ export default function AdminDashboard() {
   });
 
   const filteredMessages = messages.filter(m => {
+    // Apply status filter
+    if (messageFilter === 'Pending' && m.status === 'resolved') return false;
+    if (messageFilter === 'Resolved' && m.status !== 'resolved') return false;
+
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -1106,7 +1129,6 @@ export default function AdminDashboard() {
   onViewDetails={(order) => {
     setSelectedOrder(order);
     setIsOrderDetailsModalOpen(true);
-    setIsOrderDetailsModalOpen(true);
   }}
 />
               </div>
@@ -1152,7 +1174,28 @@ export default function AdminDashboard() {
 
             {tab === 'inbox' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Messages<span className="text-[#eb4899]">.</span></h1>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                    <h1 className="text-4xl font-black text-gray-900 tracking-tighter">Messages<span className="text-[#eb4899]">.</span></h1>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Manage customer inquiries</p>
+                  </div>
+                  <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm">
+                    {(['All', 'Pending', 'Resolved'] as const).map((filter) => (
+                      <button 
+                        key={filter} 
+                        onClick={() => setMessageFilter(filter)}
+                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                          messageFilter === filter 
+                            ? 'bg-gray-900 text-white shadow-lg shadow-black/10' 
+                            : 'text-gray-400 hover:text-gray-900'
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredMessages.map((m) => (
                     <div key={m._id} className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group">
@@ -1168,8 +1211,22 @@ export default function AdminDashboard() {
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">{m.email}</p>
                       <p className="text-sm text-gray-600 leading-relaxed line-clamp-3 mb-6">"{m.message}"</p>
                       <div className="flex items-center gap-3 pt-6 border-t border-gray-50">
-                        <button className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all">Reply</button>
-                        <button className="p-3 bg-gray-50 text-gray-400 hover:text-red-500 rounded-xl transition-all"><Trash2 size={16} /></button>
+                        {m.status !== 'resolved' ? (
+                          <button 
+                            onClick={() => updateMessageStatus(m._id, 'resolved')}
+                            className="flex-1 py-3 bg-[#eb4899] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-pink-600 transition-all flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle size={14} /> Mark Resolved
+                          </button>
+                        ) : (
+                          <button className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all">Reply</button>
+                        )}
+                        <button 
+                          onClick={() => deleteMessage(m._id)}
+                          className="p-3 bg-gray-50 text-gray-400 hover:text-red-500 rounded-xl transition-all"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
                   ))}

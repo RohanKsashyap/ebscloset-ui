@@ -25,6 +25,7 @@ export function useOrders(enabled: boolean = true) {
     queryKey: ['admin', 'orders'],
     queryFn: () => adminService.getOrders(),
     enabled,
+    refetchInterval: 10000, // Refresh every 10 seconds
   });
 }
 
@@ -49,6 +50,7 @@ export function useDashboard(enabled: boolean = true) {
     queryKey: ['admin', 'dashboard'],
     queryFn: () => adminService.getDashboard(),
     enabled,
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 }
 
