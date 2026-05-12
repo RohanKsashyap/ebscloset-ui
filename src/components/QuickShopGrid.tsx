@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import ProductModal from './ProductModal';
+import { useNavigate } from 'react-router-dom';
 import { products as defaultProducts } from '../data/products';
 import { loadProducts } from '../utils/storage';
 
@@ -7,15 +7,13 @@ const ageFilters = ['All','7-9','8-10','9-11','10-12','11-13'];
 
 export default function QuickShopGrid() {
   const [filter, setFilter] = useState<string>('All');
-  const [selected, setSelected] = useState<number | null>(null);
+  const navigate = useNavigate();
   const catalog = useMemo(() => loadProducts(defaultProducts), []);
 
   const filtered = useMemo(() => {
     if (filter === 'All') return catalog;
     return catalog.filter(p => p.category.includes(filter));
   }, [filter, catalog]);
-
-  const product = selected ? catalog.find(p => p.id === selected) ?? null : null;
 
   return (
     <section className="py-24 px-6 lg:px-12 max-w-screen-2xl mx-auto">
@@ -24,7 +22,7 @@ export default function QuickShopGrid() {
           Quick Shop
         </h2>
         <p className="text-sm tracking-[0.3em] uppercase text-rose-gold">
-          Click a box to view and purchase
+          Explore our collection
         </p>
       </div>
 
@@ -42,10 +40,10 @@ export default function QuickShopGrid() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-10">
         {filtered.map((p) => (
-          <button
+          <div
             key={p.id}
             className="group cursor-pointer text-left"
-            onClick={() => setSelected(p.id)}
+            onClick={() => navigate(`/product/${p.slug || p._id || p.id}`)}
           >
             <div className="relative overflow-hidden aspect-[3/4] mb-4 bg-gray-100">
               <img
@@ -60,13 +58,9 @@ export default function QuickShopGrid() {
             <p className="text-xs tracking-widest uppercase text-millennial-pink mb-1">{p.category}</p>
             <h3 className="font-headline text-lg md:text-xl text-gray-800">{p.name}</h3>
             <p className="text-base text-hot-pink font-semibold">${p.price}</p>
-          </button>
+          </div>
         ))}
       </div>
-
-      {product && (
-        <ProductModal product={product} onClose={() => setSelected(null)} />
-      )}
     </section>
   );
 }

@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProductModal from './ProductModal';
 import { products as defaultProducts } from '../data/products';
 import { loadProducts } from '../utils/storage';
 import { useProductContext } from '../context/ProductContext';
@@ -8,7 +7,6 @@ import { getOptimizedUrl } from '../utils/imageKit';
 
 export default function ProductShowcase() {
   const { products } = useProductContext();
-  const [selected, setSelected] = useState<any | null>(null);
   const [hoverId, setHoverId] = useState<any | null>(null);
   const navigate = useNavigate();
   
@@ -16,7 +14,6 @@ export default function ProductShowcase() {
     return products.length > 0 ? products : loadProducts(defaultProducts);
   }, [products]);
 
-  const selectedProduct = selected ? catalog.find((p: any) => (p._id || p.id) === selected) ?? null : null;
   return (
     <section className="py-12 md:py-24 px-4 sm:px-6 lg:px-12 max-w-screen-2xl mx-auto">
       <div className="text-center mb-12 md:mb-20">
@@ -48,11 +45,7 @@ export default function ProductShowcase() {
                   loading="lazy"
                   decoding="async"
                 />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black bg-opacity-20">
-                  <button className="hidden md:block border-2 border-white text-white px-10 py-4 text-sm tracking-widest uppercase hover:bg-hot-pink hover:border-hot-pink transition-all duration-500" onClick={(e) => { e.stopPropagation(); setSelected(id); }}>
-                    Try It On
-                  </button>
-                </div>
+
               </div>
 
               <p className="text-[10px] md:text-xs tracking-widest uppercase text-millennial-pink mb-1 md:mb-2">
@@ -74,9 +67,6 @@ export default function ProductShowcase() {
           See All Magic Dresses
         </button>
       </div>
-      {selectedProduct && (
-        <ProductModal product={selectedProduct} onClose={() => setSelected(null)} />
-      )}
     </section>
   );
 }
