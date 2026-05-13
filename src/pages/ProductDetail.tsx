@@ -81,7 +81,10 @@ export default function ProductDetail() {
           const normalized = {
             ...p,
             name: p.name || (p as any).title,
-            images: (p.images && p.images.length > 0) ? p.images : (p.image ? [p.image] : []),
+            images: (p.images && p.images.length > 0) 
+              ? p.images 
+              : [p.image, p.hoverImage, p.image3, p.image4].filter(Boolean),
+            videos: [p.video, p.video2, p.video3].filter(Boolean),
             image: p.image || (p.images && p.images[0] ? p.images[0] : '')
           };
           setProduct(normalized);
@@ -186,6 +189,7 @@ export default function ProductDetail() {
           <div className="lg:sticky lg:top-32 h-fit">
             <Gallery 
               images={product.images ?? []} 
+              videos={product.videos ?? []}
               productName={product.name} 
               layout="grid"
             />

@@ -31,7 +31,12 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
     onClose();
   };
 
-  const galleryImages = ((product as DataProduct).images && (product as DataProduct).images.length > 0) ? (product as DataProduct).images : [product.image];
+  const galleryImages = ((product as DataProduct).images && (product as DataProduct).images.length > 0) 
+    ? (product as DataProduct).images 
+    : [product.image, product.hoverImage, product.image3, product.image4].filter(Boolean);
+  
+  const galleryVideos = [product.video, product.video2, product.video3].filter(Boolean);
+
   return (
     <div ref={containerRef} tabIndex={-1} className="fixed inset-0 z-[100] flex items-center justify-center animate-fadeIn p-4" role="dialog" aria-modal="true" style={{ touchAction: 'none' }}>
       <div
@@ -50,7 +55,11 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
 
         <div className="grid md:grid-cols-2">
           <div className="p-4">
-            <Gallery images={galleryImages} onImageClick={() => { navigate(`/product/${product.slug || product._id || product.id}`); onClose(); }} />
+            <Gallery 
+              images={galleryImages} 
+              videos={galleryVideos}
+              onImageClick={() => { navigate(`/product/${product.slug || product._id || product.id}`); onClose(); }} 
+            />
           </div>
 
           <div className="p-8 md:p-12">

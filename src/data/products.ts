@@ -15,6 +15,13 @@ export interface Product {
   color?: string;
   type?: string;
   occasion?: string;
+  hoverImage?: string;
+  image3?: string;
+  image4?: string;
+  video?: string;
+  video2?: string;
+  video3?: string;
+  _id?: string;
 }
 
 export const products: Product[] = [
