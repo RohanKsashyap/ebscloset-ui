@@ -169,7 +169,7 @@ export default function BudgetSection() {
               Our signature high-end casual wear and formal wear for the most distinguished young wardrobes. Precision-crafted, limited edition pieces.
             </p>
             <div className="flex items-center gap-6">
-              <span className="text-3xl font-black text-hot-pink">$100+</span>
+              <span className="text-3xl font-black text-hot-pink">$100+ AUD</span>
               <Link 
                 to="/shop?budget=100plus" 
                 className="px-8 py-4 bg-hot-pink text-white font-bold uppercase tracking-widest text-xs rounded-full transition-all duration-300 hover:bg-black"

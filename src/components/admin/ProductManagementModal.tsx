@@ -261,7 +261,7 @@ export default function ProductManagementModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Price (USD)</label>
+                  <label className="text-sm font-bold text-gray-900">Price (AUD)</label>
                   <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 
@@ -275,7 +275,7 @@ export default function ProductManagementModal({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Original Price (USD)</label>
+                  <label className="text-sm font-bold text-gray-900">Original Price (AUD)</label>
                   <div className="relative">
                     <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input 

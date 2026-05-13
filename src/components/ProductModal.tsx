@@ -10,6 +10,7 @@ import Reviews from './Reviews';
 import type { Product as DataProduct } from '../data/products';
 import { useEffect, useRef, useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { formatAUD } from '../utils/storage';
 
 export default function ProductModal({ product, onClose }: ProductModalProps) {
   if (!product) return null;
@@ -70,7 +71,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               {product.name}
             </h3>
             <p className="text-xl text-hot-pink font-semibold mb-6">
-              ${product.price}
+              {formatAUD(product.price)}
             </p>
 
             <div className="mb-8">

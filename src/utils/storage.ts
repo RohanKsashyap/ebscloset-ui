@@ -184,20 +184,17 @@ export async function deleteSubscriber(id: string) { return adminService.deleteS
 export async function deleteContactMessage(id: string) { return adminService.deleteMessage(id); }
 
 // Keep helpers
-export const INR_TO_USD = 0.012; // Example conversion if needed, but we'll focus on symbols
-export function toUSD(val: number): number {
-  return val;
-}
-export function formatUSD(val: number): string {
+export function formatAUD(val: number): string {
   return `$${Number(val).toLocaleString(undefined, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2
-  })}`;
+  })} AUD`;
 }
 
-// Keeping these for backward compatibility but redirecting to USD
-export const formatAUD = formatUSD;
-export const toAUD = toUSD;
+// Redirect USD to AUD
+export const formatUSD = formatAUD;
+export const toUSD = (val: number) => val;
+export const toAUD = (val: number) => val;
 
 // Dummy/Legacy stubs to avoid breaking imports
 export function loadArrivalProducts() { return []; }

@@ -11,6 +11,7 @@ import {
   Trash2,
   MoreVertical
 } from 'lucide-react';
+import { formatAUD } from '../../utils/storage';
 
 interface OrdersManagementProps {
   orders: any[];
@@ -196,7 +197,7 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
                       </div>
                     </td>
                     <td className="px-6 py-5 font-bold text-gray-900 text-sm">
-                      ${(order.totalAmount || order.total || 0).toFixed(2)}
+                      {formatAUD(order.totalAmount || order.total || 0)}
                     </td>
                     <td className="px-6 py-5">
                       <div className="relative flex justify-center" onClick={e => e.stopPropagation()}>
@@ -241,9 +242,9 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
                         >
                           <Trash2 size={18} />
                         </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow">
+                        {/* <button className="p-2 text-gray-400 hover:text-gray-900 hover:bg-white rounded-xl transition-all shadow-sm hover:shadow">
                           <Printer size={18} />
-                        </button>
+                        </button> */}
                       </div>
                     </td>
                   </tr>
@@ -285,9 +286,9 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
             <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Total Sales</p>
             <div className="flex items-baseline gap-2 mt-2">
               <p className="text-3xl font-bold text-gray-900">
-                ${dashboardData?.counts?.sales 
-                  ? Number(dashboardData.counts.sales).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0).toFixed(2)}
+                {formatAUD(dashboardData?.counts?.sales 
+                  ? Number(dashboardData.counts.sales)
+                  : orders.reduce((acc, o) => acc + (o.totalAmount || o.total || 0), 0))}
               </p>
               <span className="text-green-500 text-xs font-bold">+12% ↑</span>
             </div>

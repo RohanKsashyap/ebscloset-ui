@@ -25,7 +25,7 @@ export default function Checkout() {
     city: '', 
     postcode: '', 
     phone: '',
-    country: 'United States'
+    country: 'Australia'
   });
 
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod' | 'apple' | 'paypal' | 'google'>('card');
@@ -96,7 +96,7 @@ export default function Checkout() {
             city: primary.city,
             postcode: primary.postalCode,
             phone: primary.phone,
-            country: primary.country || 'United States'
+            country: primary.country || 'Australia'
           });
         }
       } catch (err) {
@@ -109,7 +109,7 @@ export default function Checkout() {
     fetchData();
   }, []);
 
-  const tax = useMemo(() => total * 0.08, [total]);
+  const tax = useMemo(() => total * 0.10, [total]);
   const grandTotal = useMemo(() => total + tax, [total, tax]);
 
   const selectAddress = (addr: Address) => {
@@ -119,7 +119,7 @@ export default function Checkout() {
       city: addr.city,
       postcode: addr.postalCode,
       phone: addr.phone,
-      country: addr.country || 'United States'
+      country: addr.country || 'Australia'
     });
     setShowAddressDropdown(false);
   };
@@ -344,7 +344,7 @@ export default function Checkout() {
                   <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Phone</label>
                   <input 
                     type="text" 
-                    placeholder="+1 (555) 000"
+                    placeholder="+61 400 000 000"
                     className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
                     value={shipping.phone}
                     onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}

@@ -1,5 +1,6 @@
 import { X, Printer, CreditCard } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import { formatAUD } from '../../utils/storage';
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
@@ -63,20 +64,20 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
               <div className="space-y-4">
                 <div className="flex justify-between items-center text-sm font-bold text-gray-600">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatAUD(subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm font-bold text-gray-600">
                   <span>Shipping</span>
-                  <span>${shipping.toFixed(2)}</span>
+                  <span>{formatAUD(shipping)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm font-bold text-gray-600">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{formatAUD(tax)}</span>
                 </div>
               </div>
               <div className="pt-6 border-t border-gray-100 flex justify-between items-end">
                 <span className="text-[10px] font-black text-[#eb4899] uppercase tracking-[0.3em] mb-1">Total</span>
-                <span className="text-4xl font-black text-gray-900 tracking-tighter">${total.toFixed(2)}</span>
+                <span className="text-4xl font-black text-gray-900 tracking-tighter">{formatAUD(total)}</span>
               </div>
             </div>
           </div>
@@ -166,11 +167,11 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
                         </div>
                       </div>
                       <div className="text-left sm:text-right w-full sm:w-auto">
-                        <p className="text-lg font-black text-gray-900 tracking-tight">${item.price.toFixed(2)}</p>
+                        <p className="text-lg font-black text-gray-900 tracking-tight">{formatAUD(item.price)}</p>
                         <div className="mt-4">
                           <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest mb-0.5">Item Total</p>
                           <p className="text-sm font-black text-[#eb4899] tracking-tight">
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {formatAUD(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
