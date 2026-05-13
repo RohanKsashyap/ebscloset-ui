@@ -26,6 +26,7 @@ export default function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const { toggleWishlist, isWishlisted } = useProductContext();
 
   const updateParams = (key: string, value: string) => {
@@ -145,35 +146,45 @@ export default function Shop() {
             <span>/</span>
             <span className="text-black">Shop</span>
           </nav>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Our Collection</h1>
-              <p className="text-gray-500 max-w-xl text-sm md:text-base leading-relaxed">
-                A curated selection of premium dresses for girls, designed for every magical moment and timeless style.
-              </p>
-            </div>
-            <div className="flex items-center justify-between md:justify-end gap-4 border-b border-gray-100 pb-4 md:pb-0 md:border-none">
-              <button 
-                onClick={() => setIsFilterDrawerOpen(true)}
-                className="lg:hidden flex items-center gap-2 text-xs uppercase tracking-widest font-bold border px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
-              >
-                <SlidersHorizontal size={14} />
-                Filters
-              </button>
-              <div className="flex items-center gap-8">
-                <span className="hidden sm:inline text-sm text-gray-400">{filtered.length} Products</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase tracking-widest text-gray-400">Sort by:</span>
-                  <select className="text-sm font-medium bg-transparent focus:outline-none cursor-pointer">
-                    <option>Newest</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Best Selling</option>
-                  </select>
-                </div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Our Collection</h1>
+            <p className="text-gray-500 max-w-xl text-sm md:text-base leading-relaxed">
+              A curated selection of premium dresses for girls, designed for every magical moment and timeless style.
+            </p>
+          </div>
+        </div>
+
+        {/* Sticky Filter Bar */}
+        <div className="sticky top-14 lg:top-18 z-30 bg-white/95 backdrop-blur-md py-4 mb-8 border-b border-gray-100">
+          <div className="flex items-center justify-between gap-4">
+            <button 
+              onClick={() => {
+                if (window.innerWidth >= 1024) {
+                  setIsDesktopSidebarOpen(!isDesktopSidebarOpen);
+                } else {
+                  setIsFilterDrawerOpen(true);
+                }
+              }}
+              className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold border px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+            >
+              <SlidersHorizontal size={14} />
+              {isDesktopSidebarOpen ? 'Hide Filters' : 'Filters'}
+            </button>
+            <div className="flex items-center gap-8">
+              <span className="hidden sm:inline text-sm text-gray-400">{filtered.length} Products</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs uppercase tracking-widest text-gray-400">Sort by:</span>
+                <select className="text-sm font-medium bg-transparent focus:outline-none cursor-pointer">
+                  <option>Newest</option>
+                  <option>Price: Low to High</option>
+                  <option>Price: High to Low</option>
+                  <option>Best Selling</option>
+                </select>
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12">
@@ -187,11 +198,12 @@ export default function Shop() {
 
           {/* Sidebar Filters (Desktop) & Drawer (Mobile) */}
           <aside className={`
-            fixed lg:sticky top-0 lg:top-32 left-0 z-[70] lg:z-10
+            fixed lg:sticky top-0 lg:top-40 left-0 z-[70] lg:z-10
             h-full lg:h-fit max-h-screen lg:max-h-[calc(100vh-160px)]
             w-[280px] lg:w-64 bg-white lg:bg-transparent
             transform ${isFilterDrawerOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            transition-transform duration-300 ease-in-out
+            ${!isDesktopSidebarOpen ? 'lg:hidden' : 'lg:flex'}
+            transition-all duration-300 ease-in-out
             flex flex-col
           `}>
             {/* Drawer Header (Mobile Only) */}
