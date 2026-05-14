@@ -8,6 +8,7 @@ import ProductShowcase from './ProductShowcase';
 import NewArrivalsGallery from './NewArrivalsGallery';
 import Testimonials from './Testimonials';
 import BudgetSection from './BudgetSection';
+import FAQSection from './FAQSection';
 import SEO from './SEO';
 import { Helmet } from 'react-helmet-async';
 
@@ -111,6 +112,7 @@ export default function HomePage() {
       <Testimonials />
       <NewArrivalsGallery />
       <ProductShowcase />
+      <FAQSection />
     </main>
   );
 }
