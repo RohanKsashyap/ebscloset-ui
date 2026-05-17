@@ -34,16 +34,19 @@ export default function ProductManagementModal({
   initialProduct 
 }: ProductManagementModalProps) {
   const [form, setForm] = useState<any>({
+    id: '', // Item Code / Legacy ID
     name: '',
     price: '',
     originalPrice: '',
     description: '',
     categoryId: '',
+    brand: '',
     inStock: 0,
     minStock: 5,
     size: '',
     sizes: [],
     color: '',
+    colors: [],
     newarrival:false,
     trending: false,
     bestseller: false,
@@ -78,8 +81,10 @@ export default function ProductManagementModal({
         ...initialProduct,
         categoryId: (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '',
         sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes : [],
+        colors: Array.isArray((initialProduct as any).colors) ? (initialProduct as any).colors : [],
         ageGroups: (initialProduct as any).ageGroups || [],
         color: (initialProduct as any).color || '',
+        brand: (initialProduct as any).brand || '',
         variants: Array.isArray((initialProduct as any).variants) ? (initialProduct as any).variants : [],
       });
       setPreviews({
@@ -128,6 +133,45 @@ export default function ProductManagementModal({
     if (isOpen) fetchCats();
   }, [isOpen]);
 
+  // Automatically sync variants when colors or sizes change
+  useEffect(() => {
+    const colors = form.colors || [];
+    const sizes = form.sizes || [];
+
+    if (colors.length === 0 && sizes.length === 0) {
+      if (form.variants?.length > 0) {
+        setForm((f: any) => ({ ...f, variants: [] }));
+      }
+      return;
+    }
+
+    const currentVariants = form.variants || [];
+    let combinations: { name: string; size: string }[] = [];
+
+    if (colors.length > 0 && sizes.length > 0) {
+      combinations = colors.flatMap((c: string) => sizes.map((s: string) => ({ name: c, size: s })));
+    } else if (colors.length > 0) {
+      combinations = colors.map((c: string) => ({ name: c, size: '' }));
+    } else if (sizes.length > 0) {
+      combinations = sizes.map((s: string) => ({ name: 'Default', size: s }));
+    }
+
+    const newVariants = combinations.map(combo => {
+      const existing = currentVariants.find(
+        (v: any) => (v.name || '').toLowerCase() === (combo.name || '').toLowerCase() && 
+                    (v.size || '').toLowerCase() === (combo.size || '').toLowerCase()
+      );
+      return existing || { name: combo.name, size: combo.size, price: form.price, inStock: 0, sku: '' };
+    });
+
+    const hasChanged = newVariants.length !== currentVariants.length || 
+      newVariants.some((v, i) => v.name !== currentVariants[i]?.name || v.size !== currentVariants[i]?.size);
+
+    if (hasChanged) {
+      setForm((f: any) => ({ ...f, variants: newVariants }));
+    }
+  }, [form.colors, form.sizes]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     const file = e.target.files?.[0] || null;
     if (file) {
@@ -142,24 +186,10 @@ export default function ProductManagementModal({
     }
   };
 
-  const addVariant = () => {
-    setForm((f: any) => ({
-      ...f,
-      variants: [...(f.variants || []), { name: '', size: '', price: f.price, inStock: 0 }]
-    }));
-  };
-
   const updateVariant = (index: number, field: string, value: any) => {
     const newVariants = [...(form.variants || [])];
     newVariants[index] = { ...newVariants[index], [field]: value };
     setForm((f: any) => ({ ...f, variants: newVariants }));
-  };
-
-  const removeVariant = (index: number) => {
-    setForm((f: any) => ({
-      ...f,
-      variants: f.variants.filter((_: any, i: number) => i !== index)
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -187,6 +217,8 @@ export default function ProductManagementModal({
           formData.append(key, JSON.stringify(form[key]));
         } else if (key === 'sizes' && Array.isArray(form[key])) {
           form[key].forEach((s: string) => formData.append('sizes', s));
+        } else if (key === 'colors' && Array.isArray(form[key])) {
+          form[key].forEach((c: string) => formData.append('colors', c));
         } else if (key === 'ageGroups' && Array.isArray(form[key])) {
           form[key].forEach((a: string) => formData.append('ageGroups', a));
         } else {
@@ -245,17 +277,32 @@ export default function ProductManagementModal({
           <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-900">Product Name</label>
-                <div className="relative">
-                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input 
-                    required
-                    className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                    placeholder="e.g. Silk Oversized Blouse" 
-                    value={form.name} 
-                    onChange={(e) => setForm({ ...form, name: e.target.value })} 
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2 col-span-1 sm:col-span-2">
+                  <label className="text-sm font-bold text-gray-900">Product Name</label>
+                  <div className="relative">
+                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      required
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. Silk Oversized Blouse" 
+                      value={form.name} 
+                      onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Item Code (Numeric)</label>
+                  <div className="relative">
+                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. 101" 
+                      type="number"
+                      value={form.id} 
+                      onChange={(e) => setForm({ ...form, id: e.target.value })} 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -309,6 +356,21 @@ export default function ProductManagementModal({
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-bold text-gray-900">Brand</label>
+                  <div className="relative">
+                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    <input 
+                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                      placeholder="e.g. EB's Closet" 
+                      value={form.brand} 
+                      onChange={(e) => setForm({ ...form, brand: e.target.value })} 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Stock Quantity</label>
                   <div className="relative">
                     <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -321,10 +383,7 @@ export default function ProductManagementModal({
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 col-span-2 sm:col-span-1">
+                <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Min Stock Alert</label>
                   <div className="relative">
                     <AlertCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -354,15 +413,52 @@ export default function ProductManagementModal({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 col-span-2">
-                  <label className="text-sm font-bold text-gray-900">Color</label>
-                  <div className="relative">
-                    <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      placeholder="e.g. Black, Rose Gold" 
-                      value={form.color} 
-                      onChange={(e) => setForm({ ...form, color: e.target.value })} 
-                    />
+                  <label className="text-sm font-bold text-gray-900">Colors</label>
+                  <div className="flex gap-2 mb-2">
+                    <div className="relative flex-1">
+                      <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                      <input 
+                        className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
+                        placeholder="Add a color (e.g. Black)" 
+                        value={form.color} 
+                        onChange={(e) => setForm({ ...form, color: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (form.color.trim()) {
+                              const newColors = Array.from(new Set([...(form.colors || []), form.color.trim()]));
+                              setForm({ ...form, colors: newColors, color: '' });
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        if (form.color.trim()) {
+                          const newColors = Array.from(new Set([...(form.colors || []), form.color.trim()]));
+                          setForm({ ...form, colors: newColors, color: '' });
+                        }
+                      }}
+                      className="px-6 bg-gray-900 text-white rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(form.colors || []).map((c: string) => (
+                      <span key={c} className="inline-flex items-center gap-1 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-pink-100">
+                        {c}
+                        <button 
+                          type="button" 
+                          onClick={() => setForm({ ...form, colors: form.colors.filter((x: string) => x !== c) })}
+                          className="hover:text-pink-800"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
                   </div>
                 </div>
 
@@ -520,31 +616,46 @@ export default function ProductManagementModal({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-gray-900">
                   <Sparkles size={18} className="text-pink-500" />
-                  <h3 className="text-sm font-bold">Product Variants</h3>
+                  <h3 className="text-sm font-bold">Inventory by Variant</h3>
                 </div>
-                <button 
-                  type="button"
-                  onClick={addVariant}
-                  className="text-[10px] font-bold uppercase tracking-wider text-[#eb4899] bg-pink-50 px-4 py-2 rounded-xl hover:bg-pink-100 transition-all shadow-sm"
-                >
-                  + Add Variant
-                </button>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  {(form.variants || []).length} Combinations
+                </div>
               </div>
 
               <div className="space-y-3">
                 {form.variants?.map((v: any, i: number) => (
-                  <div key={i} className="flex gap-3 items-center bg-gray-50/50 p-3 rounded-2xl border border-transparent hover:border-pink-100 transition-all">
-                    <input className="flex-1 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-pink-100" placeholder="Variant Name (e.g. Red)" value={v.name} onChange={e => updateVariant(i, 'name', e.target.value)} />
-                    <input className="w-20 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none text-center focus:ring-2 focus:ring-pink-100" placeholder="Size" value={v.size} onChange={e => updateVariant(i, 'size', e.target.value)} />
-                    <input className="w-20 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none text-center focus:ring-2 focus:ring-pink-100" type="number" placeholder="Stock" value={v.inStock} onChange={e => updateVariant(i, 'inStock', Number(e.target.value))} />
-                    <button type="button" onClick={() => removeVariant(i)} className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                      <X size={16} />
-                    </button>
+                  <div key={`${v.name}-${v.size}-${i}`} className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-gray-50/50 p-3 rounded-2xl border border-transparent hover:border-pink-100 transition-all">
+                    <div className="flex-1 w-full sm:w-auto bg-white rounded-xl px-4 py-2.5 text-xs font-bold text-gray-700">
+                      {v.name} {v.size ? `(${v.size})` : ''}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <span className="text-[10px] font-bold uppercase text-gray-400">SKU</span>
+                      <input 
+                        className="flex-1 sm:w-32 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-pink-100 font-bold" 
+                        type="text" 
+                        placeholder="SKU" 
+                        value={v.sku || ''} 
+                        onChange={e => updateVariant(i, 'sku', e.target.value)} 
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <span className="text-[10px] font-bold uppercase text-gray-400">Stock</span>
+                      <input 
+                        className="w-20 bg-white border-none rounded-xl px-4 py-2.5 text-xs outline-none text-center focus:ring-2 focus:ring-pink-100 font-bold" 
+                        type="number" 
+                        placeholder="Stock" 
+                        value={v.inStock} 
+                        onChange={e => updateVariant(i, 'inStock', Number(e.target.value))} 
+                      />
+                    </div>
                   </div>
                 ))}
                 {(!form.variants || form.variants.length === 0) && (
                   <div className="text-center py-8 bg-gray-50/50 rounded-2xl border-2 border-dashed border-gray-100">
-                    <p className="text-[10px] font-bold uppercase text-gray-400">No variants added yet</p>
+                    <p className="text-[10px] font-bold uppercase text-gray-400">Select colors and sizes above to generate variants</p>
                   </div>
                 )}
               </div>

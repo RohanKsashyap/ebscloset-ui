@@ -22,6 +22,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [size, setSize] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [pin, setPin] = useState<string>('');
   const [pinMsg, setPinMsg] = useState<string>('');
   const [showSizeGuide, setShowSizeGuide] = useState(false);
@@ -33,12 +34,20 @@ export default function ProductDetail() {
     ? (product.reviews ?? []).reduce((s: number, r: { rating: number }) => s + r.rating, 0) / reviewsCount
     : 0;
 
+  const selectedVariant = product?.variants?.find((v: any) => {
+    const colorMatch = !selectedColor || (v.attributes?.color || v.color) === selectedColor;
+    const sizeMatch = !size || (v.attributes?.size || v.size) === size;
+    return colorMatch && sizeMatch;
+  });
+
+  const displayPrice = selectedVariant?.price || product?.price;
+
   const totalStock = (() => {
     if (product?.variants && product.variants.length > 0) {
-      return product.variants.reduce((a: any, b: any) => a + (Number(b.inStock) || 0), 0);
-    }
-    if (product?.stock && Object.keys(product.stock).length > 0) {
-      return Object.values(product.stock).reduce((a: any, b: any) => a + (Number(b) || 0), 0);
+      return product.variants.reduce((a: any, b: any) => {
+        const stock = b.stock?.quantity ?? b.inStock ?? 0;
+        return a + Number(stock);
+      }, 0);
     }
     return (Number(product?.inStock) || 0);
   })();
@@ -49,8 +58,12 @@ export default function ProductDetail() {
     
     // 1. Check variants
     if (product.variants && product.variants.length > 0) {
-      const variant = product.variants.find((v: any) => v.size?.toLowerCase() === size.toLowerCase());
-      if (variant) return Number(variant.inStock) || 0;
+      const variant = product.variants.find((v: any) => {
+        const sMatch = (v.attributes?.size || v.size)?.toLowerCase() === size.toLowerCase();
+        const cMatch = !selectedColor || (v.attributes?.color || v.color) === selectedColor;
+        return sMatch && cMatch;
+      });
+      if (variant) return Number(variant.stock?.quantity ?? variant.inStock ?? 0);
     }
     
     // 2. Check stock object (case-insensitive)
@@ -88,6 +101,12 @@ export default function ProductDetail() {
             image: p.image || (p.images && p.images[0] ? p.images[0] : '')
           };
           setProduct(normalized);
+
+          // Auto-select first color if available
+          if (normalized.variants && normalized.variants.length > 0) {
+            const firstColor = normalized.variants.find((v: any) => v.attributes?.color || v.color)?.attributes?.color || normalized.variants.find((v: any) => v.color)?.color;
+            if (firstColor) setSelectedColor(firstColor);
+          }
         } else {
           setProduct(null);
         }
@@ -129,7 +148,21 @@ export default function ProductDetail() {
   }
 
   const handleAdd = () => {
-    addItem({ id: product.id || product._id, name: product.name, price: product.price, originalPrice: product.originalPrice, image: product.image, size: size ?? undefined }, 1);
+    addItem({ 
+      id: product.id || product._id, 
+      name: product.name, 
+      price: displayPrice, 
+      originalPrice: product.originalPrice, 
+      image: (selectedVariant?.images && selectedVariant.images[0]) || product.image, 
+      size: size ?? undefined,
+      color: selectedColor ?? undefined,
+      variantId: selectedVariant?._id || selectedVariant?.id,
+      sku: selectedVariant?.sku || product.sku,
+      selectedAttributes: selectedVariant?.attributes || {
+        color: selectedColor,
+        size: size
+      }
+    }, 1);
     showToast('Added to bag');
   };
 
@@ -148,7 +181,7 @@ export default function ProductDetail() {
       <SEO 
         title={product.name}
         description={product.description?.substring(0, 160)}
-        ogImage={product.image}
+        ogImage={(selectedVariant?.images && selectedVariant.images[0]) || product.image}
         ogType="product"
         canonical={`https://www.ebscloset.com.au/product/${product.slug || product.id}`}
       />
@@ -158,9 +191,9 @@ export default function ProductDetail() {
             "@context": "https://schema.org/",
             "@type": "Product",
             "name": product.name,
-            "image": product.images || [product.image],
+            "image": (selectedVariant?.images && selectedVariant.images.length > 0) ? selectedVariant.images : (product.images || [product.image]),
             "description": product.description,
-            "sku": product.sku || product.id,
+            "sku": selectedVariant?.sku || product.sku || product.id,
             "brand": {
               "@type": "Brand",
               "name": "EB's Closet"
@@ -169,8 +202,8 @@ export default function ProductDetail() {
               "@type": "Offer",
               "url": `https://www.ebscloset.com.au/product/${product.slug || product.id}`,
               "priceCurrency": "AUD",
-              "price": product.price,
-              "availability": "https://schema.org/InStock",
+              "price": displayPrice,
+              "availability": isOutOfStock || isSelectedSizeOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
               "itemCondition": "https://schema.org/NewCondition"
             },
             "aggregateRating": reviewsCount > 0 ? {
@@ -188,7 +221,7 @@ export default function ProductDetail() {
           {/* Left: Gallery */}
           <div className="lg:sticky lg:top-32 h-fit">
             <Gallery 
-              images={product.images ?? []} 
+              images={(selectedVariant?.images && selectedVariant.images.length > 0) ? selectedVariant.images : (product.images ?? [])} 
               videos={product.videos ?? []}
               productName={product.name} 
               layout="grid"
@@ -218,10 +251,14 @@ export default function ProductDetail() {
             </div>
 
             <div className="flex items-center gap-4 mb-8">
-              <span className="text-3xl font-light text-gray-900">{formatAUD(product.price)}</span>
+              <span className="text-3xl font-light text-gray-900">{formatAUD(displayPrice)}</span>
               {isOutOfStock ? (
                 <span className="bg-gray-100 text-gray-500 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
                   Sold Out
+                </span>
+              ) : isSelectedSizeOutOfStock ? (
+                <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
+                  Size Out of Stock
                 </span>
               ) : (
                 <span className="bg-hot-pink text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
@@ -236,11 +273,39 @@ export default function ProductDetail() {
 
             {/* Colors */}
             <div className="mb-8">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold mb-4">Color / {product.color || 'Charcoal Black'}</p>
-              <div className="flex gap-4">
-                <button className="w-8 h-8 rounded-full bg-gray-900 ring-2 ring-offset-2 ring-gray-900" />
-                <button className="w-8 h-8 rounded-full bg-gray-300 ring-1 ring-gray-200" />
-                <button className="w-8 h-8 rounded-full bg-[#1a2b3c] ring-1 ring-[#1a2b3c]" />
+              <p className="text-[10px] tracking-[0.2em] uppercase text-gray-500 font-bold mb-4">Color / {selectedColor || product.color || 'Default'}</p>
+              <div className="flex flex-wrap gap-4">
+                {(() => {
+                  const availableColors = Array.from(new Set([
+                    ...(product.variants ? product.variants.map((v: any) => v.attributes?.color || v.color).filter(Boolean) : []),
+                    ...(product.colors && product.colors.length > 0 ? product.colors : []),
+                    ...(product.color ? [product.color] : [])
+                  ])) as string[];
+
+                  if (availableColors.length === 0) return <p className="text-xs text-gray-400 italic">No color options</p>;
+
+                  return availableColors.map((c: string) => (
+                    <button
+                      key={c}
+                      onClick={() => {
+                        setSelectedColor(c);
+                        // Reset size if it's not available in the new color
+                        const variantsWithNewColor = product.variants?.filter((v: any) => (v.attributes?.color || v.color) === c);
+                        const sizesForNewColor = variantsWithNewColor?.map((v: any) => v.attributes?.size || v.size);
+                        if (size && sizesForNewColor && !sizesForNewColor.includes(size)) {
+                          setSize(null);
+                        }
+                      }}
+                      className={`px-4 py-2 border text-[10px] tracking-widest uppercase transition-all duration-300 ${
+                        selectedColor === c 
+                          ? 'bg-gray-900 text-white border-gray-900 font-bold' 
+                          : 'border-gray-200 text-gray-400 hover:border-gray-400'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ));
+                })()}
               </div>
             </div>
 
@@ -252,13 +317,26 @@ export default function ProductDetail() {
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {(() => {
-                  const availableSizes = [
-                    ...(product.sizes && product.sizes.length > 0 ? product.sizes : []),
-                    ...(product.size ? [product.size] : []),
-                    ...(product.variants ? product.variants.map((v: any) => v.size).filter(Boolean) : [])
-                  ];
+                  let availableSizes: string[] = [];
+                  
+                  if (selectedColor && product.variants && product.variants.length > 0) {
+                    // Filter sizes by selected color
+                    availableSizes = product.variants
+                      .filter((v: any) => (v.attributes?.color || v.color) === selectedColor)
+                      .map((v: any) => v.attributes?.size || v.size)
+                      .filter(Boolean);
+                  } else {
+                    availableSizes = [
+                      ...(product.sizes && product.sizes.length > 0 ? product.sizes : []),
+                      ...(product.size ? [product.size] : []),
+                      ...(product.variants ? product.variants.map((v: any) => v.attributes?.size || v.size).filter(Boolean) : [])
+                    ];
+                  }
+                  
                   const uniqueSizes = Array.from(new Set(availableSizes)) as string[];
                   
+                  if (uniqueSizes.length === 0) return <p className="text-xs text-gray-400 italic col-span-full">No sizes available for this color</p>;
+
                   return uniqueSizes.map((s: string) => (
                     <button
                       key={s}
@@ -279,16 +357,25 @@ export default function ProductDetail() {
             {/* Actions */}
             <div className="space-y-4 mb-12">
               <button 
-                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
-                onClick={() => { if (!size) { showToast('Please select a size', 'error'); return; } handleAdd(); }} 
+                disabled={isOutOfStock || isSelectedSizeOutOfStock}
+                onClick={() => { 
+                  if (!size && (product.sizes?.length > 0 || product.variants?.some((v: any) => v.attributes?.size || v.size))) { 
+                    showToast('Please select a size', 'error'); 
+                    return; 
+                  } 
+                  handleAdd(); 
+                }} 
                 className="w-full h-16 bg-hot-pink text-white text-[10px] tracking-[0.3em] font-bold uppercase hover:opacity-90 transition-all duration-500 disabled:opacity-50"
               >
-                Add to Bag — {formatAUD(product.price)}
+                Add to Bag — {formatAUD(displayPrice)}
               </button>
               <button 
-                disabled={isOutOfStock || (size ? isSelectedSizeOutOfStock : false)}
+                disabled={isOutOfStock || isSelectedSizeOutOfStock}
                 onClick={() => { 
-                  if (!size) { showToast('Please select a size', 'error'); return; } 
+                  if (!size && (product.sizes?.length > 0 || product.variants?.some((v: any) => v.attributes?.size || v.size))) { 
+                    showToast('Please select a size', 'error'); 
+                    return; 
+                  } 
                   handleAdd();
                   navigate('/checkout');
                 }} 

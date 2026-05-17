@@ -8,14 +8,18 @@ export interface CartItem {
   originalPrice?: number;
   image: string;
   size?: string;
+  color?: string;
+  variantId?: string;
+  sku?: string;
+  selectedAttributes?: Record<string, any>;
   qty: number;
 }
 
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'qty'>, qty?: number) => void;
-  removeItem: (id: string | number, size?: string) => void;
-  updateQty: (id: string | number, qty: number, size?: string) => void;
+  removeItem: (id: string | number, size?: string, sku?: string) => void;
+  updateQty: (id: string | number, qty: number, size?: string, sku?: string) => void;
   total: number;
   clear: () => void;
 }
@@ -39,23 +43,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem: CartContextValue['addItem'] = (item, qty = 1) => {
     setItems((prev) => {
-      const existing = prev.find((p) => p.id === item.id && p.size === item.size);
+      const existing = prev.find((p) => {
+        if (item.sku && p.sku) return p.sku === item.sku;
+        return p.id === item.id && p.size === item.size;
+      });
       if (existing) {
         showToast(`Updated quantity for ${item.name}`, 'info');
-        return prev.map((p) => (p.id === item.id && p.size === item.size ? { ...p, qty: p.qty + qty } : p));
+        return prev.map((p) => {
+          const match = (item.sku && p.sku) ? p.sku === item.sku : (p.id === item.id && p.size === item.size);
+          return match ? { ...p, qty: p.qty + qty } : p;
+        });
       }
       showToast(`Added ${item.name} to bag`);
       return [...prev, { ...item, qty }];
     });
   };
 
-  const removeItem: CartContextValue['removeItem'] = (id, size) => {
-    setItems((prev) => prev.filter((p) => !(p.id === id && (size === undefined || p.size === size))));
+  const removeItem: CartContextValue['removeItem'] = (id, size, sku) => {
+    setItems((prev) => prev.filter((p) => {
+      if (sku && p.sku) return p.sku !== sku;
+      return !(p.id === id && (size === undefined || p.size === size));
+    }));
     showToast('Item removed from bag', 'info');
   };
 
-  const updateQty: CartContextValue['updateQty'] = (id, qty, size) => {
-    setItems((prev) => prev.map((p) => (p.id === id && (size === undefined || p.size === size) ? { ...p, qty } : p)));
+  const updateQty: CartContextValue['updateQty'] = (id, qty, size, sku) => {
+    setItems((prev) => prev.map((p) => {
+      const match = (sku && p.sku) ? p.sku === sku : (p.id === id && (size === undefined || p.size === size));
+      return match ? { ...p, qty } : p;
+    }));
   };
 
   const clear = () => setItems([]);
