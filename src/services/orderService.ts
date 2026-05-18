@@ -70,4 +70,10 @@ export const orderService = {
     const response = await apiClient.get('/checkout/orders');
     return response.data || [];
   },
+
+  createPaymentSession: async (orderId: string): Promise<{ url: string }> => {
+    if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
+    const response = await apiClient.post(`/checkout/create-payment-session/${orderId}`);
+    return response.data;
+  },
 };
