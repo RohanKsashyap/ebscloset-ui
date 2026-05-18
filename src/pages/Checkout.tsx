@@ -28,7 +28,7 @@ export default function Checkout() {
     country: 'Australia'
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod' | 'apple' | 'paypal' | 'google'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
   const [user, setUser] = useState<User | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -179,14 +179,25 @@ export default function Checkout() {
         variantName: i.size || ''
       })), 
       shippingFee: 0,
+      tax: Math.round(tax * 100),
+      successUrl: `${window.location.origin}/order-confirmation`,
+      cancelUrl: `${window.location.origin}/checkout`,
       paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod.toUpperCase()
     };
 
     try {
-      const res = await orderService.createOrder(payload);
-      if (!buyNowItem) clear();
-      showToast('Order placed successfully!');
-      navigate('/order-confirmation', { state: { orderId: res.orderId } });
+      if (paymentMethod === 'card') {
+        const res = await orderService.createStripeSession(payload);
+        if (res.url) {
+          window.location.href = res.url;
+          return;
+        }
+      } else {
+        const res = await orderService.createOrder(payload);
+        if (!buyNowItem) clear();
+        showToast('Order placed successfully!');
+        navigate('/order-confirmation', { state: { orderId: res.orderId } });
+      }
     } catch (err: any) {
       showToast(err.response?.data?.message || 'Failed to place order', 'error');
     } finally {
@@ -388,40 +399,27 @@ export default function Checkout() {
               <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Step 03</span>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div className="grid grid-cols-2 gap-4 mb-12">
               <button 
-                onClick={() => setPaymentMethod('apple')}
-                className={`flex flex-col items-center justify-center gap-2 py-6 rounded-3xl border-2 transition-all ${paymentMethod === 'apple' ? 'bg-black text-white border-black shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
+                onClick={() => setPaymentMethod('card')}
+                className={`flex flex-col items-center justify-center gap-2 py-8 rounded-3xl border-2 transition-all ${paymentMethod === 'card' ? 'bg-[#6772E5] text-white border-[#6772E5] shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
               >
-                <div className={`w-6 h-6 rounded flex items-center justify-center ${paymentMethod === 'apple' ? 'bg-white' : 'bg-black'}`}>
-                  <div className={`w-3 h-3 rounded-full ${paymentMethod === 'apple' ? 'bg-black' : 'bg-white'}`} />
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${paymentMethod === 'card' ? 'bg-white text-[#6772E5]' : 'bg-black text-white'}`}>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13.911 10.428l-2.091 9.537h-3.666l2.091-9.537h3.666zm-0.082-3.83c0 1.144-0.89 2.067-1.996 2.067s-2.012-0.923-2.012-2.067c0-1.127 0.906-2.051 2.012-2.051s1.996 0.924 1.996 2.051zm8.171 10.37c0 1.631-2.484 2.115-3.629 2.115-1.112 0-3.694-0.451-3.694-2.115 0-1.613 2.582-2.131 3.694-2.131 1.145 0 3.629 0.518 3.629 2.131zm-0.049-3.328c0-1.742-1.411-2.612-3.895-2.612-2.433 0-3.924 0.887-3.924 2.612 0 1.709 1.491 2.578 3.924 2.578 2.484 0 3.895-0.869 3.895-2.578z"/>
+                  </svg>
                 </div>
-                <span className="text-[8px] font-bold tracking-[0.2em] uppercase">Apple Pay</span>
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Pay with Card</span>
               </button>
-              <button 
-                onClick={() => setPaymentMethod('paypal')}
-                className={`flex flex-col items-center justify-center gap-2 py-6 rounded-3xl border-2 transition-all ${paymentMethod === 'paypal' ? 'bg-[#003087] text-white border-[#003087] shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
-              >
-                <div className={`w-6 h-6 rounded flex items-center justify-center ${paymentMethod === 'paypal' ? 'bg-white' : 'bg-black'}`}>
-                  <div className={`w-3 h-1.5 rounded-sm ${paymentMethod === 'paypal' ? 'bg-[#003087]' : 'bg-white'}`} />
-                </div>
-                <span className="text-[8px] font-bold tracking-[0.2em] uppercase">PayPal</span>
-              </button>
-              <button 
-                onClick={() => setPaymentMethod('google')}
-                className={`flex flex-col items-center justify-center py-6 rounded-3xl border-2 transition-all ${paymentMethod === 'google' ? 'bg-white text-black border-black shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
-              >
-                <span className="text-xl font-bold tracking-tighter uppercase">Google</span>
-                <span className="text-[8px] font-bold tracking-[0.2em] uppercase">Google Pay</span>
-              </button>
+              
               <button 
                 onClick={() => setPaymentMethod('cod')}
-                className={`flex flex-col items-center justify-center gap-2 py-6 rounded-3xl border-2 transition-all ${paymentMethod === 'cod' ? 'bg-black text-white border-black shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
+                className={`flex flex-col items-center justify-center gap-2 py-8 rounded-3xl border-2 transition-all ${paymentMethod === 'cod' ? 'bg-black text-white border-black shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
               >
-                <div className={`w-6 h-6 rounded flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                  <span className="text-[10px] font-black">$</span>
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                  <span className="text-sm font-black">$</span>
                 </div>
-                <span className="text-[8px] font-bold tracking-[0.2em] uppercase text-center leading-tight">Cash on<br/>Delivery</span>
+                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-center leading-tight">Cash on Delivery</span>
               </button>
             </div>
 
@@ -435,33 +433,16 @@ export default function Checkout() {
             </div>
 
             {paymentMethod === 'card' ? (
-              <div className="bg-[#F9F9F9] p-8 rounded-[40px] space-y-6 animate-fadeIn">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Card Number</label>
-                  <input 
-                    type="text" 
-                    placeholder="0000 0000 0000 0000"
-                    className="w-full bg-white border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all shadow-sm"
-                  />
+              <div className="bg-[#F9F9F9] p-12 rounded-[40px] text-center space-y-4 animate-scaleIn border-2 border-black/5">
+                <div className="w-16 h-16 bg-[#6772E5] text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13.911 10.428l-2.091 9.537h-3.666l2.091-9.537h3.666zm-0.082-3.83c0 1.144-0.89 2.067-1.996 2.067s-2.012-0.923-2.012-2.067c0-1.127 0.906-2.051 2.012-2.051s1.996 0.924 1.996 2.051zm8.171 10.37c0 1.631-2.484 2.115-3.629 2.115-1.112 0-3.694-0.451-3.694-2.115 0-1.613 2.582-2.131 3.694-2.131 1.145 0 3.629 0.518 3.629 2.131zm-0.049-3.328c0-1.742-1.411-2.612-3.895-2.612-2.433 0-3.924 0.887-3.924 2.612 0 1.709 1.491 2.578 3.924 2.578 2.484 0 3.895-0.869 3.895-2.578z"/>
+                  </svg>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Expiry Date</label>
-                    <input 
-                      type="text" 
-                      placeholder="MM/YY"
-                      className="w-full bg-white border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all shadow-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">CVC</label>
-                    <input 
-                      type="text" 
-                      placeholder="123"
-                      className="w-full bg-white border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all shadow-sm"
-                    />
-                  </div>
-                </div>
+                <h3 className="text-xl font-bold uppercase tracking-tight">Stripe Secure Payment</h3>
+                <p className="text-sm text-gray-500 max-w-xs mx-auto">
+                  You will be redirected to Stripe to complete your purchase securely. We support all major credit cards.
+                </p>
               </div>
             ) : (
               <div className="bg-[#F9F9F9] p-12 rounded-[40px] text-center space-y-4 animate-scaleIn border-2 border-black/5">
@@ -469,12 +450,12 @@ export default function Checkout() {
                   <Check className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold uppercase tracking-tight">
-                  {paymentMethod === 'cod' ? 'Cash on Delivery Selected' : `${paymentMethod} Selected`}
+                  {paymentMethod === 'cod' ? 'Cash on Delivery Selected' : 'Stripe Payment Selected'}
                 </h3>
                 <p className="text-sm text-gray-500 max-w-xs mx-auto">
                   {paymentMethod === 'cod' 
                     ? 'You will pay for your order in cash when it arrives at your doorstep.'
-                    : `Your ${paymentMethod} account will be used to complete this transaction securely.`}
+                    : 'You will be redirected to Stripe to complete your purchase securely.'}
                 </p>
                 <button 
                   onClick={() => setPaymentMethod('card')}

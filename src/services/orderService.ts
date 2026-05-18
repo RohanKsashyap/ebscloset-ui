@@ -30,6 +30,9 @@ export interface OrderData {
     country: string;
   };
   shippingFee: number;
+  tax?: number;
+  successUrl?: string;
+  cancelUrl?: string;
 }
 
 export interface Order {
@@ -47,6 +50,12 @@ export const orderService = {
   createOrder: async (orderData: OrderData): Promise<{ orderId: string }> => {
     if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
     const response = await apiClient.post('/checkout/cod', orderData);
+    return response.data;
+  },
+
+  createStripeSession: async (orderData: OrderData): Promise<{ url: string }> => {
+    if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
+    const response = await apiClient.post('/checkout/stripe-session', orderData);
     return response.data;
   },
 
