@@ -22,15 +22,28 @@ export default function Cart() {
               let sizeStock = 0;
               let available = false;
 
-              if (it.sku && p.variants && p.variants.length > 0) {
-                const variant = p.variants.find((v: any) => v.sku === it.sku);
+              if (p.variants && p.variants.length > 0) {
+                const variant = p.variants.find((v: any) => {
+                  if (it.variantId && (v._id === it.variantId || v.id === it.variantId)) return true;
+                  if (it.sku && v.sku && v.sku === it.sku) return true;
+                  
+                  const vColor = (v.attributes?.color || v.color || v.name || '').toLowerCase();
+                  const vSize = (v.attributes?.size || v.size || '').toLowerCase();
+                  const itColor = (it.color || '').toLowerCase();
+                  const itSize = (it.size || '').toLowerCase();
+
+                  const colorMatch = !it.color || vColor === itColor;
+                  const sizeMatch = !it.size || vSize === itSize;
+                  return colorMatch && sizeMatch;
+                });
+
                 if (variant) {
                   sizeStock = variant.stock?.quantity ?? variant.inStock ?? 0;
                   available = sizeStock > 0;
                   totalStock = p.variants.reduce((s: number, v: any) => s + (v.stock?.quantity ?? v.inStock ?? 0), 0);
                 } else {
-                  // Fallback if SKU not found in variants
-                  totalStock = Number(p.inStock || 0);
+                  // Fallback if no specific variant match found
+                  totalStock = p.variants.reduce((s: number, v: any) => s + (v.stock?.quantity ?? v.inStock ?? 0), 0);
                   available = totalStock > 0;
                 }
               } else {
@@ -148,8 +161,15 @@ export default function Cart() {
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
-                  <span className="text-sm">Calculated at checkout</span>
+                  <span className={total > 150 ? "text-green-600 font-bold" : "text-sm"}>
+                    {total > 150 ? 'FREE' : 'Calculated at checkout'}
+                  </span>
                 </div>
+                {total > 0 && total <= 150 && (
+                  <p className="text-[10px] text-hot-pink font-bold uppercase tracking-wider text-right">
+                    Add {formatAUD(150 - total)} more for FREE shipping!
+                  </p>
+                )}
                 <div className="border-t pt-4 flex justify-between">
                   <span className="text-lg font-bold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-hot-pink">{formatAUD(total)}</span>

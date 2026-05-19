@@ -232,7 +232,7 @@ export default function ProductDetail() {
           <div className="flex flex-col">
             <div className="flex flex-col gap-2 mb-6">
               <span className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-semibold border-l-2 border-hot-pink pl-3 h-3 flex items-center">
-                Atelier Series No. {String(product.sku || '').slice(-3) || '062'}
+                Eb's Closet Series No. {String(product.sku || '').slice(-3) || '062'}
               </span>
               <h1 className="font-headline text-5xl md:text-6xl lg:text-7xl text-gray-900 leading-[1.05] tracking-tight uppercase">
                 {(() => {

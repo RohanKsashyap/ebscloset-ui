@@ -9,13 +9,14 @@ import {
   ChevronRight,
   Sparkles,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Loader2
 } from 'lucide-react';
 import { formatAUD } from '../../utils/storage';
 
 interface OrdersManagementProps {
   orders: any[];
-  onUpdateStatus: (id: string, status: string) => void;
+  onUpdateStatus: (id: string, status: string) => Promise<void> | void;
   onDeleteOrder: (id: string) => void;
   onBulkDeleteOrders: (ids: string[]) => void;
   onViewDetails: (order: any) => void;
@@ -27,6 +28,7 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   const tabs = ['All Orders', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
   const statusOptions = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'];
@@ -54,9 +56,14 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
     );
   };
 
-  const handleStatusChange = (id: string, status: string) => {
-    onUpdateStatus(id, status);
+  const handleStatusChange = async (id: string, status: string) => {
+    setUpdatingOrderId(id);
     setOpenDropdownId(null);
+    try {
+      await onUpdateStatus(id, status);
+    } finally {
+      setUpdatingOrderId(null);
+    }
   };
 
   const toggleSelectAll = () => {
@@ -203,10 +210,17 @@ export default function OrdersManagement({ orders, onUpdateStatus, onDeleteOrder
                       <div className="relative flex justify-center" onClick={e => e.stopPropagation()}>
                         <button 
                           onClick={() => setOpenDropdownId(openDropdownId === order._id ? null : order._id)}
-                          className={`flex items-center justify-between gap-3 px-5 py-2 rounded-full text-[11px] font-bold border transition-all hover:shadow-sm min-w-[130px] ${getFulfillmentColor(order.status || 'pending')}`}
+                          disabled={updatingOrderId === order._id}
+                          className={`flex items-center justify-between gap-3 px-5 py-2 rounded-full text-[11px] font-bold border transition-all hover:shadow-sm min-w-[130px] ${getFulfillmentColor(order.status || 'pending')} ${updatingOrderId === order._id ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                          <span className="tracking-widest uppercase">{(order.status || 'Pending')}</span>
-                          <MoreVertical size={12} className="opacity-40" />
+                          <span className="tracking-widest uppercase">
+                            {updatingOrderId === order._id ? 'Updating...' : (order.status || 'Pending')}
+                          </span>
+                          {updatingOrderId === order._id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <MoreVertical size={12} className="opacity-40" />
+                          )}
                         </button>
                         
                         {openDropdownId === order._id && (

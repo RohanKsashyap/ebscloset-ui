@@ -44,8 +44,15 @@ const Wishlist = () => {
   };
 
   const getStockStatus = (product: any) => {
-    const stockValues = product.stock ? Object.values(product.stock as Record<string, number>) : [];
-    const totalStock = stockValues.reduce((a, b) => a + b, 0);
+    const totalStock = (() => {
+      if (product.variants && product.variants.length > 0) {
+        return product.variants.reduce((acc: number, v: any) => acc + (Number(v.stock?.quantity ?? v.inStock) || 0), 0);
+      }
+      if (product.stock && Object.keys(product.stock).length > 0) {
+        return Object.values(product.stock as Record<string, number>).reduce((a, b) => a + (Number(b) || 0), 0);
+      }
+      return (Number(product.inStock) || 0);
+    })();
     
     if (totalStock === 0) return 'Coming Soon';
     if (totalStock <= 5) return 'Limited Quantity';

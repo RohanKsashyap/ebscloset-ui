@@ -159,6 +159,21 @@ export default function OrderDetailsModal({ isOpen, onClose, order }: OrderDetai
                             Variant: {item.variantName}
                           </p>
                         )}
+                        {(item.color || item.variantColor) && (
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Color: {item.color || item.variantColor}
+                          </p>
+                        )}
+                        {(item.size || item.variantSize) && (
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                            Size: {item.size || item.variantSize}
+                          </p>
+                        )}
+                        {item.sku && (
+                          <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-1">
+                            SKU: {item.sku}
+                          </p>
+                        )}
                         <div className="flex items-center gap-3 mt-4">
                           <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Quantity</p>
                           <div className="px-3 py-1 bg-gray-50 rounded-lg text-xs font-black text-gray-900 border border-gray-100">

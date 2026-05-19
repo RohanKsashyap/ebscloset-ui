@@ -40,8 +40,12 @@ export default function NewsletterPopup({ onClose }: NewsletterPopupProps) {
         </button>
 
         <div className="grid md:grid-cols-2">
-          <div className="hidden md:block bg-pink-50 flex items-center justify-center">
-            <div className="text-hot-pink opacity-20 italic font-headline text-4xl">EB'S</div>
+          <div 
+            className="hidden md:block relative overflow-hidden bg-pink-50 flex items-center justify-center bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1621330396173-e41b1cafd17f?q=80&w=1000&auto=format&fit=crop")' }}
+          >
+            <div className="absolute inset-0 bg-hot-pink/10" />
+            <div className="relative text-hot-pink opacity-30 italic font-headline text-5xl">EB'S</div>
           </div>
 
           <div className="p-12 md:p-16 flex flex-col justify-center">

@@ -18,15 +18,27 @@ export default function Checkout() {
   const items = useMemo(() => buyNowItem ? [buyNowItem] : cartItems, [buyNowItem, cartItems]);
   const total = useMemo(() => buyNowItem ? buyNowItem.price * buyNowItem.qty : cartTotal, [buyNowItem, cartTotal]);
   
-  const [email, setEmail] = useState('');
-  const [shipping, setShipping] = useState({ 
-    fullName: '',
-    address: '', 
-    city: '', 
-    postcode: '', 
-    phone: '',
-    country: 'Australia'
+  const [email, setEmail] = useState(() => sessionStorage.getItem('checkout_email') || '');
+  const [shipping, setShipping] = useState(() => {
+    const saved = sessionStorage.getItem('checkout_shipping');
+    if (saved) return JSON.parse(saved);
+    return { 
+      fullName: '',
+      address: '', 
+      city: '', 
+      postcode: '', 
+      phone: '',
+      country: 'Australia'
+    };
   });
+
+  useEffect(() => {
+    sessionStorage.setItem('checkout_email', email);
+  }, [email]);
+
+  useEffect(() => {
+    sessionStorage.setItem('checkout_shipping', JSON.stringify(shipping));
+  }, [shipping]);
 
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +49,29 @@ export default function Checkout() {
   const [outOfStockItems, setOutOfStockItems] = useState<string[]>([]);
   const [isCheckingStock, setIsCheckingStock] = useState(false);
 
+  // Persistence: Load from sessionStorage
+  useEffect(() => {
+    const savedEmail = sessionStorage.getItem('checkout_email');
+    const savedShipping = sessionStorage.getItem('checkout_shipping');
+    if (savedEmail) setEmail(savedEmail);
+    if (savedShipping) {
+      try {
+        setShipping(JSON.parse(savedShipping));
+      } catch (e) {
+        console.error('Failed to parse saved shipping', e);
+      }
+    }
+  }, []);
+
+  // Persistence: Save to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('checkout_email', email);
+  }, [email]);
+
+  useEffect(() => {
+    sessionStorage.setItem('checkout_shipping', JSON.stringify(shipping));
+  }, [shipping]);
+
   useEffect(() => {
     const checkStock = async () => {
       if (items.length === 0) return;
@@ -45,19 +80,37 @@ export default function Checkout() {
       await Promise.all(items.map(async (item) => {
         try {
           const p = await productService.getProduct(String(item.id));
-          const stockMap: Record<string, number> = p?.stock || {};
           let availableStock = 0;
           
-          if (item.size && stockMap[item.size] !== undefined) {
-            availableStock = Number(stockMap[item.size] || 0);
-          } else if (Object.keys(stockMap).length > 0) {
-            availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+          if (p.variants && p.variants.length > 0) {
+            const variant = p.variants.find((v: any) => {
+              if (item.variantId && (v._id === item.variantId || v.id === item.variantId)) return true;
+              if (item.sku && v.sku && v.sku === item.sku) return true;
+              
+              const vColor = (v.attributes?.color || v.color || v.name || '').toLowerCase();
+              const vSize = (v.attributes?.size || v.size || '').toLowerCase();
+              const itemColor = (item.color || '').toLowerCase();
+              const itemSize = (item.size || '').toLowerCase();
+
+              const colorMatch = !item.color || vColor === itemColor;
+              const sizeMatch = !item.size || vSize === itemSize;
+              return colorMatch && sizeMatch;
+            });
+            availableStock = Number(variant?.stock?.quantity ?? variant?.inStock ?? 0);
           } else {
-            availableStock = Number((p as any).inStock || 0);
+            const stockMap: Record<string, number> = p?.stock || {};
+            if (item.size && stockMap[item.size] !== undefined) {
+              availableStock = Number(stockMap[item.size] || 0);
+            } else if (Object.keys(stockMap).length > 0) {
+              availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+            } else {
+              availableStock = Number((p as any).inStock || 0);
+            }
           }
 
           if (availableStock < item.qty) {
-            oos.push(item.id);
+            const key = item.sku || `${item.id}:${item.size || ''}:${item.color || ''}`;
+            oos.push(key);
           }
         } catch (err) {
           console.error('Stock check failed for', item.id, err);
@@ -84,12 +137,12 @@ export default function Checkout() {
         ]);
 
         setUser(userData);
-        setEmail(userData.email);
+        if (!email) setEmail(userData.email);
         setAddresses(userAddresses);
 
-        // Pre-fill with primary address
+        // Pre-fill with primary address ONLY if current fields are empty
         const primary = userAddresses.find(a => a.isPrimary) || userAddresses[0];
-        if (primary) {
+        if (primary && !shipping.fullName && !shipping.address) {
           setShipping({
             fullName: primary.fullName,
             address: primary.address,
@@ -109,8 +162,9 @@ export default function Checkout() {
     fetchData();
   }, []);
 
+  const shippingFee = useMemo(() => total > 150 ? 0 : 10, [total]);
   const tax = useMemo(() => total * 0.10, [total]);
-  const grandTotal = useMemo(() => total + tax, [total, tax]);
+  const grandTotal = useMemo(() => total + tax + shippingFee, [total, tax, shippingFee]);
 
   const selectAddress = (addr: Address) => {
     setShipping({
@@ -138,15 +192,32 @@ export default function Checkout() {
     await Promise.all(items.map(async (item) => {
       try {
         const p = await productService.getProduct(String(item.id));
-        const stockMap: Record<string, number> = p?.stock || {};
         let availableStock = 0;
         
-        if (item.size && stockMap[item.size] !== undefined) {
-          availableStock = Number(stockMap[item.size] || 0);
-        } else if (Object.keys(stockMap).length > 0) {
-          availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+        if (p.variants && p.variants.length > 0) {
+          const variant = p.variants.find((v: any) => {
+            if (item.variantId && (v._id === item.variantId || v.id === item.variantId)) return true;
+            if (item.sku && v.sku && v.sku === item.sku) return true;
+            
+            const vColor = (v.attributes?.color || v.color || v.name || '').toLowerCase();
+            const vSize = (v.attributes?.size || v.size || '').toLowerCase();
+            const itemColor = (item.color || '').toLowerCase();
+            const itemSize = (item.size || '').toLowerCase();
+
+            const colorMatch = !item.color || vColor === itemColor;
+            const sizeMatch = !item.size || vSize === itemSize;
+            return colorMatch && sizeMatch;
+          });
+          availableStock = Number(variant?.stock?.quantity ?? variant?.inStock ?? 0);
         } else {
-          availableStock = Number((p as any).inStock || 0);
+          const stockMap: Record<string, number> = p?.stock || {};
+          if (item.size && stockMap[item.size] !== undefined) {
+            availableStock = Number(stockMap[item.size] || 0);
+          } else if (Object.keys(stockMap).length > 0) {
+            availableStock = Object.values(stockMap).reduce((a, b) => a + (Number(b) || 0), 0);
+          } else {
+            availableStock = Number((p as any).inStock || 0);
+          }
         }
 
         if (availableStock < item.qty) oos.push(item.name);
@@ -176,9 +247,12 @@ export default function Checkout() {
         title: i.name, 
         unitPrice: i.price * 100,
         quantity: i.qty,
-        variantName: i.size || ''
+        variantName: i.size || i.color || '',
+        sku: i.sku,
+        color: i.color,
+        variantId: i.variantId
       })), 
-      shippingFee: 0,
+      shippingFee: Math.round(shippingFee * 100),
       tax: Math.round(tax * 100),
       successUrl: `${window.location.origin}/order-confirmation`,
       cancelUrl: `${window.location.origin}/checkout`,
@@ -195,6 +269,8 @@ export default function Checkout() {
       } else {
         const res = await orderService.createOrder(payload);
         if (!buyNowItem) clear();
+        sessionStorage.removeItem('checkout_email');
+        sessionStorage.removeItem('checkout_shipping');
         showToast('Order placed successfully!');
         navigate('/order-confirmation', { state: { orderId: res.orderId } });
       }
@@ -480,7 +556,9 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Shipping</span>
-                <span className="text-black">Free</span>
+                <span className={shippingFee === 0 ? 'text-green-600 font-bold' : 'text-black'}>
+                  {shippingFee === 0 ? 'Free' : formatAUD(shippingFee)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Taxes (Estimated)</span>

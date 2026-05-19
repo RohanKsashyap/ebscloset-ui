@@ -398,9 +398,15 @@ export default function Shop() {
               ) : (
                 filtered.map((p, idx) => {
                   const productId = p._id || p.id;
-                  const totalStock = (p.stock && Object.keys(p.stock).length > 0) 
-                    ? Object.values(p.stock).reduce((a: any, b: any) => a + (Number(b) || 0), 0)
-                    : (Number(p.inStock) || 0);
+                  const totalStock = (() => {
+                    if (p.variants && p.variants.length > 0) {
+                      return p.variants.reduce((acc: number, v: any) => acc + (Number(v.stock?.quantity ?? v.inStock) || 0), 0);
+                    }
+                    if (p.stock && Object.keys(p.stock).length > 0) {
+                      return Object.values(p.stock).reduce((a: any, b: any) => a + (Number(b) || 0), 0);
+                    }
+                    return (Number(p.inStock) || 0);
+                  })();
                   const isOutOfStock = totalStock === 0;
                   return (
                     <div key={`${productId}-${idx}`} className="group relative">

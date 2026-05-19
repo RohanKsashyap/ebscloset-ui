@@ -145,6 +145,19 @@ export default function AdminDashboard() {
   const [testimonialEditing, setTestimonialEditing] = useState<Testimonial | undefined>(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [adminName, setAdminName] = useState('Administrator');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await queryClient.invalidateQueries({ queryKey: ['admin'] });
+      showToast('Dashboard data refreshed');
+    } catch (err) {
+      showToast('Error refreshing data', 'error');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -671,6 +684,15 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-6">
+            <button 
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className={`hidden md:flex items-center justify-center p-2.5 rounded-xl border border-gray-100 bg-white text-gray-500 hover:text-[#eb4899] hover:border-pink-100 transition-all shadow-sm group ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title="Refresh Dashboard"
+            >
+              <RefreshCcw size={18} className={`${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+            </button>
+
             <div className="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-xl border border-gray-100 relative group">
               <Search className="text-gray-400" size={16} />
               <input 
@@ -804,7 +826,13 @@ export default function AdminDashboard() {
                         <h3 className="text-xl font-black text-gray-900 tracking-tight">Recent Activity</h3>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Real-time store updates</p>
                       </div>
-                      <button className="p-2 text-gray-400 hover:text-[#eb4899] transition-colors"><RefreshCcw size={20} /></button>
+                      <button 
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className={`p-2 text-gray-400 hover:text-[#eb4899] transition-colors ${isRefreshing ? 'opacity-50' : ''}`}
+                      >
+                        <RefreshCcw size={20} className={isRefreshing ? 'animate-spin' : ''} />
+                      </button>
                     </div>
                     
                     <div className="space-y-6">
@@ -1085,6 +1113,8 @@ export default function AdminDashboard() {
                   setProductEditing(p);
                   setIsProductModalOpen(true);
                 }} 
+                onRefresh={handleRefresh}
+                isRefreshing={isRefreshing}
               />
             )}
 
@@ -1095,7 +1125,7 @@ export default function AdminDashboard() {
             {tab === 'categories' && (
               <CategoryManagement 
                 categories={filteredCategories}
-                onRefresh={() => queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })}
+                onRefresh={handleRefresh}
                 onEdit={(cat) => {
                   setCategoryEditing(cat);
                   setIsCategoryModalOpen(true);

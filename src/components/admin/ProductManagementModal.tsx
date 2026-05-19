@@ -41,8 +41,6 @@ export default function ProductManagementModal({
     description: '',
     categoryId: '',
     brand: '',
-    inStock: 0,
-    minStock: 5,
     size: '',
     sizes: [],
     color: '',
@@ -100,8 +98,6 @@ export default function ProductManagementModal({
         originalPrice: '',
         description: '',
         categoryId: '',
-        inStock: 0,
-        minStock: 5,
         size: '',
         sizes: [],
         ageGroups: [],
@@ -209,7 +205,8 @@ export default function ProductManagementModal({
         const skipFields = [
           '_id', '__v', 'createdAt', 'updatedAt', 
           'imageId', 'hoverImageId', 'image3Id', 'image4Id', 
-          'videoId', 'video2Id', 'video3Id', 'thumbnailUrl'
+          'videoId', 'video2Id', 'video3Id', 'thumbnailUrl',
+          'inStock', 'minStock'
         ];
         if (skipFields.includes(key)) return;
 
@@ -369,35 +366,6 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Stock Quantity</label>
-                  <div className="relative">
-                    <Package className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      type="number" 
-                      placeholder="100"
-                      value={form.inStock} 
-                      onChange={(e) => setForm({ ...form, inStock: Number(e.target.value) })} 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Min Stock Alert</label>
-                  <div className="relative">
-                    <AlertCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input 
-                      className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none" 
-                      type="number" 
-                      placeholder="5"
-                      value={form.minStock} 
-                      onChange={(e) => setForm({ ...form, minStock: Number(e.target.value) })} 
-                    />
-                  </div>
-                </div>
-              </div>
-
               <div className="space-y-2">
                 <label className="text-sm font-bold text-gray-900">Description</label>
                 <div className="relative">
@@ -501,66 +469,101 @@ export default function ProductManagementModal({
                 </div>
               </div>
 
-              {/* Age Groups */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-gray-900">Age Groups</label>
-                <div className="flex flex-wrap gap-2">
-                  {["0-1", "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14"].map((age) => (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3 col-span-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-bold text-gray-900">Age Groups</label>
                     <button
-                      key={age}
                       type="button"
                       onClick={() => {
-                        const current = form.ageGroups || [];
-                        const updated = current.includes(age)
-                          ? current.filter((a: string) => a !== age)
-                          : [...current, age];
-                        setForm({ ...form, ageGroups: updated });
+                        const allAges = ["0-1", "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14"];
+                        const allSelected = (form.ageGroups || []).length === allAges.length;
+                        setForm({ ...form, ageGroups: allSelected ? [] : [...allAges] });
                       }}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                        (form.ageGroups || []).includes(age)
-                          ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
-                          : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'
-                      }`}
+                      className="text-[10px] font-bold uppercase tracking-wider text-pink-500 hover:text-pink-600 transition-colors"
                     >
-                      {age} Yrs
+                      {(form.ageGroups || []).length === 8 ? 'Deselect All' : 'Select All'}
                     </button>
-                  ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["0-1", "1-2", "3-4", "5-6", "7-8", "9-10", "11-12", "13-14"].map((age) => (
+                      <button
+                        key={age}
+                        type="button"
+                        onClick={() => {
+                          const current = form.ageGroups || [];
+                          const updated = current.includes(age)
+                            ? current.filter((a: string) => a !== age)
+                            : [...current, age];
+                          setForm({ ...form, ageGroups: updated });
+                        }}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                          (form.ageGroups || []).includes(age)
+                            ? 'bg-pink-500 text-white border-pink-500 shadow-sm'
+                            : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'
+                        }`}
+                      >
+                        {age} Yrs
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-x-6 gap-y-4 pt-4">
-                {/* newarrival */}
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.newarrival ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.newarrival ? 'left-6' : 'left-1'}`} />
-                  </div>
-                  <input type="checkbox" className="hidden" checked={form.newarrival} onChange={(e) => setForm({...form, newarrival: e.target.checked})} />
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Arrival</span>
-                </label>
-                {/* trending */}
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.trending ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.trending ? 'left-6' : 'left-1'}`} />
-                  </div>
-                  <input type="checkbox" className="hidden" checked={form.trending} onChange={(e) => setForm({...form, trending: e.target.checked})} />
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Trending</span>
-                </label>
-                {/* bestseller */}
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.bestseller ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.bestseller ? 'left-6' : 'left-1'}`} />
-                  </div>
-                  <input type="checkbox" className="hidden" checked={form.bestseller} onChange={(e) => setForm({...form, bestseller: e.target.checked})} />
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Bestseller</span>
-                </label>
-                {/* assured */}
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-11 h-6 rounded-full relative transition-all ${form.assured ? 'bg-pink-500' : 'bg-gray-200'}`}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.assured ? 'left-6' : 'left-1'}`} />
-                  </div>
-                  <input type="checkbox" className="hidden" checked={form.assured} onChange={(e) => setForm({...form, assured: e.target.checked})} />
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Assured</span>
-                </label>
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold text-gray-900">Product Highlights</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const allSelected = form.newarrival && form.trending && form.bestseller && form.assured;
+                      setForm({ 
+                        ...form, 
+                        newarrival: !allSelected,
+                        trending: !allSelected,
+                        bestseller: !allSelected,
+                        assured: !allSelected
+                      });
+                    }}
+                    className="text-[10px] font-bold uppercase tracking-wider text-pink-500 hover:text-pink-600 transition-colors"
+                  >
+                    {form.newarrival && form.trending && form.bestseller && form.assured ? 'Deselect All' : 'Select All'}
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-4">
+                  {/* newarrival */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.newarrival ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.newarrival ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.newarrival} onChange={(e) => setForm({...form, newarrival: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Arrival</span>
+                  </label>
+                  {/* trending */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.trending ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.trending ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.trending} onChange={(e) => setForm({...form, trending: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Trending</span>
+                  </label>
+                  {/* bestseller */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.bestseller ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.bestseller ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.bestseller} onChange={(e) => setForm({...form, bestseller: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Bestseller</span>
+                  </label>
+                  {/* assured */}
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className={`w-11 h-6 rounded-full relative transition-all ${form.assured ? 'bg-pink-500' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-all ${form.assured ? 'left-6' : 'left-1'}`} />
+                    </div>
+                    <input type="checkbox" className="hidden" checked={form.assured} onChange={(e) => setForm({...form, assured: e.target.checked})} />
+                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wider group-hover:text-gray-700">Assured</span>
+                  </label>
+                </div>
               </div>
             </div>
 

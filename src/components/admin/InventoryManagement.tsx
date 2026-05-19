@@ -1,17 +1,24 @@
-import { useState } from 'react';
-import { Search, Bell, ClipboardList, Filter, BarChart3 as BarChart, Menu, Plus, Edit, AlertCircle, RefreshCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Bell, ClipboardList, Filter, BarChart3 as BarChart, Menu, Plus, Edit, AlertCircle, RefreshCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Product } from '../../services/productService';
 
 interface InventoryManagementProps {
   products: Product[];
   onEdit: (product: Product) => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export default function InventoryManagement({ products, onEdit }: InventoryManagementProps) {
+export default function InventoryManagement({ products, onEdit, onRefresh, isRefreshing }: InventoryManagementProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'low' | 'out'>('all');
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   
   const getTotalStock = (p: Product) => {
+    const variants = (p as any).variants;
+    if (Array.isArray(variants) && variants.length > 0) {
+      return variants.reduce((acc: number, v: any) => acc + (Number(v.stock?.quantity ?? v.inStock ?? 0) || 0), 0);
+    }
     if (p.stock && Object.keys(p.stock).length > 0) {
       return Object.values(p.stock).reduce((acc, val) => acc + (Number(val) || 0), 0);
     }
@@ -129,49 +136,88 @@ export default function InventoryManagement({ products, onEdit }: InventoryManag
                     const stock = getTotalStock(product);
                     const isLow = stock > 0 && stock < lowStockThreshold;
                     const isOut = stock === 0;
+                    const isExpanded = expandedProduct === product._id;
+                    const variants = (product as any).variants || [];
                     
                     return (
-                      <tr key={product._id} className="group hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
-                               {(product.image || product.images?.[0]) && (
-                                 <img src={product.image || product.images?.[0]} alt="" className="w-full h-full object-cover" />
-                               )}
+                      <React.Fragment key={product._id}>
+                        <tr 
+                          onClick={() => setExpandedProduct(isExpanded ? null : product._id!)}
+                          className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
+                        >
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-gray-50 flex-shrink-0 overflow-hidden border border-gray-100">
+                                 {(product.image || product.images?.[0]) && (
+                                   <img src={product.image || product.images?.[0]} alt="" className="w-full h-full object-cover" />
+                                 )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-bold text-gray-900 line-clamp-1">{product.name}</p>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${product.price}</p>
+                              </div>
+                              {variants.length > 0 && (
+                                <div className="text-gray-300 group-hover:text-gray-400 transition-colors pr-2">
+                                  {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-gray-900 line-clamp-1">{product.name}</p>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">${product.price}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                            {(product.categoryId as any)?.name || product.category || 'Uncategorized'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-bold ${isOut || isLow ? 'text-red-500' : 'text-emerald-500'}`}>
-                              {stock}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                              {(product.categoryId as any)?.name || product.category || 'Uncategorized'}
                             </span>
-                            <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full ${isOut || isLow ? 'bg-red-500' : 'bg-emerald-500'}`} 
-                                style={{ width: `${Math.min(stock, 100)}%` }}
-                              ></div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-sm font-bold ${isOut || isLow ? 'text-red-500' : 'text-emerald-500'}`}>
+                                {stock}
+                              </span>
+                              <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full ${isOut || isLow ? 'bg-red-500' : 'bg-emerald-500'}`} 
+                                  style={{ width: `${Math.min(stock, 100)}%` }}
+                                ></div>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button 
-                            onClick={() => onEdit(product)}
-                            className="p-2 text-gray-400 hover:text-[#eb4899] hover:bg-pink-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <Edit size={16} />
-                          </button>
-                        </td>
-                      </tr>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(product);
+                              }}
+                              className="p-2 text-gray-400 hover:text-[#eb4899] hover:bg-pink-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Edit size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                        {isExpanded && variants.length > 0 && (
+                          <tr className="bg-gray-50/30">
+                            <td colSpan={4} className="px-6 pb-6 pt-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                {variants.map((v: any, idx: number) => (
+                                  <div key={idx} className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded-md">
+                                        {v.name} {v.size ? `• ${v.size}` : ''}
+                                      </span>
+                                      {v.sku && <span className="text-[8px] font-bold text-gray-300 tracking-tighter">{v.sku}</span>}
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-[10px] font-bold text-gray-400">Inventory</span>
+                                      <span className={`text-xs font-black ${(v.stock?.quantity ?? v.inStock ?? 0) <= 5 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                        {v.stock?.quantity ?? v.inStock ?? 0} <span className="text-[8px] uppercase tracking-tighter opacity-50 ml-0.5">Units</span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
@@ -229,8 +275,12 @@ export default function InventoryManagement({ products, onEdit }: InventoryManag
               <button className="flex-1 py-3 bg-gray-900 text-white rounded-2xl text-xs font-bold hover:bg-black transition-all shadow-lg shadow-black/20 tracking-wide">
                 Export CSV
               </button>
-              <button className="p-3 bg-white text-gray-400 hover:text-gray-900 rounded-2xl transition-all border border-pink-50 shadow-sm">
-                <RefreshCcw size={16} />
+              <button 
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="p-3 bg-white text-gray-400 hover:text-[#eb4899] rounded-2xl transition-all border border-pink-50 shadow-sm disabled:opacity-50"
+              >
+                <RefreshCcw size={16} className={isRefreshing ? 'animate-spin' : ''} />
               </button>
             </div>
           </div>
