@@ -51,7 +51,11 @@ const defaultCategories = [
       { label: 'Unicorn Dreams', href: '/shop?type=unicorn' }
     ] 
   },
-  
+  {
+    name: 'Journal',
+    href: '/journal',
+    items: []
+  }
 ];
 
 export default function Navigation() {

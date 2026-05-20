@@ -35,6 +35,8 @@ import Cookies from './pages/Cookies';
 import Auth from './pages/Auth';
 import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
+import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
 import NotFound from './pages/NotFound';
 
 function AppRoutes() {
@@ -68,6 +70,8 @@ function AppRoutes() {
         <Route path="/login" element={<Auth />} />
         <Route path="/signup" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/journal" element={<Blog />} />
+        <Route path="/journal/:slug" element={<BlogDetail />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

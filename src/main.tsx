@@ -6,6 +6,10 @@ import { CartProvider } from './context/CartContext';
 import { ToastProvider } from './context/ToastContext';
 import { ProductProvider } from './context/ProductContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { registerSW } from 'virtual:pwa-register';
+
+// Register service worker
+registerSW({ immediate: true });
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -11,6 +11,7 @@ import CategoryManagement from './CategoryManagement';
 import AgeCategoryManager from './AgeCategoryManager';
 import Analytics from './Analytics';
 import SiteSettingsComp from './SiteSettings';
+import BlogManagement from './BlogManagement';
 import { useToast } from '../../context/ToastContext';
 import ProductManagementModal from '../../components/admin/ProductManagementModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
@@ -37,8 +38,9 @@ import {
   useCreateProduct,
   useUpdateProduct
 } from '../../hooks/useAdminData';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { saveSite } from '../../utils/storage';
+import { blogService } from '../../services/blogService';
 
 import { 
   LayoutGrid, 
@@ -83,7 +85,7 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'customers'|'analytics'|'settings'|'inventory'>('dashboard');
+  const [tab, setTab] = useState<'dashboard'|'products'|'categories'|'age-categories'|'budgets'|'discounts'|'site'|'orders'|'newsletter'|'inbox'|'reviews'|'testimonials'|'customers'|'analytics'|'settings'|'inventory'|'blogs'>('dashboard');
   const [productCategoryId, setProductCategoryId] = useState<string>('all');
   const [reviewFilter, setReviewFilter] = useState<'All' | 'Approved' | 'Pending'>('All');
   const [messageFilter, setMessageFilter] = useState<'All' | 'Pending' | 'Resolved'>('All');
@@ -115,6 +117,12 @@ export default function AdminDashboard() {
   const { data: ageCollections = [], isLoading: ageCollectionsLoading } = useAgeCollections(tab === 'age-categories' || tab === 'dashboard');
   const { data: users = [], isLoading: usersLoading } = useUsers(tab === 'customers');
 
+  const { data: blogs = [], isLoading: blogsLoading } = useQuery({
+    queryKey: ['admin', 'blogs'],
+    queryFn: blogService.adminGetBlogs,
+    enabled: tab === 'blogs' || tab === 'dashboard'
+  });
+
   const isPageLoading = 
     (tab === 'dashboard' && (dashboardLoading || (productsLoading && catalog.length === 0) || ordersLoading || siteLoading || codesLoading || ageCollectionsLoading)) ||
     (tab === 'products' && ((productsLoading && catalog.length === 0) || productCategoriesLoading)) ||
@@ -130,6 +138,7 @@ export default function AdminDashboard() {
     (tab === 'testimonials' && testimonialsLoading) ||
     (tab === 'customers' && usersLoading) ||
     (tab === 'analytics' && dashboardLoading) ||
+    (tab === 'blogs' && blogsLoading) ||
     (tab === 'inventory' && (productsLoading && catalog.length === 0));
 
   const createProductMutation = useCreateProduct();
@@ -626,6 +635,7 @@ export default function AdminDashboard() {
                 <SidebarItem icon={LayoutGrid} label="Dashboard" active={tab === 'dashboard'} onClick={() => setTab('dashboard')} />
                 <SidebarItem icon={ShoppingBag} label="Products" active={tab === 'products'} onClick={() => setTab('products')} />
                 <SidebarItem icon={LayoutGrid} label="Categories" active={tab === 'categories'} onClick={() => setTab('categories')} />
+                <SidebarItem icon={Edit} label="Journal" active={tab === 'blogs'} onClick={() => setTab('blogs')} />
                 <SidebarItem icon={Layers} label="Age Categories" active={tab === 'age-categories'} onClick={() => setTab('age-categories')} />
                 <SidebarItem icon={ShoppingCart} label="Orders" active={tab === 'orders'} onClick={() => setTab('orders')} />
                 <SidebarItem icon={Users} label="Customers" active={tab === 'customers'} onClick={() => setTab('customers')} />
@@ -1509,6 +1519,12 @@ export default function AdminDashboard() {
             )}
 
             {tab === 'analytics' && <Analytics data={dashboardData} />}
+
+            {tab === 'blogs' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <BlogManagement blogs={blogs} onRefresh={() => queryClient.invalidateQueries({ queryKey: ['admin', 'blogs'] })} />
+              </div>
+            )}
 
             {tab === 'settings' && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
