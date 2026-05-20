@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { Product } from '../data/products';
 import { loadProducts } from '../utils/storage';
 import { products as defaultProducts } from '../data/products';
+import { useProductContext } from '../context/ProductContext';
 
 export default function RecentlyViewed() {
   const [recent, setRecent] = useState<Product[]>([]);
+  const { products } = useProductContext();
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('recently_viewed');
       if (stored) {
         const ids = JSON.parse(stored) as number[];
-        const allProducts = loadProducts(defaultProducts);
+        const allProducts = products.length > 0 ? products : loadProducts(defaultProducts);
         // Filter out products that might have been deleted and limit to 4
         const found = ids.map(id => allProducts.find(p => p.id === id)).filter((p): p is Product => !!p).slice(0, 4);
         setRecent(found);
@@ -19,7 +21,7 @@ export default function RecentlyViewed() {
     } catch (e) {
       console.error(e);
     }
-  }, []);
+  }, [products]);
 
   if (recent.length === 0) return null;
 

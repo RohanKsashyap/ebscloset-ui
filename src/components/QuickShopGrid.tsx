@@ -2,13 +2,17 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { products as defaultProducts } from '../data/products';
 import { loadProducts } from '../utils/storage';
+import { useProductContext } from '../context/ProductContext';
 
 const ageFilters = ['All','7-9','8-10','9-11','10-12','11-13'];
 
 export default function QuickShopGrid() {
   const [filter, setFilter] = useState<string>('All');
   const navigate = useNavigate();
-  const catalog = useMemo(() => loadProducts(defaultProducts), []);
+  const { products } = useProductContext();
+  const catalog = useMemo(() => {
+    return products.length > 0 ? products : loadProducts(defaultProducts);
+  }, [products]);
 
   const filtered = useMemo(() => {
     if (filter === 'All') return catalog;

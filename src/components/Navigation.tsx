@@ -5,6 +5,7 @@ import { loadNav, isAuthenticated } from '../utils/storage';
 import { products as defaultProducts } from '../data/products';
 import { loadProducts } from '../utils/storage';
 import { useCart } from '../context/CartContext';
+import { useProductContext } from '../context/ProductContext';
 
 const defaultCategories = [
   { 
@@ -76,7 +77,7 @@ export default function Navigation() {
   
 
   const navigate = useNavigate();
-  const catalog = useMemo(() => loadProducts(defaultProducts), []);
+  const { products: catalog } = useProductContext();
   const [expanded, setExpanded] = useState(false);
   const [q, setQ] = useState('');
   const panelRef = useRef<HTMLDivElement | null>(null);

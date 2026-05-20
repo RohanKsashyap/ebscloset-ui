@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { productService, type Product } from '../services/productService';
+import { loadProducts } from '../utils/storage';
+import { products as defaultProducts } from '../data/products';
 
 interface ProductContextType {
   products: Product[];
@@ -18,7 +20,7 @@ interface ProductContextType {
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(() => loadProducts(defaultProducts));
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [trending, setTrending] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
