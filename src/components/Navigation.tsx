@@ -249,12 +249,12 @@ export default function Navigation() {
                 </button>
               )}
 
-              <button 
+              {/* <button 
                 className={`transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`}
                 onClick={() => navigate(isAuthenticated() ? '/dashboard' : '/login')}
               >
                 <User className="w-5 h-5 lg:w-6 lg:h-6" />
-              </button>
+              </button> */}
 
               <button 
                 className={`relative transition-colors duration-300 ${shouldShowSolid ? 'text-black hover:text-hot-pink' : 'text-white hover:text-white/70'}`} 
