@@ -140,7 +140,7 @@ export default function Navigation() {
             </div>
 
             {/* Center Section: Logo */}
-            <div className="flex-none flex justify-center items-center h-full px-4">
+            <div className={`flex-none flex justify-center items-center h-full px-4 ${expanded ? 'hidden sm:flex' : ''}`}>
               <Link 
                 to="/" 
                 className={`font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap pt-1 ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
@@ -190,7 +190,7 @@ export default function Navigation() {
             {/* Right Section: Profile, Cart,Search */}
             <div className="flex-1 flex items-center justify-end space-x-4 lg:space-x-6">
               {expanded && (
-                <div ref={panelRef} className="lg:flex items-stretch w-64 relative ">
+                <div ref={panelRef} className="flex items-stretch flex-1 sm:flex-none sm:w-64 relative ">
                   <input 
                     autoFocus
                     value={q} 
@@ -211,7 +211,7 @@ export default function Navigation() {
 
                   {/* Results Dropdown */}
                   {results.length > 0 && (
-                    <div className="absolute top-full right-0 mt-2 w-80 bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-100 animate-fadeIn z-[60]">
+                    <div className="fixed sm:absolute top-16 sm:top-full left-4 right-4 sm:left-auto sm:right-0 sm:translate-x-0 mt-2 sm:w-80 bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-100 animate-fadeIn z-[60]">
                       <div className="py-2">
                         {results.map((product: any) => (
                           <button
@@ -327,9 +327,9 @@ export default function Navigation() {
           <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white shadow-2xl animate-slideInLeft h-full flex flex-col">
             <div className="p-6 flex-shrink-0 flex items-center justify-between border-b">
-              <Link to="/" className="font-headline text-xl text-hot-pink" onClick={() => setIsMobileMenuOpen(false)}>
+              {/* <Link to="/" className="font-headline text-xl text-hot-pink" onClick={() => setIsMobileMenuOpen(false)}>
                 <img src="/logo.png" alt="Eb's Closet" className="h-8 w-auto object-contain" />
-              </Link>
+              </Link> */}
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2">
                 <X className="w-6 h-6 text-gray-500" />
               </button>
