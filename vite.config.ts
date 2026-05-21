@@ -39,6 +39,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024, // Increase limit to 15MB for large assets like logo-1.png
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -62,6 +63,17 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'lucide-react'],
+          'ui': ['@tanstack/react-query', 'axios', 'zustand']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
