@@ -365,14 +365,14 @@ export default function Navigation() {
               </div>
 
               <div className="pt-8 border-t space-y-6">
-                <Link 
+                {/* <Link 
                   to={isAuthenticated() ? "/dashboard" : "/login"} 
                   className="flex items-center space-x-4 text-gray-800"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <User className="w-5 h-5" />
                   <span className="text-sm uppercase tracking-widest">My Account</span>
-                </Link>
+                </Link> */}
                 <Link 
                   to="/cart" 
                   className="flex items-center space-x-4 text-gray-800"
