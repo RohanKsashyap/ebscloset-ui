@@ -425,20 +425,20 @@ export default function Shop() {
                         </Link>
                         
                         {/* Badges */}
-                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                        <div className="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col gap-1 md:gap-2">
                           {isOutOfStock ? (
-                            <span className="bg-gray-800 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg">
+                            <span className="bg-gray-800 text-white text-[8px] md:text-[10px] font-bold uppercase tracking-wide px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg">
                               Out of Stock
                             </span>
                           ) : (
                             <>
                               {idx < 3 && (
-                                <span className="bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full text-black shadow-sm">
+                                <span className="bg-white/90 backdrop-blur-md text-[8px] md:text-[10px] font-bold uppercase tracking-wide px-2 py-1 md:px-1 md:py-1.5 rounded-full text-black shadow-sm">
                                   New Arrival
                                 </span>
                               )}
                               {p.price < 1000 && (
-                                <span className="bg-hot-pink text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg shadow-hot-pink/20">
+                                <span className="bg-hot-pink text-white text-[8px] md:text-[10px] font-bold uppercase tracking-wide px-2 py-1 md:px-3 md:py-1.5 rounded-full shadow-lg shadow-hot-pink/20">
                                   Sale
                                 </span>
                               )}

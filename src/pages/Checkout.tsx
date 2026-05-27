@@ -1,12 +1,13 @@
 import { useCart } from '../context/CartContext';
 import { useMemo, useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { authService, User, Address } from '../services/authService';
 import { formatAUD } from '../utils/storage';
-import { ShoppingBag, X, Check, MapPin, ChevronDown } from 'lucide-react';
+import { ShoppingBag, X, Check, MapPin, ChevronDown, Lock, Search, HelpCircle } from 'lucide-react';
+import CheckoutHeader from '../components/checkout/CheckoutHeader';
 
 export default function Checkout() {
   const { items: cartItems, total: cartTotal, clear } = useCart();
@@ -23,9 +24,13 @@ export default function Checkout() {
     const saved = sessionStorage.getItem('checkout_shipping');
     if (saved) return JSON.parse(saved);
     return { 
-      fullName: '',
+      firstName: '',
+      lastName: '',
       address: '', 
+      apartment: '',
+      suburb: '',
       city: '', 
+      state: '',
       postcode: '', 
       phone: '',
       country: 'Australia'
@@ -142,11 +147,16 @@ export default function Checkout() {
 
         // Pre-fill with primary address ONLY if current fields are empty
         const primary = userAddresses.find(a => a.isPrimary) || userAddresses[0];
-        if (primary && !shipping.fullName && !shipping.address) {
+        if (primary && !shipping.firstName && !shipping.address) {
+          const names = (primary.fullName || '').split(' ');
           setShipping({
-            fullName: primary.fullName,
+            firstName: names[0] || '',
+            lastName: names.slice(1).join(' ') || '',
             address: primary.address,
+            apartment: '',
+            suburb: '',
             city: primary.city,
+            state: '',
             postcode: primary.postalCode,
             phone: primary.phone,
             country: primary.country || 'Australia'
@@ -167,10 +177,15 @@ export default function Checkout() {
   const grandTotal = useMemo(() => total + tax + shippingFee, [total, tax, shippingFee]);
 
   const selectAddress = (addr: Address) => {
+    const names = (addr.fullName || '').split(' ');
     setShipping({
-      fullName: addr.fullName,
+      firstName: names[0] || '',
+      lastName: names.slice(1).join(' ') || '',
       address: addr.address,
+      apartment: '',
+      suburb: '',
       city: addr.city,
+      state: '',
       postcode: addr.postalCode,
       phone: addr.phone,
       country: addr.country || 'Australia'
@@ -180,7 +195,7 @@ export default function Checkout() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shipping.fullName || !shipping.address || !shipping.city || !shipping.postcode) {
+    if (!shipping.firstName || !shipping.address || !shipping.city || !shipping.postcode) {
       showToast('Please fill in all shipping details', 'error');
       return;
     }
@@ -234,13 +249,15 @@ export default function Checkout() {
 
     const payload = { 
       customer: {
-        fullName: shipping.fullName,
+        fullName: `${shipping.firstName} ${shipping.lastName}`.trim(),
         email: email || (user?.email) || 'guest@example.com',
         phone: shipping.phone,
-        address: shipping.address,
+        address: `${shipping.address}${shipping.apartment ? ', ' + shipping.apartment : ''}`,
         city: shipping.city,
         postalCode: shipping.postcode,
-        country: shipping.country
+        country: shipping.country,
+        suburb: shipping.suburb || shipping.city,
+        state: shipping.state
       },
       cart: items.map(i => ({ 
         productId: i.id,
@@ -293,334 +310,374 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans text-black">
-      {/* Header */}
-      <header className="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-50">
-        <div className="flex items-center gap-8">
-          <h1 className="text-xl font-bold tracking-tighter uppercase cursor-pointer" onClick={() => navigate('/')}>Checkout</h1>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <a href="/shop" className="hover:text-black transition-colors">Shop</a>
-            <a href="/collection" className="hover:text-black transition-colors">Collection</a>
-            <a href="/about" className="hover:text-black transition-colors">About</a>
-          </nav>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative cursor-pointer" onClick={() => navigate('/cart')}>
-            <ShoppingBag className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-black text-white text-[8px] w-3.5 h-3.5 rounded-full flex items-center justify-center font-bold">
-              {items.length}
-            </span>
-          </div>
-          <X className="w-5 h-5 cursor-pointer" onClick={() => navigate('/cart')} />
-        </div>
-      </header>
+    <div className="min-h-screen bg-white font-sans text-gray-900">
+      <CheckoutHeader itemCount={items.length} />
 
-      <main className="max-w-7xl mx-auto px-4 py-12 md:px-8 lg:px-12 grid lg:grid-cols-[1fr,400px] gap-16">
+      <main className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr,450px] min-h-[calc(100vh-80px)]">
         {/* Left Column: Form Sections */}
-        <div className="space-y-16">
-          {/* Step 01: Shipping */}
-          <section>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-4xl font-bold tracking-tight">Shipping</h2>
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Step 01</span>
-            </div>
-            
-            {/* Address Selector for Auth Users */}
-            {addresses.length > 0 && (
-              <div className="mb-8 relative">
-                <button 
-                  onClick={() => setShowAddressDropdown(!showAddressDropdown)}
-                  className="w-full flex items-center justify-between bg-[#F9F9F9] border border-gray-100 rounded-2xl px-6 py-4 hover:bg-gray-100 transition-colors group"
-                >
-                  <div className="flex items-center gap-4 text-left">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                      <MapPin className="w-5 h-5 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Deliver to</p>
-                      <p className="text-sm font-bold truncate max-w-[200px] md:max-w-[400px]">
-                        {shipping.address}, {shipping.city}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showAddressDropdown ? 'rotate-180' : ''}`} />
-                </button>
-
-                {showAddressDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-3xl shadow-2xl z-20 overflow-hidden animate-scaleIn origin-top">
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                      {addresses.map((addr) => (
-                        <button
-                          key={addr._id}
-                          onClick={() => selectAddress(addr)}
-                          className="w-full flex items-center gap-4 px-6 py-5 hover:bg-gray-50 border-b border-gray-50 last:border-none transition-colors text-left"
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${shipping.address === addr.address ? 'bg-black text-white' : 'bg-gray-100 text-gray-400'}`}>
-                            {shipping.address === addr.address ? <Check className="w-5 h-5" /> : <MapPin className="w-5 h-5" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm">{addr.fullName}</p>
-                            <p className="text-xs text-gray-500 truncate">{addr.address}, {addr.city}</p>
-                          </div>
-                          {addr.isPrimary && (
-                            <span className="text-[8px] font-bold tracking-widest uppercase bg-gray-100 px-2 py-1 rounded">Default</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Full Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="Julianne Moore"
-                    className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
-                    value={shipping.fullName}
-                    onChange={(e) => setShipping({ ...shipping, fullName: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Email Address</label>
-                  <input 
-                    type="email" 
-                    placeholder="julianne@example.com"
-                    className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+        <div className="px-4 py-8 md:px-8 lg:px-12 border-r border-gray-100">
+          <div className="max-w-[600px] mx-auto lg:ml-auto lg:mr-0 space-y-8">
+            {/* Contact Section */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-medium">Contact</h2>
+                {/* <button onClick={() => navigate('/auth')} className="text-xs text-gray-600 underline">Sign in</button> */}
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Address</label>
                 <input 
-                  type="text" 
-                  placeholder="742 Evergreen Terrace"
-                  className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
-                  value={shipping.address}
-                  onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
+                  type="email" 
+                  placeholder="Email"
+                  className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input type="checkbox" className="peer sr-only" defaultChecked />
+                    <div className="w-5 h-5 border border-gray-300 rounded bg-white peer-checked:bg-hot-pink peer-checked:border-hot-pink transition-all"></div>
+                    <Check className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  </div>
+                  <span className="text-xs text-gray-600">Email me with news and offers</span>
+                </label>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">City</label>
+            </section>
+
+            {/* Delivery Section */}
+            <section className="space-y-4">
+              <h2 className="text-xl font-medium">Delivery</h2>
+              <div className="space-y-3">
+                <div className="relative">
+                  <select 
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 appearance-none focus:ring-1 focus:ring-black focus:border-black transition-all outline-none bg-white text-sm"
+                    value={shipping.country}
+                    onChange={(e) => setShipping({ ...shipping, country: e.target.value })}
+                  >
+                    <option value="Australia">Australia</option>
+                    <option value="New Zealand">New Zealand</option>
+                    <option value="USA">USA</option>
+                    <option value="UK">UK</option>
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <label className="absolute -top-2 left-3 bg-white px-1 text-[10px] text-gray-500 uppercase tracking-tighter">Country/Region</label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <input 
                     type="text" 
-                    placeholder="Springfield"
-                    className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
+                    placeholder="First name"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                    value={shipping.firstName}
+                    onChange={(e) => setShipping({ ...shipping, firstName: e.target.value })}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="Last name"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                    value={shipping.lastName}
+                    onChange={(e) => setShipping({ ...shipping, lastName: e.target.value })}
+                  />
+                </div>
+
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    placeholder="Address"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                    value={shipping.address}
+                    onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
+                  />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Search className="w-4 h-4 text-gray-400" />
+                  </div>
+                </div>
+
+                <input 
+                  type="text" 
+                  placeholder="Apartment, suite, etc. (optional)"
+                  className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                  value={shipping.apartment}
+                  onChange={(e) => setShipping({ ...shipping, apartment: e.target.value })}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <input 
+                    type="text" 
+                    placeholder="City"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
                     value={shipping.city}
                     onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
                   />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Zip Code</label>
+                  <div className="relative">
+                    <select 
+                      className="w-full border border-gray-300 rounded-md px-4 py-3 appearance-none focus:ring-1 focus:ring-black focus:border-black transition-all outline-none bg-white text-sm"
+                      value={shipping.state}
+                      onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
+                    >
+                      <option value="">State/territory</option>
+                      <option value="NSW">NSW</option>
+                      <option value="VIC">VIC</option>
+                      <option value="QLD">QLD</option>
+                      <option value="WA">WA</option>
+                      <option value="SA">SA</option>
+                      <option value="TAS">TAS</option>
+                      <option value="ACT">ACT</option>
+                      <option value="NT">NT</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                   <input 
                     type="text" 
-                    placeholder="62704"
-                    className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
+                    placeholder="Postcode"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
                     value={shipping.postcode}
                     onChange={(e) => setShipping({ ...shipping, postcode: e.target.value })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold tracking-widest uppercase text-gray-500">Phone</label>
+
+                <div className="relative">
                   <input 
                     type="text" 
-                    placeholder="+61 400 000 000"
-                    className="w-full bg-[#F0F0F0] border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-black transition-all"
+                    placeholder="Phone"
+                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
                     value={shipping.phone}
                     onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
                   />
+                  {/* <div className="absolute right-4 top-1/2 -translate-y-1/2 group relative">
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                  </div> */}
                 </div>
+
+                {/* <label className="flex items-center gap-2 cursor-pointer group pt-2">
+                  <div className="relative flex items-center justify-center">
+                    <input type="checkbox" className="peer sr-only" />
+                    <div className="w-5 h-5 border border-gray-300 rounded bg-white peer-checked:bg-hot-pink peer-checked:border-hot-pink transition-all"></div>
+                    <Check className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                  </div>
+                  <span className="text-xs text-gray-600">Text me with news and offers</span>
+                </label> */}
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Step 02: Review */}
-          <section>
-            <div className="flex items-center justify-between mb-8 text-black">
-              <h2 className="text-4xl font-bold tracking-tight">Review</h2>
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Step 02</span>
-            </div>
-            <div className="space-y-8">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-6">
-                  <div className="w-24 h-32 bg-gray-100 rounded-3xl overflow-hidden flex-shrink-0">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold truncate">{item.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1 uppercase tracking-tight">
-                      Size: {item.size || 'N/A'} | Color: {item.color || 'Default'}
-                    </p>
-                    <p className="text-sm font-bold mt-2">Qty: {item.qty}</p>
-                  </div>
-                  <div className="text-lg font-bold">
-                    {formatAUD(item.price * item.qty)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+            {/* Shipping Method Section
+            <section className="space-y-4">
+              <h2 className="text-xl font-medium">Shipping method</h2>
+              <div className="bg-[#f5f5f5] p-6 rounded-md text-center">
+                <p className="text-xs text-gray-500">Enter your shipping address to view available shipping methods.</p>
+              </div>
+            </section> */}
 
-          {/* Step 03: Payment */}
-          <section>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-4xl font-bold tracking-tight">Payment</h2>
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">Step 03</span>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 mb-12">
-              <button 
-                onClick={() => setPaymentMethod('card')}
-                className={`flex flex-col items-center justify-center gap-2 py-8 rounded-3xl border-2 transition-all ${paymentMethod === 'card' ? 'bg-[#6772E5] text-white border-[#6772E5] shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
-              >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${paymentMethod === 'card' ? 'bg-white text-[#6772E5]' : 'bg-black text-white'}`}>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M13.911 10.428l-2.091 9.537h-3.666l2.091-9.537h3.666zm-0.082-3.83c0 1.144-0.89 2.067-1.996 2.067s-2.012-0.923-2.012-2.067c0-1.127 0.906-2.051 2.012-2.051s1.996 0.924 1.996 2.051zm8.171 10.37c0 1.631-2.484 2.115-3.629 2.115-1.112 0-3.694-0.451-3.694-2.115 0-1.613 2.582-2.131 3.694-2.131 1.145 0 3.629 0.518 3.629 2.131zm-0.049-3.328c0-1.742-1.411-2.612-3.895-2.612-2.433 0-3.924 0.887-3.924 2.612 0 1.709 1.491 2.578 3.924 2.578 2.484 0 3.895-0.869 3.895-2.578z"/>
-                  </svg>
+            {/* Payment Section */}
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h2 className="text-xl font-medium">Payment</h2>
+                  <p className="text-xs text-gray-500">All transactions are secure and encrypted.</p>
                 </div>
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Pay with Card</span>
-              </button>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-6" />
+              </div>
               
-              <button 
-                onClick={() => setPaymentMethod('cod')}
-                className={`flex flex-col items-center justify-center gap-2 py-8 rounded-3xl border-2 transition-all ${paymentMethod === 'cod' ? 'bg-black text-white border-black shadow-lg scale-[1.02]' : 'bg-[#F0F0F0] border-transparent hover:bg-gray-200'}`}
-              >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${paymentMethod === 'cod' ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                  <span className="text-sm font-black">$</span>
-                </div>
-                <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-center leading-tight">Cash on Delivery</span>
-              </button>
-            </div>
-
-            <div className="relative flex items-center justify-center mb-12">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-100"></div>
-              </div>
-              <span className="relative bg-white px-4 text-[8px] font-bold tracking-[0.2em] uppercase text-gray-400">
-                {paymentMethod === 'card' ? 'Credit Card Details' : 'Payment Selection'}
-              </span>
-            </div>
-
-            {paymentMethod === 'card' ? (
-              <div className="bg-[#F9F9F9] p-12 rounded-[40px] text-center space-y-4 animate-scaleIn border-2 border-black/5">
-                <div className="w-16 h-16 bg-[#6772E5] text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M13.911 10.428l-2.091 9.537h-3.666l2.091-9.537h3.666zm-0.082-3.83c0 1.144-0.89 2.067-1.996 2.067s-2.012-0.923-2.012-2.067c0-1.127 0.906-2.051 2.012-2.051s1.996 0.924 1.996 2.051zm8.171 10.37c0 1.631-2.484 2.115-3.629 2.115-1.112 0-3.694-0.451-3.694-2.115 0-1.613 2.582-2.131 3.694-2.131 1.145 0 3.629 0.518 3.629 2.131zm-0.049-3.328c0-1.742-1.411-2.612-3.895-2.612-2.433 0-3.924 0.887-3.924 2.612 0 1.709 1.491 2.578 3.924 2.578 2.484 0 3.895-0.869 3.895-2.578z"/>
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold uppercase tracking-tight">Stripe Secure Payment</h3>
-                <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                  You will be redirected to Stripe to complete your purchase securely. We support all major credit cards.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-[#F9F9F9] p-12 rounded-[40px] text-center space-y-4 animate-scaleIn border-2 border-black/5">
-                <div className="w-16 h-16 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Check className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl font-bold uppercase tracking-tight">
-                  {paymentMethod === 'cod' ? 'Cash on Delivery Selected' : 'Stripe Payment Selected'}
-                </h3>
-                <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                  {paymentMethod === 'cod' 
-                    ? 'You will pay for your order in cash when it arrives at your doorstep.'
-                    : 'You will be redirected to Stripe to complete your purchase securely.'}
-                </p>
+              <div className="border border-gray-200 rounded-md overflow-hidden">
                 <button 
                   onClick={() => setPaymentMethod('card')}
-                  className="text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-black transition-colors underline pt-4"
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'card' ? 'bg-[#f0f9ff]' : 'bg-white'}`}
                 >
-                  Switch to Credit Card
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'card' ? 'border-black' : 'border-gray-300'}`}>
+                      {paymentMethod === 'card' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    </div>
+                    <span className="text-sm font-medium">Card</span>
+                  </div>
+                  <div className="flex gap-1">
+                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="stripe" className="h-2" />
+                    </div>
+                    {/* <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-3" />
+                    </div>
+                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" alt="Amex" className="h-3" />
+                    </div>
+                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <span className="text-[8px] text-gray-400 font-bold">+2</span>
+                    </div> */}
+                  </div>
+                </button>
+
+                {/* {paymentMethod === 'card' && (
+                  <div className="p-4 bg-[#f8f8f8] border-t border-gray-200 space-y-3 animate-fadeIn">
+                    <div className="relative">
+                      <input 
+                        type="text" 
+                        placeholder="Card number"
+                        className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <Lock className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <input 
+                        type="text" 
+                        placeholder="Expiration date (MM / YY)"
+                        className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                      />
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          placeholder="Security code"
+                          className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                        </div>
+                      </div>
+                    </div>
+                    <input 
+                      type="text" 
+                      placeholder="Name on card"
+                      className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                    />
+                    <label className="flex items-center gap-2 cursor-pointer pt-1">
+                      <div className="relative flex items-center justify-center">
+                        <input type="checkbox" className="peer sr-only" defaultChecked />
+                        <div className="w-5 h-5 border border-gray-300 rounded bg-white peer-checked:bg-hot-pink peer-checked:border-hot-pink transition-all"></div>
+                        <Check className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      </div>
+                      <span className="text-xs text-gray-600">Use shipping address as billing address</span>
+                    </label>
+                  </div>
+                )} */}
+
+                <button 
+                  onClick={() => setPaymentMethod('cod')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors border-t border-gray-200 ${paymentMethod === 'cod' ? 'bg-[#f0f9ff]' : 'bg-white'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'cod' ? 'border-black' : 'border-gray-300'}`}>
+                      {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    </div>
+                    <span className="text-sm font-medium">Cash on Delivery (COD)</span>
+                  </div>
                 </button>
               </div>
-            )}
-          </section>
-        </div>
+            </section>
 
-        {/* Right Column: Order Summary */}
-        <aside className="lg:sticky lg:top-32 h-fit space-y-8">
-          <div className="bg-[#F9F9F9] p-10 rounded-[48px] space-y-8">
-            <h2 className="text-2xl font-bold">Order Summary</h2>
-            
-            <div className="space-y-4 text-sm font-medium">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal</span>
-                <span>{formatAUD(total)}</span>
+            <section className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-medium">Save my information for a faster checkout</h2>
+                <button className="text-xs text-gray-600 underline">Not now</button>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Shipping</span>
-                <span className={shippingFee === 0 ? 'text-green-600 font-bold' : 'text-black'}>
-                  {shippingFee === 0 ? 'Free' : formatAUD(shippingFee)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Taxes (Estimated)</span>
-                <span>{formatAUD(tax)}</span>
-              </div>
-            </div>
-
-            <div className="pt-8 border-t border-gray-200">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-2">Total Amount</p>
-              <p className="text-5xl font-bold tracking-tighter">{formatAUD(grandTotal)}</p>
-            </div>
-
-            {outOfStockItems.length > 0 && (
-              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-medium border border-red-100 animate-shake">
-                Some items in your order are currently out of stock. Please remove them to continue.
-              </div>
-            )}
+              <p className="text-[10px] text-gray-500 leading-relaxed">
+                By paying, you agree to create a Shop account subject to Shop's <button className="underline">Terms</button> and <button className="underline">Privacy Policy</button>.
+              </p>
+            </section>
 
             <button 
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder || isLoading || isCheckingStock || outOfStockItems.length > 0}
-              className={`w-full bg-[#B11B67] text-white py-6 rounded-full font-bold tracking-widest uppercase text-sm transition-all flex items-center justify-center gap-2 ${(isPlacingOrder || isLoading || isCheckingStock || outOfStockItems.length > 0) ? 'opacity-50 cursor-not-allowed grayscale' : 'hover:scale-[1.02] active:scale-[0.98]'}`}
+              className="w-full bg-hot-pink text-white py-4 rounded-md font-medium text-lg hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isPlacingOrder ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Placing Order...
-                </>
-              ) : isCheckingStock ? (
-                'Checking Stock...'
-              ) : outOfStockItems.length > 0 ? (
-                'Out of Stock'
-              ) : (
-                'Place Order'
-              )}
+              {isPlacingOrder ? 'Processing...' : 'Pay now'}
             </button>
 
-            <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-center text-gray-400">
-              Secure transaction encrypted by Atelier Systems
+            <div className="flex flex-wrap gap-4 text-[10px] text-hot-pink font-medium pt-8">
+              <Link to="/returns" className="underline">Refund policy</Link>
+              <Link to="/shipping" className="underline">Shipping</Link>
+              <Link to="/privacy" className="underline">Privacy policy</Link>
+              <Link to="/terms" className="underline">Terms of service</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Order Summary */}
+      {/* Right Column: Order Summary */}
+      <aside className="bg-[#f5f5f5] border-l border-gray-200 lg:sticky lg:top-0 self-start lg:h-screen lg:overflow-y-auto">
+  <div className="w-full px-4 py-8 md:px-8 lg:px-12 space-y-6">
+    
+    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+      {items.map((item) => (
+        <div key={item.id} className="flex items-center gap-4">
+          <div className="relative w-16 h-20 bg-white rounded-md border border-gray-200 overflow-hidden flex-shrink-0">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-full object-cover"
+            />
+
+            <span className="absolute -top-1.5 -right-1.5 bg-black text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              {item.qty}
+            </span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium truncate">
+              {item.name}
+            </h3>
+
+            <p className="text-xs text-gray-500">
+              {item.size || item.variantName || 'One Size'}
             </p>
           </div>
 
-          {/* Member Points Box */}
-          <div className="bg-[#FFE4EF] p-8 rounded-[40px] relative overflow-hidden group">
-            <div className="absolute top-4 right-4 bg-[#B11B67] text-white text-[8px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-              Atelier Member
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="w-6 h-6 bg-[#B11B67] rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                <div className="w-2.5 h-2 bg-white rounded-sm transform rotate-45" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#B11B67]">
-                  You're earning {Math.floor(grandTotal)} points with this purchase.
-                </p>
-                <p className="text-xs text-[#B11B67]/70 mt-1">
-                  Unlock priority access to our upcoming FW24 release.
-                </p>
-              </div>
-            </div>
+          <div className="text-sm font-medium">
+            {formatAUD(item.price * item.qty)}
           </div>
-        </aside>
+        </div>
+      ))}
+    </div>
+
+    {/* <div className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Discount code or gift card"
+        className="flex-1 border border-gray-300 rounded-md px-4 py-2 text-sm focus:ring-1 focus:ring-black focus:border-black outline-none bg-white"
+      />
+
+      <button className="bg-[#f0f0f0] border border-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors">
+        Apply
+      </button>
+    </div> */}
+
+    <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="text-gray-600">Subtotal</span>
+
+        <span className="font-medium">
+          {formatAUD(total)}
+        </span>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-1 text-gray-600">
+          <span>Shipping</span>
+          <HelpCircle className="w-3.5 h-3.5" />
+        </div>
+
+        <span className="font-medium">
+        {formatAUD(shippingFee)}
+        </span>
+      </div>
+
+      <div className="flex justify-between pt-4">
+        <div className="flex flex-col">
+          <span className="text-lg font-bold">Total</span>
+
+          <span className="text-[10px] text-gray-500 font-medium">
+            Including {formatAUD(tax)} in taxes
+          </span>
+        </div>
+
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs text-gray-500">AUD</span>
+
+          <span className="text-xl font-bold">
+            {formatAUD(grandTotal)}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
       </main>
     </div>
   );

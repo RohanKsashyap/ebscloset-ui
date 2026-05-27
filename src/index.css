@@ -20,6 +20,34 @@
   }
 }
 
+
+/* navigation marquee */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 35s linear infinite;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 @layer utilities {
   @keyframes pageFade {
     from { opacity: 0; filter: saturate(0.9) blur(2px); transform: translateY(6px); }

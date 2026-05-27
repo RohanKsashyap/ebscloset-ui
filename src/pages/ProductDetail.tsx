@@ -383,7 +383,7 @@ export default function ProductDetail() {
               >
                 Buy Now
               </button>
-              <button 
+              {/* <button 
                 onClick={() => toggleWishlist(product.id)}
                 className="w-full h-16 border border-hot-pink text-hot-pink text-[10px] tracking-[0.3em] font-bold uppercase hover:bg-hot-pink hover:text-white transition-all duration-300 flex items-center justify-center gap-2"
               >
@@ -392,7 +392,7 @@ export default function ProductDetail() {
                 ) : (
                   <>Add to Wishlist <Heart size={14} /></>
                 )}
-              </button>
+              </button> */}
             </div>
 
             {/* Service Icons */}

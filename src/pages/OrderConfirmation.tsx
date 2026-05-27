@@ -70,7 +70,24 @@ export default function OrderConfirmation() {
   }
 
   return (
-    <main className="bg-white min-h-[60vh] flex items-center justify-center">
+    <main className="bg-white min-h-screen">
+      <header className="px-6 py-6 md:px-12 bg-white border-b border-gray-100">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-between">
+          <Link 
+            to="/" 
+            className="text-2xl font-black uppercase tracking-widest text-hot-pink hover:opacity-90 transition-opacity font-headline"
+          >
+            EB'S CLOSET
+          </Link>
+          <Link 
+            to="/cart" 
+            className="relative p-2 text-hot-pink hover:opacity-80 transition-colors"
+          >
+            <ShoppingBag className="w-6 h-6" />
+          </Link>
+        </div>
+      </header>
+
       <section className="py-24 px-6 lg:px-12 max-w-screen-md mx-auto text-center">
         <div className="flex justify-center mb-6">
           {paymentStatus === 'success' ? (
@@ -82,26 +99,26 @@ export default function OrderConfirmation() {
           )}
         </div>
         
-        <h1 className="font-headline text-4xl md:text-5xl mb-6 text-gray-900">
+        <h1 className="text-4xl md:text-5xl font-medium mb-6 text-gray-900 uppercase tracking-tight">
           {paymentStatus === 'success' ? 'Payment Successful!' : 
            paymentStatus === 'cancel' ? 'Payment Cancelled' : 
            'Thank You!'}
         </h1>
         
-        <p className="text-xl text-gray-600 mb-8">
+        <p className="text-xl text-gray-600 mb-8 font-light">
           {paymentStatus === 'success' ? 'Your payment has been received and your order is being processed.' :
            paymentStatus === 'cancel' ? 'Your order is still confirmed as Cash on Delivery. You can try paying online again below.' :
            'Your order has been successfully placed.'}
         </p>
         
         {orderId && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-8 inline-block">
-            <p className="text-sm text-gray-500 uppercase tracking-widest mb-2">Order Reference</p>
-            <p className="text-2xl font-semibold text-hot-pink">
+          <div className="bg-gray-50 p-6 rounded-lg mb-8 inline-block border border-gray-100">
+            <p className="text-sm text-gray-500 uppercase tracking-widest mb-2 font-bold">Order Reference</p>
+            <p className="text-2xl font-black text-hot-pink tracking-widest">
               {order?.orderId || `#${orderId}`}
             </p>
             {order && (
-              <p className="text-xs text-gray-400 mt-2 uppercase tracking-tighter">
+              <p className="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">
                 Payment: <span className="font-bold text-gray-600">{order.paymentMethod === 'COD' ? 'Cash on Delivery' : order.paymentMethod}</span>
               </p>
             )}
@@ -110,15 +127,15 @@ export default function OrderConfirmation() {
 
         {/* Pay Now Button for COD orders */}
         {order && order.paymentMethod?.toLowerCase() === 'cod' && order.status?.toLowerCase() === 'pending' && (
-          <div className="mb-12 p-8 bg-hot-pink/5 rounded-[32px] border border-hot-pink/10 max-w-sm mx-auto">
-            <h3 className="text-lg font-bold mb-2">Want to pay now?</h3>
+          <div className="mb-12 p-8 bg-hot-pink/5 rounded-2xl border border-hot-pink/10 max-w-sm mx-auto">
+            <h3 className="text-lg font-bold mb-2 uppercase tracking-wide">Want to pay now?</h3>
             <p className="text-sm text-gray-500 mb-6">
               You can pay securely with your card now to avoid carrying cash later.
             </p>
             <button 
               onClick={() => handlePayNow(order._id!)}
               disabled={isPaying}
-              className="premium-button w-full flex items-center justify-center gap-2 py-4"
+              className="w-full bg-hot-pink text-white py-4 rounded-md font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-hot-pink/20"
             >
               {isPaying ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -130,18 +147,18 @@ export default function OrderConfirmation() {
           </div>
         )}
         
-        <p className="text-gray-600 mb-12 max-w-lg mx-auto">
+        <p className="text-gray-600 mb-12 max-w-lg mx-auto font-light">
           We've sent a confirmation email to <strong>{order?.customer?.email}</strong> with your order details. 
           We'll notify you as soon as your package ships.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link to="/shop" className="premium-button inline-flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+          <Link to="/shop" className="bg-black text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-xs hover:bg-gray-800 transition-all flex items-center gap-2 shadow-xl">
             <ShoppingBag className="w-4 h-4" />
             Continue Shopping
           </Link>
           {order && (
-            <Link to="/orders" className="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-hot-pink transition-colors">
+            <Link to="/orders" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-hot-pink transition-colors">
               View My Orders
             </Link>
           )}

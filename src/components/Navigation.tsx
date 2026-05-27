@@ -110,8 +110,35 @@ export default function Navigation() {
 
   return (
     <>
+
+{/* marquee  */}
+
+
+{/* Top Marquee Bar */}
+<div className="fixed top-0 left-0 w-full z-[60] bg-black text-white h-6 overflow-hidden">
+  <div className="flex whitespace-nowrap animate-marquee min-w-max h-full items-center">
+    
+    {/* Duplicate Content */}
+    {[...Array(2)].map((_, i) => (
+      <div key={i} className="flex items-center">
+        {[...Array(10)].map((_, idx) => (
+          <span
+            key={idx}
+            className="mx-6 text-[10px] md:text-xs font-medium tracking-[0.25em] uppercase"
+          >
+            🚚 Free Delivery On Orders Above $150 AUD
+          </span>
+        ))}
+      </div>
+    ))}
+    
+  </div>
+</div>
+{/*  */}
+
+
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-4 left-0 right-0 z-50 transition-all duration-500 ${
           shouldShowSolid
             ? 'bg-white shadow-md'
             : 'bg-transparent'
@@ -143,7 +170,7 @@ export default function Navigation() {
             <div className={`flex-none flex justify-center items-center h-full px-4 ${expanded ? 'hidden sm:flex' : ''}`}>
               <Link 
                 to="/" 
-                className={`font-headline tracking-widest text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap pt-1 ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
+                className={`font-headline tracking-widest  text-xl lg:text-3xl text-hot-pink animate-fadeIn whitespace-nowrap pt-1 ${(shouldShowSolid) ? 'block' : 'lg:hidden block'}`}
               >
                 EB'S CLOSET
               </Link>
