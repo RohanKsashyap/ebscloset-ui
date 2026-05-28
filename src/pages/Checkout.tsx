@@ -473,7 +473,7 @@ export default function Checkout() {
                   <h2 className="text-xl font-medium">Payment</h2>
                   <p className="text-xs text-gray-500">All transactions are secure and encrypted.</p>
                 </div>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-6" />
+                {/* <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-6" /> */}
               </div>
               
               <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -488,9 +488,9 @@ export default function Checkout() {
                     <span className="text-sm font-medium">Card</span>
                   </div>
                   <div className="flex gap-1">
-                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
+                    {/* <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="stripe" className="h-2" />
-                    </div>
+                    </div> */}
                     {/* <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-3" />
                     </div>
