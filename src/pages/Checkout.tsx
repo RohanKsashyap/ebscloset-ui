@@ -548,7 +548,7 @@ export default function Checkout() {
                   </div>
                 )} */}
 
-                <button 
+                {/* <button 
                   onClick={() => setPaymentMethod('cod')}
                   className={`w-full flex items-center justify-between p-4 text-left transition-colors border-t border-gray-200 ${paymentMethod === 'cod' ? 'bg-[#f0f9ff]' : 'bg-white'}`}
                 >
@@ -558,7 +558,7 @@ export default function Checkout() {
                     </div>
                     <span className="text-sm font-medium">Cash on Delivery (COD)</span>
                   </div>
-                </button>
+                </button> */}
               </div>
             </section>
 
@@ -610,12 +610,12 @@ export default function Checkout() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-medium truncate">
+            <h3 className="text-sm font-medium truncate capitalize">
               {item.name}
             </h3>
 
-            <p className="text-xs text-gray-500">
-              {item.size || item.variantName || 'One Size'}
+            <p className=" text-gray-500">
+              size: {item.size || item.variantName || 'One Size'}
             </p>
           </div>
 
