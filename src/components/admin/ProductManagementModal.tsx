@@ -71,13 +71,15 @@ export default function ProductManagementModal({
   });
 
   const [categories, setCategories] = useState<any[]>([]);
+  const [selectedMainCatId, setSelectedMainCatId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (initialProduct) {
+      const resolvedCatId = (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '';
       setForm({
         ...initialProduct,
-        categoryId: (initialProduct as any).categoryId?._id || (initialProduct as any).categoryId || '',
+        categoryId: resolvedCatId,
         sizes: Array.isArray((initialProduct as any).sizes) ? (initialProduct as any).sizes : [],
         colors: Array.isArray((initialProduct as any).colors) ? (initialProduct as any).colors : [],
         ageGroups: (initialProduct as any).ageGroups || [],
@@ -91,6 +93,16 @@ export default function ProductManagementModal({
         image3: (initialProduct as any).image3 || '',
         image4: (initialProduct as any).image4 || '',
       });
+      // Pre-select main category: find if the saved category has a parent
+      if (resolvedCatId && categories.length > 0) {
+        const saved = categories.find((c: any) => c._id === resolvedCatId);
+        if (saved?.parentCategory) {
+          const parentId = saved.parentCategory?._id || saved.parentCategory;
+          setSelectedMainCatId(parentId);
+        } else {
+          setSelectedMainCatId(resolvedCatId);
+        }
+      }
     } else {
       setForm({
         name: '',
@@ -114,6 +126,7 @@ export default function ProductManagementModal({
         image3: '',
         image4: '',
       });
+      setSelectedMainCatId('');
     }
   }, [initialProduct, isOpen]);
 
@@ -336,21 +349,79 @@ export default function ProductManagementModal({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Category</label>
+
+                  {/* ── Step 1: Main Category ── */}
                   <div className="relative">
                     <LayoutGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <select 
-                      required
+                    <select
                       className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-10 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none appearance-none"
-                      value={form.categoryId}
-                      onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                      value={selectedMainCatId}
+                      onChange={(e) => {
+                        const mainId = e.target.value;
+                        setSelectedMainCatId(mainId);
+                        // When main changes, reset sub-category
+                        setForm((f: any) => ({ ...f, categoryId: mainId }));
+                      }}
                     >
-                      <option value="">Select Category</option>
-                      {categories.map(cat => (
-                        <option key={cat._id} value={cat._id}>{cat.name}</option>
-                      ))}
+                      <option value="">Select Main Category</option>
+                      {categories
+                        .filter((c: any) => !c.parentCategory)
+                        .map((c: any) => (
+                          <option key={c._id} value={c._id}>{c.name}</option>
+                        ))}
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                   </div>
+
+                  {/* ── Step 2: Sub-category (only shown when a main cat with children is selected) ── */}
+                  {(() => {
+                    const subs = categories.filter(
+                      (c: any) => {
+                        const parentId = c.parentCategory?._id || c.parentCategory;
+                        return parentId === selectedMainCatId;
+                      }
+                    );
+                    if (!selectedMainCatId || subs.length === 0) return null;
+                    return (
+                      <div className="relative mt-2">
+                        <LayoutGrid className="absolute left-4 top-1/2 -translate-y-1/2 text-[#eb4899]" size={16} />
+                        <select
+                          className="w-full bg-pink-50/50 border border-pink-100 rounded-xl pl-11 pr-10 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none appearance-none"
+                          value={form.categoryId === selectedMainCatId ? '' : form.categoryId}
+                          onChange={(e) => {
+                            setForm((f: any) => ({ ...f, categoryId: e.target.value || selectedMainCatId }));
+                          }}
+                        >
+                          <option value="">— All / No Subcategory —</option>
+                          {subs.map((c: any) => (
+                            <option key={c._id} value={c._id}>{c.name}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-[#eb4899] pointer-events-none" size={16} />
+                      </div>
+                    );
+                  })()}
+
+                  {/* Selection summary pill */}
+                  {form.categoryId && (
+                    <div className="flex items-center gap-2 mt-1">
+                      {(() => {
+                        const selected = categories.find((c: any) => c._id === form.categoryId);
+                        const parent = selected?.parentCategory
+                          ? categories.find((c: any) => c._id === (selected.parentCategory?._id || selected.parentCategory))
+                          : null;
+                        return (
+                          <span className="text-[11px] text-gray-500 font-medium">
+                            {parent ? (
+                              <><span className="font-bold text-gray-700">{parent.name}</span> → <span className="text-[#eb4899] font-bold">{selected?.name}</span></>
+                            ) : (
+                              <span className="font-bold text-gray-700">{selected?.name}</span>
+                            )}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-900">Brand</label>

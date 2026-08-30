@@ -1577,6 +1577,7 @@ export default function AdminDashboard() {
           onClose={() => setIsCategoryModalOpen(false)}
           onSave={saveCategory}
           initialCategory={categoryEditing}
+          allCategories={productCategories}
         />
       )}
 

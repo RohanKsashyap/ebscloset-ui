@@ -5,9 +5,9 @@ import {
   FileText, 
   LayoutGrid, 
   Upload, 
-  Image as ImageIcon,
-  ChevronDown,
-  Hash
+  Hash,
+  FolderTree,
+  ChevronDown
 } from 'lucide-react';
 import type { Category } from '../../services/adminService';
 
@@ -16,20 +16,24 @@ interface CategoryManagementModalProps {
   onClose: () => void;
   onSave: (formData: FormData) => void;
   initialCategory?: Category;
+  /** Flat list of all categories used to populate the parent selector */
+  allCategories?: Category[];
 }
 
 export default function CategoryManagementModal({ 
   isOpen, 
   onClose, 
   onSave, 
-  initialCategory 
+  initialCategory,
+  allCategories = []
 }: CategoryManagementModalProps) {
   const [form, setForm] = useState({
     name: '',
     slug: '',
     description: '',
     displayOrder: 0,
-    isActive: true
+    isActive: true,
+    parentCategory: '' // empty = top-level
   });
   
   const [file, setFile] = useState<File | null>(null);
@@ -42,17 +46,12 @@ export default function CategoryManagementModal({
         slug: initialCategory.slug || '',
         description: initialCategory.description || '',
         displayOrder: initialCategory.displayOrder || 0,
-        isActive: initialCategory.isActive ?? true
+        isActive: initialCategory.isActive ?? true,
+        parentCategory: (initialCategory.parentCategory as any)?._id || (initialCategory.parentCategory as any) || ''
       });
       setPreview(initialCategory.imageUrl || '');
     } else {
-      setForm({
-        name: '',
-        slug: '',
-        description: '',
-        displayOrder: 0,
-        isActive: true
-      });
+      setForm({ name: '', slug: '', description: '', displayOrder: 0, isActive: true, parentCategory: '' });
       setPreview('');
     }
     setFile(null);
@@ -68,9 +67,7 @@ export default function CategoryManagementModal({
     if (selectedFile) {
       setFile(selectedFile);
       const reader = new FileReader();
-      reader.onload = () => {
-        setPreview(reader.result as string);
-      };
+      reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(selectedFile);
     }
   };
@@ -83,47 +80,103 @@ export default function CategoryManagementModal({
     formData.append('description', form.description);
     formData.append('displayOrder', String(form.displayOrder));
     formData.append('isActive', String(form.isActive));
-    
-    if (file) {
-      formData.append('image', file);
-    }
-
+    formData.append('parentCategory', form.parentCategory || '');
+    if (file) formData.append('image', file);
     onSave(formData);
   };
+
+  // Parent candidates: only top-level categories (no parent themselves), and exclude self
+  const parentOptions = allCategories.filter(c => 
+    !c.parentCategory && c._id !== initialCategory?._id
+  );
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-md animate-fadeIn" 
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md animate-fadeIn" onClick={onClose} />
       
-      {/* Modal Container */}
-      <div className="relative w-full max-w-xl bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-slideUp">
+      <div className="relative w-full max-w-xl bg-white rounded-[32px] shadow-2xl overflow-hidden flex flex-col animate-slideUp max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-8 py-6 flex items-center justify-between border-b border-gray-50">
+        <div className="px-8 py-6 flex items-center justify-between border-b border-gray-50 sticky top-0 bg-white z-10">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
               {initialCategory ? 'Edit Category' : 'Add New Category'}
             </h2>
             <p className="text-gray-400 text-sm font-medium mt-0.5">
-              Organize your product catalog with collections.
+              {form.parentCategory ? 'Creating a subcategory' : 'Top-level navigation category'}
             </p>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-gray-50 rounded-full transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-50 rounded-full transition-colors">
             <X size={24} className="text-gray-400" />
           </button>
         </div>
 
-        {/* Form Content */}
         <div className="p-8">
           <form id="category-form" onSubmit={handleSubmit} className="space-y-6">
+
+            {/* Parent Category Picker */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <FolderTree size={16} className="text-[#eb4899]" />
+                Category Type
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, parentCategory: '' }))}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
+                    !form.parentCategory 
+                      ? 'border-[#eb4899] bg-pink-50/50 text-[#eb4899]' 
+                      : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-pink-200'
+                  }`}
+                >
+                  <LayoutGrid size={20} />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest">Main Category</p>
+                    <p className="text-[10px] opacity-70 mt-0.5">Shown as nav header</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (parentOptions.length > 0 && !form.parentCategory) {
+                      setForm(f => ({ ...f, parentCategory: parentOptions[0]._id }));
+                    }
+                  }}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
+                    form.parentCategory 
+                      ? 'border-[#eb4899] bg-pink-50/50 text-[#eb4899]' 
+                      : 'border-gray-100 bg-gray-50 text-gray-500 hover:border-pink-200'
+                  }`}
+                >
+                  <ChevronDown size={20} />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-widest">Subcategory</p>
+                    <p className="text-[10px] opacity-70 mt-0.5">Shown in dropdown</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Parent selector — only shown when subcategory is chosen */}
+              {form.parentCategory !== '' && (
+                <div className="relative mt-2">
+                  <FolderTree className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <select
+                    className="w-full bg-gray-50 border-none rounded-xl pl-11 pr-4 py-3 text-sm focus:ring-2 focus:ring-pink-200 outline-none appearance-none"
+                    value={form.parentCategory}
+                    onChange={e => setForm(f => ({ ...f, parentCategory: e.target.value }))}
+                  >
+                    <option value="">— Select parent category —</option>
+                    {parentOptions.map(c => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category Image */}
               <div className="space-y-4">
@@ -225,7 +278,6 @@ export default function CategoryManagementModal({
               </label>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-4 pt-4">
               <button 
                 type="button"

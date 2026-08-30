@@ -53,11 +53,13 @@ export interface Category {
   slug: string;
   isActive: boolean;
   displayOrder: number;
+  parentCategory?: { _id: string; name: string; slug: string } | null;
   imageUrl?: string;
   thumbnailUrl?: string;
   imageId?: string;
   productCount?: number;
   createdAt: string;
+  subcategories?: Category[]; // populated in tree endpoint
 }
 
 export interface AgeCollection {
@@ -339,6 +341,11 @@ export const adminService = {
     return response.data || [];
   },
 
+  getCategoryTree: async (): Promise<Category[]> => {
+    const response = await apiClient.get('/admin/categories/tree');
+    return response.data || [];
+  },
+
   createCategory: async (formData: FormData): Promise<Category> => {
     const response = await apiClient.post('/admin/categories', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -355,6 +362,10 @@ export const adminService = {
 
   deleteCategory: async (id: string): Promise<void> => {
     await apiClient.delete(`/admin/categories/${id}`);
+  },
+
+  bulkDeleteCategories: async (ids: string[]): Promise<void> => {
+    await apiClient.delete('/admin/categories', { data: { ids } });
   },
 
   // Age Collections

@@ -201,8 +201,9 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
 
     return (
       <div ref={ref} className="relative bg-white pt-0">
-        <section 
-          className="relative h-screen w-full overflow-hidden touch-pan-y"
+        {/* Hero: portrait rectangle on mobile (≈9:16), full-screen on desktop */}
+        <section
+          className="relative w-full overflow-hidden touch-pan-y aspect-[9/16] md:aspect-auto md:h-screen"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -218,7 +219,7 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
               {slide.type === 'video' ? (
                 <video
                   src={slide.url}
-                  className="w-full h-full object-cover lg:object-contain bg-neutral-100"
+                  className="w-full h-full object-cover"
                   autoPlay={index === currentImageIndex}
                   muted
                   loop
@@ -232,12 +233,31 @@ const HeroSection = forwardRef<HTMLDivElement, HeroSectionProps>(
                     });
                   }}
                 />
+              ) : slide.mobileUrl ? (
+                /* Serve portrait image on mobile, landscape on desktop */
+                <picture>
+                  <source media="(min-width: 768px)" srcSet={getOptimizedUrl(slide.url, 1920)} />
+                  <img
+                    src={getOptimizedUrl(slide.mobileUrl, 828)}
+                    alt={slide.title || `Hero slide ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    onError={() => {
+                      setBrokenIds((prev) => {
+                        const n = new Set(prev);
+                        n.add(slide.id);
+                        return n;
+                      });
+                    }}
+                  />
+                </picture>
               ) : (
                 <img
                   src={getOptimizedUrl(slide.url, 1920)}
                   alt={slide.title || `Hero slide ${index + 1}`}
-                  className="w-full h-full object-cover lg:object-contain bg-neutral-100"
-                  loading={index === 0 ? "eager" : "lazy"}
+                  className="w-full h-full object-cover"
+                  loading={index === 0 ? 'eager' : 'lazy'}
                   decoding="async"
                   onError={() => {
                     setBrokenIds((prev) => {

@@ -3,11 +3,9 @@ import { loadHomeAnimations } from '../utils/storage';
 import HeroSection from './HeroSection';
 import { Link } from 'react-router-dom';
 import CollectionGrid from './CollectionGrid';
-import EditorialSection from './EditorialSection';
 import ProductShowcase from './ProductShowcase';
 import NewArrivalsGallery from './NewArrivalsGallery';
 import Testimonials from './Testimonials';
-import BudgetSection from './BudgetSection';
 import FAQSection from './FAQSection';
 import SEO from './SEO';
 import { Helmet } from 'react-helmet-async';
@@ -63,7 +61,7 @@ export default function HomePage() {
       </Helmet>
       <HeroSection ref={heroRef} />
       <CollectionGrid />
-      <BudgetSection />
+      {/* <BudgetSection /> */}
       {animations.filter(a => !!a.video).length > 0 && (
         <section className="py-12 md:py-20 px-6 lg:px-12 max-w-screen-2xl mx-auto">
           <div className="text-center mb-12">
@@ -108,7 +106,45 @@ export default function HomePage() {
           </div>
         </section>
       )}
-      <EditorialSection />
+      <section className="w-full">
+        <div className="grid grid-cols-2 h-[420px] sm:h-[520px] md:h-[640px]">
+          {/* Boys */}
+          <Link
+            to="/shop?type=Boys"
+            className="relative overflow-hidden group cursor-pointer block"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=900&auto=format&fit=crop&q=80"
+              alt="Shop Boys"
+              className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500" />
+            <div className="absolute bottom-8 left-8">
+              <h2 className="font-headline text-5xl sm:text-7xl md:text-8xl text-white drop-shadow-lg leading-none">
+                Boys
+              </h2>
+            </div>
+          </Link>
+
+          {/* Girls */}
+          <Link
+            to="/shop?type=Girls"
+            className="relative overflow-hidden group cursor-pointer block"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=900&auto=format&fit=crop&q=80"
+              alt="Shop Girls"
+              className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors duration-500" />
+            <div className="absolute bottom-8 left-8">
+              <h2 className="font-headline text-5xl sm:text-7xl md:text-8xl text-white drop-shadow-lg leading-none">
+                Girls
+              </h2>
+            </div>
+          </Link>
+        </div>
+      </section>
       <Testimonials />
       <NewArrivalsGallery />
       <ProductShowcase />

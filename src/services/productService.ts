@@ -62,6 +62,12 @@ export const productService = {
     return response.data || [];
   },
 
+  getCategoryTree: async (): Promise<(Category & { subcategories: Category[] })[]> => {
+    if (!(await ensureBackendAvailable())) return [];
+    const response = await apiClient.get('/categories/tree');
+    return response.data || [];
+  },
+
   getProduct: async (idOrSlug: string): Promise<Product> => {
     if (!(await ensureBackendAvailable())) throw new Error('Backend unavailable');
     const response = await apiClient.get(`/products/${idOrSlug}`);

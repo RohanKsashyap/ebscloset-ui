@@ -29,7 +29,9 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
   const [activeBanner, setActiveBanner] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isMobileUploading, setIsMobileUploading] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
+  const [mobileImageUrlInput, setMobileImageUrlInput] = useState('');
   const { showToast } = useToast();
 
   useEffect(() => { setSite(initial); }, [initial]);
@@ -131,6 +133,62 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
     }
   };
 
+  // ── Mobile image handlers ──────────────────────────────────────────────────
+  const onMobileBannerFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.length) return;
+    const file = e.target.files[0];
+    setIsMobileUploading(true);
+    try {
+      const uploadRes = await adminService.uploadAsset(file, 'ebs-closet/hero-mobile');
+      const imageUrl = uploadRes.url;
+      setSite((s: any) => {
+        const newSite = { ...s };
+        if (!newSite.hero) newSite.hero = {};
+        if (!newSite.hero.slides) newSite.hero.slides = [];
+        if (!newSite.hero.slides[activeBanner]) {
+          newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
+        }
+        newSite.hero.slides[activeBanner].mobileUrl = imageUrl;
+        return newSite;
+      });
+      showToast('Mobile image uploaded successfully');
+    } catch (err) {
+      console.error('Error uploading mobile image:', err);
+      showToast('Failed to upload mobile image', 'error');
+    } finally {
+      setIsMobileUploading(false);
+    }
+  };
+
+  const onMobileBannerUrl = async () => {
+    if (!mobileImageUrlInput) {
+      showToast('Please paste a mobile image URL first', 'error');
+      return;
+    }
+    setIsMobileUploading(true);
+    try {
+      const uploadRes = await adminService.uploadAsset(mobileImageUrlInput, 'ebs-closet/hero-mobile');
+      const imageUrl = uploadRes.url;
+      setSite((s: any) => {
+        const newSite = { ...s };
+        if (!newSite.hero) newSite.hero = {};
+        if (!newSite.hero.slides) newSite.hero.slides = [];
+        if (!newSite.hero.slides[activeBanner]) {
+          newSite.hero.slides[activeBanner] = { id: String(activeBanner + 1), type: 'image' };
+        }
+        newSite.hero.slides[activeBanner].mobileUrl = imageUrl;
+        return newSite;
+      });
+      setMobileImageUrlInput('');
+      showToast('Mobile image uploaded from URL successfully');
+    } catch (err) {
+      console.error('Error uploading mobile image from URL:', err);
+      showToast('Failed to upload mobile image from URL', 'error');
+    } finally {
+      setIsMobileUploading(false);
+    }
+  };
+
   const updateHeroField = (field: string, value: any) => {
     setSite((s: any) => {
       const newSite = { ...s };
@@ -167,6 +225,7 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
 
   const currentSlide = site?.hero?.slides?.[activeBanner] || {};
   const displayImage = currentSlide.url || (activeBanner === 0 ? site?.hero?.bannerImage : '');
+  const displayMobileImage = currentSlide.mobileUrl || '';
 
   const addBanner = () => {
     setSite((s: any) => {
@@ -389,6 +448,94 @@ export default function SiteSettings({ initial, onSave }: { initial: any; onSave
                 </div>
 
                 <p className="text-[10px] text-gray-400 font-bold italic text-center">Recommended size: 1920x800px. Max size: 2MB.</p>
+              </div>
+
+              {/* Mobile Image Upload */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-bold text-gray-900">Mobile Banner Image</label>
+                  <span className="text-[10px] bg-pink-50 text-[#eb4899] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-pink-100">Portrait · 9:16</span>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  Upload a portrait-oriented image for phones. If left empty, the desktop image above is used on all screens.
+                </p>
+                <div className="relative group">
+                  <div className="w-full rounded-[2rem] border-4 border-dashed border-gray-100 bg-gray-50 flex gap-6 items-stretch overflow-hidden transition-all group-hover:border-pink-100 group-hover:bg-pink-50/30 p-4">
+                    {/* Preview column */}
+                    <div className="flex-shrink-0 w-28 aspect-[9/16] rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm relative">
+                      {isMobileUploading ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                          <Loader2 size={24} className="animate-spin text-[#eb4899]" />
+                        </div>
+                      ) : displayMobileImage ? (
+                        <img src={displayMobileImage} alt="Mobile Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-300">
+                          <ImageIcon size={24} />
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-center px-1">Mobile Preview</span>
+                        </div>
+                      )}
+                    </div>
+                    {/* Info + file input */}
+                    <div className="flex flex-col justify-center gap-2 flex-1">
+                      <p className="text-sm font-bold text-gray-900">Portrait image for phones</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Recommended: 828×1792px (9:16)</p>
+                      <p className="text-xs text-gray-500 mt-1">This image is shown on screens narrower than 768px. Ideal for tall, close-cropped product shots.</p>
+                      <label className="mt-3 inline-flex items-center gap-2 cursor-pointer bg-white border border-gray-200 rounded-2xl px-4 py-2 text-xs font-bold text-gray-700 hover:border-pink-300 hover:text-[#eb4899] transition-all w-fit">
+                        <ImageIcon size={14} />
+                        Choose Mobile Image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={onMobileBannerFile}
+                          disabled={isMobileUploading}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile URL Upload */}
+                <div className="flex gap-4">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Or paste mobile image URL here..."
+                      className="w-full bg-white border border-gray-100 rounded-2xl px-6 py-4 text-sm font-medium focus:ring-2 focus:ring-pink-500/10 transition-all placeholder:text-gray-300 shadow-sm"
+                      value={mobileImageUrlInput}
+                      onChange={(e) => setMobileImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); onMobileBannerUrl(); }
+                      }}
+                    />
+                  </div>
+                  <button
+                    onClick={onMobileBannerUrl}
+                    disabled={isMobileUploading || !mobileImageUrlInput}
+                    className="bg-[#111827] text-white px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-black/5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isMobileUploading ? <Loader2 size={16} className="animate-spin" /> : <ExternalLink size={16} />}
+                    Upload URL
+                  </button>
+                </div>
+
+                {displayMobileImage && (
+                  <button
+                    onClick={() => {
+                      setSite((s: any) => {
+                        const newSite = { ...s };
+                        if (newSite.hero?.slides?.[activeBanner]) {
+                          newSite.hero.slides[activeBanner].mobileUrl = '';
+                        }
+                        return newSite;
+                      });
+                    }}
+                    className="text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <Trash2 size={12} /> Remove mobile image (use desktop on all screens)
+                  </button>
+                )}
               </div>
 
               {/* Input Fields Grid */}

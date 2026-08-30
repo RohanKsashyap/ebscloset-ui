@@ -13,6 +13,7 @@ export type HeroSlide = {
   id: string;
   type: 'image' | 'video';
   url: string;
+  mobileUrl?: string; // portrait image for mobile screens
   title?: string;
   subtitle?: string;
   bannerCtaText?: string;
