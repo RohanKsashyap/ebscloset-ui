@@ -1,13 +1,14 @@
 import { useCart } from '../context/CartContext';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { authService, User, Address } from '../services/authService';
 import { formatAUD } from '../utils/storage';
-import { ShoppingBag, X, Check, MapPin, ChevronDown, Lock, Search, HelpCircle } from 'lucide-react';
+import { ShoppingBag, X, Check, MapPin, ChevronDown, Lock, Search, HelpCircle, Loader2 } from 'lucide-react';
 import CheckoutHeader from '../components/checkout/CheckoutHeader';
+import { useAddressAutocomplete } from '../hooks/useAddressAutocomplete';
 
 export default function Checkout() {
   const { items: cartItems, total: cartTotal, clear } = useCart();
@@ -53,6 +54,21 @@ export default function Checkout() {
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
   const [outOfStockItems, setOutOfStockItems] = useState<string[]>([]);
   const [isCheckingStock, setIsCheckingStock] = useState(false);
+
+  // Address autocomplete
+  const addressAutoComplete = useAddressAutocomplete();
+  const addressDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close autocomplete on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (addressDropdownRef.current && !addressDropdownRef.current.contains(e.target as Node)) {
+        addressAutoComplete.setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [addressAutoComplete]);
 
   // Persistence: Load from sessionStorage
   useEffect(() => {
@@ -378,17 +394,98 @@ export default function Checkout() {
                   />
                 </div>
 
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    placeholder="Address"
-                    className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
-                    value={shipping.address}
-                    onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
-                  />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <Search className="w-4 h-4 text-gray-400" />
+                <div className="relative" ref={addressDropdownRef}>
+                  {/* Address input with autocomplete */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Address"
+                      autoComplete="off"
+                      className="w-full border border-gray-300 rounded-md px-4 py-3 pr-10 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
+                      value={addressAutoComplete.query || shipping.address}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        addressAutoComplete.setQuery(val);
+                        setShipping((prev: typeof shipping) => ({ ...prev, address: val }));
+                      }}
+                      onFocus={() => {
+                        if (addressAutoComplete.suggestions.length > 0) {
+                          addressAutoComplete.setIsOpen(true);
+                        }
+                      }}
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      {addressAutoComplete.isLoading
+                        ? <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                        : <Search className="w-4 h-4 text-gray-400" />
+                      }
+                    </div>
                   </div>
+
+                  {/* Hint */}
+                  {!shipping.address && (
+                    <p className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-500">
+                      <svg className="w-3 h-3 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
+                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                        <path d="M8 7v4M8 5.5h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      Add a house number if you have one
+                    </p>
+                  )}
+
+                  {/* Suggestions dropdown */}
+                  {addressAutoComplete.isOpen && addressAutoComplete.suggestions.length > 0 && (
+                    <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden">
+                      <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                        <span className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase">Suggestions</span>
+                        <button
+                          type="button"
+                          onClick={() => addressAutoComplete.setIsOpen(false)}
+                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <ul>
+                        {addressAutoComplete.suggestions.map((s, i) => {
+                          // Bold the matching part of the suggestion
+                          const query = (addressAutoComplete.query || '').toLowerCase();
+                          const display = s.displayName;
+                          const idx = display.toLowerCase().indexOf(query);
+                          return (
+                            <li key={i}>
+                              <button
+                                type="button"
+                                className="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                                onMouseDown={(e) => {
+                                  e.preventDefault(); // prevent input blur
+                                  addressAutoComplete.setQuery(s.address);
+                                  setShipping((prev: typeof shipping) => ({
+                                    ...prev,
+                                    address: s.address,
+                                    suburb: s.suburb || prev.suburb,
+                                    city: s.city || prev.city,
+                                    state: s.state || prev.state,
+                                    postcode: s.postcode || prev.postcode,
+                                    country: s.country || prev.country,
+                                  }));
+                                  addressAutoComplete.clear();
+                                }}
+                              >
+                                {idx >= 0 && query ? (
+                                  <>
+                                    {display.slice(0, idx)}
+                                    <strong className="font-semibold">{display.slice(idx, idx + query.length)}</strong>
+                                    {display.slice(idx + query.length)}
+                                  </>
+                                ) : display}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 <input 
