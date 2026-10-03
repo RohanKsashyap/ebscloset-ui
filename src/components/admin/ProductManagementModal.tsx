@@ -13,7 +13,8 @@ import {
   FileText,
   Maximize,
   ChevronDown,
-  Loader2
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import type { Product } from '../../services/productService';
@@ -181,18 +182,40 @@ export default function ProductManagementModal({
     }
   }, [form.colors, form.sizes]);
 
+  const MAX_IMAGE_SIZE_MB = 10;
+  const MAX_VIDEO_SIZE_MB = 10;
+  const ACCEPTED_IMAGE_TYPES = 'image/jpeg,image/jpg,image/png,image/webp,image/gif,image/avif,image/svg+xml,image/bmp,image/tiff';
+  const ACCEPTED_VIDEO_TYPES = 'video/mp4,video/webm,video/ogg,video/quicktime,video/x-msvideo';
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     const file = e.target.files?.[0] || null;
-    if (file) {
-      setFiles(prev => ({ ...prev, [key]: file }));
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          setPreviews(prev => ({ ...prev, [key]: reader.result as string }));
-        };
-        reader.readAsDataURL(file);
-      }
+    if (!file) return;
+
+    const isVideo = key.startsWith('video');
+    const maxMB = isVideo ? MAX_VIDEO_SIZE_MB : MAX_IMAGE_SIZE_MB;
+    const maxBytes = maxMB * 1024 * 1024;
+
+    if (file.size > maxBytes) {
+      alert(`File is too large. Maximum allowed size is ${maxMB}MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+      e.target.value = '';
+      return;
     }
+
+    setFiles(prev => ({ ...prev, [key]: file }));
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviews(prev => ({ ...prev, [key]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveMedia = (e: React.MouseEvent, key: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFiles(prev => ({ ...prev, [key]: null }));
+    setPreviews(prev => ({ ...prev, [key]: '' }));
   };
 
   const updateVariant = (index: number, field: string, value: any) => {
@@ -649,16 +672,27 @@ export default function ProductManagementModal({
                 {/* Main Image */}
                 <label className="col-span-2 aspect-[4/3] bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden group">
                   {previews.image ? (
-                    <img src={previews.image} className="w-full h-full object-cover" />
+                    <>
+                      <img src={previews.image} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveMedia(e, 'image')}
+                        className="absolute top-2 right-2 z-10 w-7 h-7 bg-white/90 hover:bg-red-500 text-gray-500 hover:text-white rounded-full flex items-center justify-center shadow-md transition-all"
+                        title="Remove image"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </>
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
                       <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center">
                         <Upload size={18} className="text-pink-500" />
                       </div>
                       <span className="text-[10px] font-bold uppercase text-gray-400">Main Image</span>
+                      <span className="text-[9px] text-gray-300 font-medium leading-snug">JPG, PNG, WEBP, GIF, AVIF, SVG…<br />Max 10 MB</span>
                     </div>
                   )}
-                  <input type="file" className="hidden" accept="image/*" onChange={e => handleFileChange(e, 'image')} />
+                  <input type="file" className="hidden" accept={ACCEPTED_IMAGE_TYPES} onChange={e => handleFileChange(e, 'image')} />
                 </label>
 
                 {/* Additional Media */}
@@ -666,20 +700,49 @@ export default function ProductManagementModal({
                   {['hoverImage', 'image3', 'image4'].map((key) => (
                     <label key={key} className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden">
                       {previews[key as keyof typeof previews] ? (
-                        <img src={previews[key as keyof typeof previews]} className="w-full h-full object-cover" />
+                        <>
+                          <img src={previews[key as keyof typeof previews]} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={(e) => handleRemoveMedia(e, key)}
+                            className="absolute top-1.5 right-1.5 z-10 w-6 h-6 bg-white/90 hover:bg-red-500 text-gray-500 hover:text-white rounded-full flex items-center justify-center shadow-md transition-all"
+                            title="Remove image"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        </>
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <ImageIcon size={18} className="text-gray-300" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center">
+                          <ImageIcon size={16} className="text-gray-300" />
+                          <span className="text-[8px] text-gray-300 font-medium leading-snug">Any image format<br />Max 10 MB</span>
                         </div>
                       )}
-                      <input type="file" className="hidden" accept="image/*" onChange={e => handleFileChange(e, key)} />
+                      <input type="file" className="hidden" accept={ACCEPTED_IMAGE_TYPES} onChange={e => handleFileChange(e, key)} />
                     </label>
                   ))}
                   <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Video size={18} className="text-gray-300" />
-                    </div>
-                    <input type="file" className="hidden" accept="video/*" onChange={e => handleFileChange(e, 'video')} />
+                    {files.video ? (
+                      <>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                          <Video size={18} className="text-pink-400" />
+                          <span className="text-[9px] font-bold text-gray-400 uppercase px-2 text-center truncate w-full text-center">{files.video.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveMedia(e, 'video')}
+                          className="absolute top-1.5 right-1.5 z-10 w-6 h-6 bg-white/90 hover:bg-red-500 text-gray-500 hover:text-white rounded-full flex items-center justify-center shadow-md transition-all"
+                          title="Remove video"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center">
+                        <Video size={16} className="text-gray-300" />
+                        <span className="text-[8px] text-gray-300 font-medium leading-snug">MP4, WEBM, MOV<br />Max 10 MB</span>
+                      </div>
+                    )}
+                    <input type="file" className="hidden" accept={ACCEPTED_VIDEO_TYPES} onChange={e => handleFileChange(e, 'video')} />
                   </label>
                 </div>
               </div>

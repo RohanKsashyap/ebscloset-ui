@@ -46,7 +46,7 @@ export default function Checkout() {
     sessionStorage.setItem('checkout_shipping', JSON.stringify(shipping));
   }, [shipping]);
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'afterpay' | 'zip' | 'cod'>('card');
   const [user, setUser] = useState<User | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -289,7 +289,7 @@ export default function Checkout() {
       tax: Math.round(tax * 100),
       successUrl: `${window.location.origin}/order-confirmation`,
       cancelUrl: `${window.location.origin}/checkout`,
-      paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod.toUpperCase()
+      paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'card' ? 'CARD' : paymentMethod.toUpperCase()
     };
 
     try {
@@ -299,6 +299,14 @@ export default function Checkout() {
           window.location.href = res.url;
           return;
         }
+      } else if (paymentMethod === 'paypal' || paymentMethod === 'afterpay' || paymentMethod === 'zip') {
+        // TODO: integrate real PayPal / Afterpay / Zip SDK flows here
+        showToast(`${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)} integration coming soon. Your order has been placed as pending.`, 'info');
+        const res = await orderService.createOrder(payload);
+        if (!buyNowItem) clear();
+        sessionStorage.removeItem('checkout_email');
+        sessionStorage.removeItem('checkout_shipping');
+        navigate('/order-confirmation', { state: { orderId: res.orderId } });
       } else {
         const res = await orderService.createOrder(payload);
         if (!buyNowItem) clear();
@@ -563,99 +571,181 @@ export default function Checkout() {
               </div>
             </section> */}
 
+            {/* Express Checkout */}
+            <section className="space-y-3">
+              <p className="text-center text-xs text-gray-400 font-medium tracking-wide">Express checkout</p>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Shop Pay */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className="h-12 rounded-lg flex items-center justify-center font-bold text-white text-base tracking-tight transition-opacity hover:opacity-90"
+                  style={{ background: '#5a31f4' }}
+                  title="Shop Pay"
+                >
+                  <svg viewBox="0 0 60 24" className="h-5 fill-white" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="19" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="18" fill="white">shop</text>
+                  </svg>
+                  <span className="ml-1 font-bold text-white text-lg leading-none">shop</span>
+                </button>
+                {/* PayPal */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('paypal')}
+                  className="h-12 rounded-lg flex items-center justify-center transition-opacity hover:opacity-90"
+                  style={{ background: '#FFC439' }}
+                  title="PayPal"
+                >
+                  <svg viewBox="0 0 101 32" className="h-6" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12.237 2.845c-.636-.73-1.784-1.044-3.254-1.044H4.958a.74.74 0 0 0-.73.624L2.67 13.791a.445.445 0 0 0 .44.514h2.2l.553-3.51-.017.11a.738.738 0 0 1 .729-.624h1.52c2.98 0 5.313-1.212 5.994-4.716.02-.103.038-.203.053-.3.17-1.088.012-1.83-.905-2.42z" fill="#003087"/>
+                    <path d="M12.237 2.845c-.636-.73-1.784-1.044-3.254-1.044H4.958a.74.74 0 0 0-.73.624L2.67 13.791a.445.445 0 0 0 .44.514h2.2l.553-3.51.553-3.51a.738.738 0 0 1 .73-.624h1.518c2.98 0 5.314-1.212 5.995-4.716.02-.103.037-.203.053-.3-.403-.236-.874-.413-1.475-.8z" fill="#0070E0"/>
+                    <path d="M5.84 6.47a.643.643 0 0 1 .636-.544h4.037c.478 0 .924.031 1.33.098.116.018.23.04.34.064.11.023.218.05.32.08.05.016.1.032.148.05.388.131.742.31 1.049.554.298-1.9-.003-3.194-1.03-4.366C11.445.9 9.584.5 7.207.5H1.574A.888.888 0 0 0 .699 1.25L-1.32 14.306a.535.535 0 0 0 .528.617H2.67L3.82 7.67l2.02-1.2z" fill="#001C64"/>
+                    <text x="20" y="22" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#003087">Pay</text>
+                    <text x="39" y="22" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#009CDE">Pal</text>
+                  </svg>
+                </button>
+                {/* Google Pay */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('card')}
+                  className="h-12 rounded-lg flex items-center justify-center transition-opacity hover:opacity-90 border border-gray-200"
+                  style={{ background: '#000' }}
+                  title="Google Pay"
+                >
+                  <svg viewBox="0 0 70 28" className="h-6" xmlns="http://www.w3.org/2000/svg">
+                    <text x="0" y="20" fontFamily="Arial, sans-serif" fontSize="15" fill="white">
+                      <tspan fill="#4285F4">G</tspan>
+                      <tspan fill="white"> Pay</tspan>
+                    </text>
+                  </svg>
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-xs text-gray-400 font-medium uppercase tracking-widest">OR</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+            </section>
+
             {/* Payment Section */}
             <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-xl font-medium">Payment</h2>
-                  <p className="text-xs text-gray-500">All transactions are secure and encrypted.</p>
-                </div>
-                {/* <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-6" /> */}
+              <div className="space-y-1">
+                <h2 className="text-xl font-medium">Payment</h2>
+                <p className="text-xs text-gray-500">All transactions are secure and encrypted.</p>
               </div>
               
-              <div className="border border-gray-200 rounded-md overflow-hidden">
+              <div className="border border-gray-200 rounded-md overflow-hidden divide-y divide-gray-200">
+                {/* Credit Card */}
                 <button 
+                  type="button"
                   onClick={() => setPaymentMethod('card')}
-                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'card' ? 'bg-[#f0f9ff]' : 'bg-white'}`}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'card' ? 'bg-[#f0f9ff]' : 'bg-white hover:bg-gray-50'}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'card' ? 'border-black' : 'border-gray-300'}`}>
-                      {paymentMethod === 'card' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'card' ? 'border-blue-600' : 'border-gray-300'}`}>
+                      {paymentMethod === 'card' && <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
                     </div>
-                    <span className="text-sm font-medium">Card</span>
+                    <span className="text-sm font-medium">Credit card</span>
                   </div>
-                  <div className="flex gap-1">
-                    {/* <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="stripe" className="h-2" />
-                    </div> */}
-                    {/* <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-3" />
+                  {/* Card brand logos */}
+                  <div className="flex items-center gap-1">
+                    {/* Visa */}
+                    <div className="w-9 h-6 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <svg viewBox="0 0 38 24" className="w-7 h-4" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="38" height="24" rx="3" fill="#1A1F71"/>
+                        <text x="5" y="17" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="11" fill="white" letterSpacing="1">VISA</text>
+                      </svg>
                     </div>
-                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" alt="Amex" className="h-3" />
+                    {/* Mastercard */}
+                    <div className="w-9 h-6 bg-white border border-gray-200 rounded flex items-center justify-center overflow-hidden">
+                      <svg viewBox="0 0 38 24" className="w-8 h-5" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="15" cy="12" r="8" fill="#EB001B"/>
+                        <circle cx="23" cy="12" r="8" fill="#F79E1B"/>
+                        <path d="M19 6.8a8 8 0 0 1 0 10.4A8 8 0 0 1 19 6.8z" fill="#FF5F00"/>
+                      </svg>
                     </div>
-                    <div className="w-8 h-5 bg-white border border-gray-200 rounded flex items-center justify-center">
-                      <span className="text-[8px] text-gray-400 font-bold">+2</span>
-                    </div> */}
+                    {/* Amex */}
+                    <div className="w-9 h-6 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <svg viewBox="0 0 38 24" className="w-7 h-4" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="38" height="24" rx="3" fill="#007BC1"/>
+                        <text x="4" y="17" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="8.5" fill="white" letterSpacing="0.3">AMEX</text>
+                      </svg>
+                    </div>
+                    <div className="w-9 h-6 bg-white border border-gray-200 rounded flex items-center justify-center">
+                      <span className="text-[9px] text-gray-500 font-semibold">+2</span>
+                    </div>
                   </div>
                 </button>
 
-                {/* {paymentMethod === 'card' && (
-                  <div className="p-4 bg-[#f8f8f8] border-t border-gray-200 space-y-3 animate-fadeIn">
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        placeholder="Card number"
-                        className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
-                      />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                        <Lock className="w-4 h-4 text-gray-400" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input 
-                        type="text" 
-                        placeholder="Expiration date (MM / YY)"
-                        className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
-                      />
-                      <div className="relative">
-                        <input 
-                          type="text" 
-                          placeholder="Security code"
-                          className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
-                        />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                          <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
-                        </div>
-                      </div>
-                    </div>
-                    <input 
-                      type="text" 
-                      placeholder="Name on card"
-                      className="w-full border border-gray-300 rounded-md px-4 py-3 focus:ring-1 focus:ring-black focus:border-black transition-all outline-none text-sm"
-                    />
-                    <label className="flex items-center gap-2 cursor-pointer pt-1">
-                      <div className="relative flex items-center justify-center">
-                        <input type="checkbox" className="peer sr-only" defaultChecked />
-                        <div className="w-5 h-5 border border-gray-300 rounded bg-white peer-checked:bg-hot-pink peer-checked:border-hot-pink transition-all"></div>
-                        <Check className="absolute w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                      </div>
-                      <span className="text-xs text-gray-600">Use shipping address as billing address</span>
-                    </label>
+                {/* Card selected: redirect info */}
+                {paymentMethod === 'card' && (
+                  <div className="px-4 py-3 bg-[#f0f9ff] text-xs text-gray-500 flex items-center gap-2 border-t border-blue-100">
+                    <Lock className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    You'll be redirected to our secure Stripe payment page to complete your purchase.
                   </div>
-                )} */}
+                )}
 
-                {/* <button 
-                  onClick={() => setPaymentMethod('cod')}
-                  className={`w-full flex items-center justify-between p-4 text-left transition-colors border-t border-gray-200 ${paymentMethod === 'cod' ? 'bg-[#f0f9ff]' : 'bg-white'}`}
+                {/* PayPal */}
+                <button 
+                  type="button"
+                  onClick={() => setPaymentMethod('paypal')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'paypal' ? 'bg-[#fef9ed]' : 'bg-white hover:bg-gray-50'}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === 'cod' ? 'border-black' : 'border-gray-300'}`}>
-                      {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-black"></div>}
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'paypal' ? 'border-blue-600' : 'border-gray-300'}`}>
+                      {paymentMethod === 'paypal' && <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
                     </div>
-                    <span className="text-sm font-medium">Cash on Delivery (COD)</span>
+                    <span className="text-sm font-medium">PayPal</span>
                   </div>
-                </button> */}
+                  {/* PayPal logo */}
+                  <div className="w-16 h-6 flex items-center justify-end">
+                    <svg viewBox="0 0 80 20" className="h-5" xmlns="http://www.w3.org/2000/svg">
+                      <text x="0" y="16" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="14" fill="#003087">Pay</text>
+                      <text x="25" y="16" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="14" fill="#009CDE">Pal</text>
+                    </svg>
+                  </div>
+                </button>
+
+                {/* Afterpay */}
+                <button 
+                  type="button"
+                  onClick={() => setPaymentMethod('afterpay')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'afterpay' ? 'bg-[#f0fff4]' : 'bg-white hover:bg-gray-50'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'afterpay' ? 'border-blue-600' : 'border-gray-300'}`}>
+                      {paymentMethod === 'afterpay' && <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
+                    </div>
+                    <span className="text-sm font-medium">Afterpay</span>
+                  </div>
+                  {/* Afterpay logo */}
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ background: '#B2FCE4' }}>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L6 8l2 1-4 5h4l-1 8 9-11h-4l3-4-2-1 4-4z" fill="#000"/>
+                    </svg>
+                  </div>
+                </button>
+
+                {/* Zip */}
+                <button 
+                  type="button"
+                  onClick={() => setPaymentMethod('zip')}
+                  className={`w-full flex items-center justify-between p-4 text-left transition-colors ${paymentMethod === 'zip' ? 'bg-[#f5f0ff]' : 'bg-white hover:bg-gray-50'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === 'zip' ? 'border-blue-600' : 'border-gray-300'}`}>
+                      {paymentMethod === 'zip' && <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
+                    </div>
+                    <span className="text-sm font-medium">Zip – Flexible payment options</span>
+                  </div>
+                  {/* Zip logo */}
+                  <div className="h-6 flex items-center justify-end">
+                    <svg viewBox="0 0 44 18" className="h-5" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="44" height="18" rx="3" fill="#AA8FFF"/>
+                      <text x="8" y="13" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="10" fill="white" letterSpacing="1">zip</text>
+                    </svg>
+                  </div>
+                </button>
               </div>
             </section>
 
