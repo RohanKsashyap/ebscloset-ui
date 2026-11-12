@@ -59,6 +59,8 @@ export default function ProductManagementModal({
     hoverImage: null,
     image3: null,
     image4: null,
+    image5: null,
+    image6: null,
     video: null,
     video2: null,
     video3: null
@@ -69,6 +71,8 @@ export default function ProductManagementModal({
     hoverImage: '',
     image3: '',
     image4: '',
+    image5: '',
+    image6: '',
   });
 
   const [categories, setCategories] = useState<any[]>([]);
@@ -93,6 +97,8 @@ export default function ProductManagementModal({
         hoverImage: (initialProduct as any).hoverImage || '',
         image3: (initialProduct as any).image3 || '',
         image4: (initialProduct as any).image4 || '',
+        image5: (initialProduct as any).image5 || '',
+        image6: (initialProduct as any).image6 || '',
       });
       // Pre-select main category: find if the saved category has a parent
       if (resolvedCatId && categories.length > 0) {
@@ -126,6 +132,8 @@ export default function ProductManagementModal({
         hoverImage: '',
         image3: '',
         image4: '',
+        image5: '',
+        image6: '',
       });
       setSelectedMainCatId('');
     }
@@ -240,7 +248,7 @@ export default function ProductManagementModal({
         // Filter out internal MongoDB/Mongoose fields and redundant IDs
         const skipFields = [
           '_id', '__v', 'createdAt', 'updatedAt', 
-          'imageId', 'hoverImageId', 'image3Id', 'image4Id', 
+          'imageId', 'hoverImageId', 'image3Id', 'image4Id', 'image5Id', 'image6Id',
           'videoId', 'video2Id', 'video3Id', 'thumbnailUrl',
           'inStock', 'minStock'
         ];
@@ -668,9 +676,9 @@ export default function ProductManagementModal({
                 <h3 className="text-sm font-bold">Product Media</h3>
               </div>
               
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 {/* Main Image */}
-                <label className="col-span-2 aspect-[4/3] bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden group">
+                <label className="col-span-1 row-span-2 aspect-[3/4] bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden group">
                   {previews.image ? (
                     <>
                       <img src={previews.image} className="w-full h-full object-cover" />
@@ -695,9 +703,9 @@ export default function ProductManagementModal({
                   <input type="file" className="hidden" accept={ACCEPTED_IMAGE_TYPES} onChange={e => handleFileChange(e, 'image')} />
                 </label>
 
-                {/* Additional Media */}
-                <div className="col-span-2 grid grid-cols-2 gap-4">
-                  {['hoverImage', 'image3', 'image4'].map((key) => (
+                {/* Additional Images (image5, image6 added) */}
+                <div className="col-span-2 grid grid-cols-3 gap-3">
+                  {['hoverImage', 'image3', 'image4', 'image5', 'image6'].map((key) => (
                     <label key={key} className="aspect-square bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl cursor-pointer hover:bg-gray-100 transition-all relative overflow-hidden">
                       {previews[key as keyof typeof previews] ? (
                         <>

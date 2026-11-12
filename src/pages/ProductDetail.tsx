@@ -114,7 +114,7 @@ export default function ProductDetail() {
             name: p.name || (p as any).title,
             images: (p.images && p.images.length > 0) 
               ? p.images 
-              : [p.image, p.hoverImage, p.image3, p.image4].filter(Boolean),
+              : [p.image, p.hoverImage, p.image3, p.image4, (p as any).image5, (p as any).image6].filter(Boolean),
             videos: [p.video, p.video2, p.video3].filter(Boolean),
             image: p.image || (p.images && p.images[0] ? p.images[0] : '')
           };
