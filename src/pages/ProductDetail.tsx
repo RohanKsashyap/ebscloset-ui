@@ -1,5 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useCart } from '../context/CartContext';
 import Gallery from '../components/Gallery';
 import Reviews from '../components/Reviews';
@@ -27,6 +28,23 @@ export default function ProductDetail() {
   const [pinMsg, setPinMsg] = useState<string>('');
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const { addItem } = useCart();
+
+  // ESC key to close size guide + lock body scroll when open
+  useEffect(() => {
+    if (!showSizeGuide) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowSizeGuide(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [showSizeGuide]);
   const { showToast } = useToast();
   const { toggleWishlist, isWishlisted } = useProductContext();
   const reviewsCount = product?.reviews?.length || 0;
@@ -531,49 +549,86 @@ export default function ProductDetail() {
         }}
       />
 
-      {/* Size Guide Modal */}
-      {showSizeGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white p-8 max-w-lg w-full rounded-lg shadow-xl relative animate-slideUp">
-            <button 
+      {/* Size Guide Modal — rendered via portal to escape stacking contexts */}
+      {showSizeGuide && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 99999,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSizeGuide(false); }}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+              position: 'relative',
+              width: '100%',
+              maxWidth: '520px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '24px',
+            }}
+          >
+            <button
               onClick={() => setShowSizeGuide(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-900"
+              style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '4px' }}
+              aria-label="Close size guide"
             >
-              <X className="w-6 h-6" />
+              <X style={{ width: '24px', height: '24px' }} />
             </button>
-            
-            <h3 className="font-headline text-2xl mb-2 text-center">Size Guide</h3>
-            <p className="text-center text-gray-500 text-sm mb-6">Find the perfect fit for your little one</p>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+
+            <h3 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '22px', marginBottom: '4px', textAlign: 'center', paddingRight: '32px' }}>Size Guide</h3>
+            <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '14px', marginBottom: '24px' }}>Find the perfect fit for your little one</p>
+
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any }}>
+              <table style={{ width: '100%', minWidth: '320px', fontSize: '14px', borderCollapse: 'collapse' as any }}>
+                <thead style={{ backgroundColor: '#f9fafb' }}>
                   <tr>
-                    <th className="px-4 py-3">Size</th>
-                    <th className="px-4 py-3">Height (cm)</th>
-                    <th className="px-4 py-3">Chest (cm)</th>
-                    <th className="px-4 py-3">Waist (cm)</th>
+                    {['Size', 'Height (cm)', 'Chest (cm)', 'Waist (cm)'].map(h => (
+                      <th key={h} style={{ padding: '10px 12px', textAlign: 'left' as any, fontSize: '11px', textTransform: 'uppercase' as any, color: '#374151', fontWeight: 600 }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y">
-                  <tr><td className="px-4 py-3 font-medium">7-8 Years</td><td className="px-4 py-3">122-128</td><td className="px-4 py-3">63-66</td><td className="px-4 py-3">57-59</td></tr>
-                  <tr><td className="px-4 py-3 font-medium">9-10 Years</td><td className="px-4 py-3">134-140</td><td className="px-4 py-3">69-72</td><td className="px-4 py-3">61-63</td></tr>
-                  <tr><td className="px-4 py-3 font-medium">11-12 Years</td><td className="px-4 py-3">146-152</td><td className="px-4 py-3">75-78</td><td className="px-4 py-3">65-67</td></tr>
-                  <tr><td className="px-4 py-3 font-medium">12-13 Years</td><td className="px-4 py-3">152-158</td><td className="px-4 py-3">78-81</td><td className="px-4 py-3">67-69</td></tr>
+                <tbody>
+                  {[
+                    ['7–8 Years',   '122–128', '63–66', '57–59'],
+                    ['9–10 Years',  '134–140', '69–72', '61–63'],
+                    ['11–12 Years', '146–152', '75–78', '65–67'],
+                    ['12–13 Years', '152–158', '78–81', '67–69'],
+                  ].map(([s, h, c, w], i) => (
+                    <tr key={i} style={{ borderTop: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '10px 12px', fontWeight: 500 }}>{s}</td>
+                      <td style={{ padding: '10px 12px' }}>{h}</td>
+                      <td style={{ padding: '10px 12px' }}>{c}</td>
+                      <td style={{ padding: '10px 12px' }}>{w}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            
-            <div className="mt-6 text-xs text-gray-500">
-              <p className="font-medium mb-1">How to Measure:</p>
-              <ul className="list-disc pl-4 space-y-1">
+
+            <div style={{ marginTop: '20px', fontSize: '12px', color: '#6b7280' }}>
+              <p style={{ fontWeight: 600, marginBottom: '6px' }}>How to Measure:</p>
+              <ul style={{ paddingLeft: '16px', listStyleType: 'disc', lineHeight: '1.8' }}>
                 <li><strong>Height:</strong> Measure from the top of the head to the floor.</li>
                 <li><strong>Chest:</strong> Measure around the fullest part of the chest.</li>
                 <li><strong>Waist:</strong> Measure around the natural waistline.</li>
               </ul>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </main>
   );
